@@ -1173,17 +1173,17 @@ function renderBalanceGrid() {
   if (!cachedBalance || !el) return;
 
   if (!showBalance) {
-    el.innerHTML = '<span style="font-size:18px;font-weight:700">••••••••</span>';
+    el.innerHTML = '<span style="font-size:10px;font-weight:500;color:var(--muted)">••••••••</span>';
     return;
   }
 
   const idr = cachedBalance.idr || 0;
   const cryptos = Object.entries(cachedBalance)
     .filter(([c, val]) => c !== 'idr' && parseFloat(val) > 0)
-    .map(([c, val]) => `<span style="font-size:15px;color:var(--accent2);font-weight:700">${parseFloat(val).toFixed(6)} ${c.toUpperCase()}</span>`);
+    .map(([c, val]) => `<span style="font-size:10px;color:var(--accent2);font-weight:500">${parseFloat(val).toFixed(6)} ${c.toUpperCase()}</span>`);
 
-  const cryptoHtml = cryptos.length ? cryptos.join(' <span style="color:var(--muted)">|</span> ') + ' <span style="color:var(--muted)">|</span> ' : '';
-  el.innerHTML = `${cryptoHtml}<span style="font-size:18px;font-weight:700">${fmtIDR(idr)}</span>`;
+  const cryptoHtml = cryptos.length ? cryptos.join(' <span style="color:var(--muted);font-size:9px">|</span> ') + ' <span style="color:var(--muted);font-size:9px">|</span> ' : '';
+  el.innerHTML = `${cryptoHtml}<span style="font-size:10px;font-weight:600;color:var(--green)">${fmtIDR(idr)}</span>`;
 }
 
 // Trades
