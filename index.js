@@ -391,7 +391,7 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
 
   // === GUARD: SELL only if we have an open position ===
   if (signal === 'SELL' && !positions[pair]) {
-    log(`[${pair.toUpperCase()}] SELL skipped — no open position`);
+    console.log(`[${pair.toUpperCase()}] SELL skipped — no open position`);
     return null;
   }
 
@@ -405,7 +405,7 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
       }
       if (idrBalance < idrAmount) {
         const msg = `BUY skipped — IDR saldo Rp ${idrBalance.toLocaleString('id-ID')} tidak cukup (butuh Rp ${idrAmount.toLocaleString('id-ID')})`;
-        log(`[${pair.toUpperCase()}] ${msg}`);
+        console.log(`[${pair.toUpperCase()}] ${msg}`);
         broadcast({ type: 'alert', pair, msg });
         lastTradeTime[pair] = Date.now();
         return null;
@@ -415,7 +415,7 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
 
   // Min order check — Indodax minimum Rp 10.000
   if (idrAmount < 10000) {
-    log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 10.000`);
+    console.log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 10.000`);
     lastTradeTime[pair] = Date.now();
     return null;
   }
@@ -447,7 +447,7 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
         const coinValueIdr = actualCoinAmount * price;
         if (coinValueIdr < 10000) {
           const msg = `SELL skipped — nilai koin Rp ${Math.round(coinValueIdr).toLocaleString('id-ID')} di bawah minimum Indodax (Rp 10.000)`;
-          log(`[${pair.toUpperCase()}] ${msg}`);
+          console.log(`[${pair.toUpperCase()}] ${msg}`);
           broadcast({ type: 'alert', pair, msg });
           // Clear position dust if paper or sub-minimum to prevent endless trigger spam
           delete positions[pair];
@@ -576,10 +576,12 @@ function restorePositions() {
     if (fs.existsSync(POSITIONS_FILE)) {
       const data = JSON.parse(fs.readFileSync(POSITIONS_FILE, 'utf8'));
       Object.assign(positions, data);
-      const pairs = Object.keys(data);
-      if (pairs.length) log(`[POSITIONS] Restored ${pairs.length} open position(s): ${pairs.join(', ')}`);
+      const pairs = Object.keys(positions);
+      if (pairs.length) console.log(`[POSITIONS] Restored ${pairs.length} open position(s): ${pairs.join(', ')}`);
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error('Failed to restore positions:', err.message);
+  }
 }
 
 async function saveBotsState() {
