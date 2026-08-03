@@ -11,10 +11,10 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #090d16;          /* Pure Deep Black */
-    --surface: #111622;     /* Dark Charcoal Card Surface */
-    --surface2: #1a202c;    /* Input / Table Row Surface */
-    --border: #232d3f;      /* Sleek Dark Border */
+    --bg: #000000;          /* Pure Pitch Black */
+    --surface: #0a0d14;     /* Pure Dark Card Surface */
+    --surface2: #121722;    /* Dark Input Surface */
+    --border: #1c2433;      /* Dark Border */
     --header-blue: #0088cc; /* Indodax Header Blue */
     --accent: #0066ff;      /* Primary Accent Blue */
     --accent2: #00b4d8;     /* Cyan Accent */
@@ -41,29 +41,7 @@
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
-
-  /* 3D Parallax Background Mesh & Stars Layer */
-  .parallax-bg {
-    position: fixed;
-    top: -20vh;
-    left: -20vw;
-    width: 140vw;
-    height: 140vh;
-    z-index: 0;
-    pointer-events: none;
-    background: 
-      radial-gradient(circle at 15% 20%, rgba(0, 136, 204, 0.25) 0%, transparent 40%),
-      radial-gradient(circle at 85% 75%, rgba(0, 192, 135, 0.2) 0%, transparent 45%),
-      radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
-      radial-gradient(3px 3px at 40px 60px, rgba(255, 255, 255, 0.4), rgba(0,0,0,0)),
-      radial-gradient(3px 3px at 120px 180px, rgba(0, 212, 255, 0.5), rgba(0,0,0,0)),
-      radial-gradient(4px 4px at 240px 100px, rgba(0, 192, 135, 0.45), rgba(0,0,0,0)),
-      radial-gradient(3px 3px at 320px 220px, rgba(245, 158, 11, 0.4), rgba(0,0,0,0));
-    background-size: 100% 100%, 100% 100%, 100% 100%, 180px 180px, 240px 240px, 320px 320px, 400px 400px;
-    will-change: transform;
-    transition: transform 0.05s ease-out;
-  }
+  html, body { background: #000000; color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
 
   /* Top Navigation Bar */
   nav.topbar {
@@ -149,17 +127,23 @@
   /* Table Responsive Container */
   .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  /* Generic Card Container */
+  /* Generic Card Container with Per-Card 3D Parallax Tilt */
   .card {
-    background: rgba(17, 22, 34, 0.86);
-    backdrop-filter: blur(12px);
+    background: #0a0d14;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 16px;
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
-    z-index: 1;
+    transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s, box-shadow 0.2s;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    will-change: transform;
+  }
+  .card:hover {
+    border-color: rgba(0, 136, 204, 0.45);
+    box-shadow: 0 10px 28px rgba(0, 136, 204, 0.15);
   }
   .card-title {
     font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
@@ -311,9 +295,6 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
-
-<!-- Parallax Layer -->
-<div id="parallax-bg-layer" class="parallax-bg"></div>
 
 <!-- Top Navigation -->
 <nav class="topbar">
@@ -931,14 +912,30 @@ let allPairsData = [];
 let showBalance = false;
 let cachedBalance = null;
 
-// Parallax Mousemove Effect
-document.addEventListener('mousemove', (e) => {
-  const bg = document.getElementById('parallax-bg-layer');
-  if (!bg) return;
-  const x = (window.innerWidth / 2 - e.clientX) / 45;
-  const y = (window.innerHeight / 2 - e.clientY) / 45;
-  bg.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-});
+// Per-Card 3D Parallax Tilt Effect
+function initCardParallax() {
+  document.querySelectorAll('.card').forEach(card => {
+    if (card.dataset.parallaxInit) return;
+    card.dataset.parallaxInit = 'true';
+
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -5;
+      const rotateY = ((x - centerX) / centerX) * 5;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    });
+  });
+}
+window.addEventListener('DOMContentLoaded', initCardParallax);
+setTimeout(initCardParallax, 500);
 
 // Clock
 setInterval(() => {
