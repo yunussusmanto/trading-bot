@@ -324,8 +324,6 @@ async function botTick(pair) {
         const cooldownMs = (bot.config.cooldownMinutes || 15) * 60 * 1000;
         if (!lastTradeTime[pair] || (Date.now() - lastTradeTime[pair] >= cooldownMs)) {
           const reason = `DCA #${pos.entries.length + 1} — harga turun ${dropFromLast.toFixed(1)}% dari entry terakhir`;
-          broadcast({ type: 'alert', pair, msg: reason });
-          sendTelegram(`📉 <b>[${pair.toUpperCase()}] ${reason}</b>`);
           await executeOrder(pair, 'DCA_BUY', price, bot.config, reason);
           return;
         }
@@ -409,14 +407,16 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
         const msg = `BUY skipped — IDR saldo Rp ${idrBalance.toLocaleString('id-ID')} tidak cukup (butuh Rp ${idrAmount.toLocaleString('id-ID')})`;
         log(`[${pair.toUpperCase()}] ${msg}`);
         broadcast({ type: 'alert', pair, msg });
+        lastTradeTime[pair] = Date.now();
         return null;
       }
     } catch (_) {}
   }
 
-  // Min order check — Indodax minimum ~Rp 15.000 (Rp 10.000 + buffer untuk fee)
-  if (idrAmount < 15000) {
-    log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 15.000`);
+  // Min order check — Indodax minimum Rp 10.000
+  if (idrAmount < 10000) {
+    log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 10.000`);
+    lastTradeTime[pair] = Date.now();
     return null;
   }
 
