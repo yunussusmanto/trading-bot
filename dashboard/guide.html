@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indodax Trading Bot Pro – Panduan Lengkap & Dokumentasi Pengguna</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #090d16;
+    --surface: #111622;
+    --surface2: #1a202c;
+    --border: #232d3f;
+    --header-blue: #0088cc;
+    --accent: #0066ff;
+    --accent2: #00b4d8;
+    --green: #00c087;
+    --red: #ff4d4d;
+    --yellow: #f59e0b;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header Navbar */
+  header.nav-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+  }
+  .brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--header-blue);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover {
+    background: var(--header-blue);
+    color: #ffffff;
+  }
+
+  /* Container Shell */
+  .guide-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    display: flex;
+    gap: 30px;
+  }
+
+  /* Sidebar TOC */
+  aside.toc-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .toc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .toc-item a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .toc-item a:hover {
+    background: var(--surface2);
+    color: var(--header-blue);
+  }
+
+  /* Content Main Body */
+  main.guide-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .doc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .doc-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--header-blue);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .doc-subtitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin: 18px 0 10px 0;
+  }
+
+  p { margin-bottom: 12px; font-size: 13px; color: var(--text); }
+  ul, ol { margin-left: 20px; margin-bottom: 14px; font-size: 13px; }
+  li { margin-bottom: 6px; }
+
+  /* Callout Boxes */
+  .callout-info {
+    background: rgba(0, 136, 204, 0.1);
+    border-left: 4px solid var(--header-blue);
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+  .callout-success {
+    background: rgba(0, 192, 135, 0.1);
+    border-left: 4px solid var(--green);
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+  .callout-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid var(--yellow);
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+
+  /* Feature Grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin: 14px 0;
+  }
+  .grid-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 14px;
+    border-radius: 8px;
+  }
+  .grid-box-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  /* Table styling */
+  table.doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12px;
+  }
+  table.doc-table th {
+    background: var(--surface2);
+    padding: 10px;
+    text-align: left;
+    color: var(--accent2);
+    border: 1px solid var(--border);
+  }
+  table.doc-table td {
+    padding: 10px;
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Code snippet box */
+  .code-box {
+    background: #060911;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #38bdf8;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  @media (max-width: 900px) {
+    .guide-container { flex-direction: column; }
+    aside.toc-sidebar { width: 100%; height: auto; position: static; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav-header">
+  <a href="/dashboard" class="brand">
+    <span>INDODAX PRO</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 8px;border-radius:4px">DOCUMENTATION</span>
+  </a>
+  <div style="display:flex;gap:10px">
+    <a href="/dashboard" class="nav-btn">← Kembali ke Dashboard</a>
+  </div>
+</header>
+
+<div class="guide-container">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="toc-sidebar">
+    <div class="toc-title">📖 Daftar Isi Panduan</div>
+    <ul class="toc-list">
+      <li class="toc-item"><a href="#sec-intro">1. Pengenalan & Arsitektur Bot</a></li>
+      <li class="toc-item"><a href="#sec-quickstart">2. Panduan Cepat (Quick Start)</a></li>
+      <li class="toc-item"><a href="#sec-params">3. Penjelasan Parameter Form</a></li>
+      <li class="toc-item"><a href="#sec-dca">4. Strategi & Simulasi DCA</a></li>
+      <li class="toc-item"><a href="#sec-antiloss">5. Sistem Proteksi Anti-Loss (SL 0%)</a></li>
+      <li class="toc-item"><a href="#sec-telegram">6. Notifikasi Telegram Instant</a></li>
+      <li class="toc-item"><a href="#sec-faq">7. FAQ & TroubleShooting</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="guide-content">
+
+    <!-- Section 1: Pengenalan -->
+    <section id="sec-intro" class="doc-card">
+      <div class="doc-title">🤖 1. Pengenalan & Arsitektur System Bot</div>
+      <p>
+        <b>Indodax Trading Bot Pro v2.0</b> adalah perangkat lunak perdagangan kuantitatif otomatis (Quantitative Automated Trading Software) yang terhubung langsung dengan bursa pasar kripto terbesar di Indonesia, <b>Indodax</b>, menggunakan enkripsi tingkat tinggi <b>HMAC-SHA512</b>.
+      </p>
+      
+      <div class="grid-2">
+        <div class="grid-box">
+          <div class="grid-box-title">⚡ 24/7 VPS Server Execution</div>
+          <p style="font-size:11px;color:var(--muted)">Bot berjalan nonstop 24 jam di Cloud VPS Linux dengan manajemen proses PM2 & database PostgreSQL.</p>
+        </div>
+        <div class="grid-box">
+          <div class="grid-box-title">🛡️ Strict Capital Preservation</div>
+          <p style="font-size:11px;color:var(--muted)">Sistem garansi proteksi modal dengan prinsip Stop Loss 0% (Tanpa jual rugi, wajib profit +3%).</p>
+        </div>
+      </div>
+
+      <div class="callout-info">
+        <b>Pemilik & Pengguna Resmi:</b> Yunus Susmanto (yunussusmanto)<br>
+        <b>Infrastruktur Server:</b> Ubuntu Cloud VPS (PM2 process ID: 87)
+      </div>
+    </section>
+
+    <!-- Section 2: Quick Start -->
+    <section id="sec-quickstart" class="doc-card">
+      <div class="doc-title">🚀 2. Panduan Cepat Jalankan Bot (Quick Start)</div>
+      <p>Hanya dengan 3 langkah mudah di Dashboard, Anda dapat langsung mengaktifkan bot trading otomatis:</p>
+      
+      <ol>
+        <li><b>Pilih Pair Koin:</b> Pilih koin liquid yang ingin ditradingkan di Control Panel (Contoh: <code>BTC/IDR</code>, <code>ETH/IDR</code>, <code>KOMA/IDR</code>, <code>XRP/IDR</code>).</li>
+        <li><b>Atur Nominal Modal & Parameter:</b> Masukkan Modal Per Order (misal Rp 60.000), Take Profit (3%), dan pastikan Stop Loss di-set ke <b>0%</b>.</li>
+        <li><b>Klik Tombol ▶ Start Bot:</b> Bot otomatis tersimpan di server VPS & langsung berjaga mengeksekusi order saat sinyal pasar terdeteksi!</li>
+      </ol>
+
+      <div class="callout-success">
+        💡 <b>Tips Pro:</b> Bot dapat dijalankan di 10 koin sekaligus untuk membagikan risiko (diversifikasi portofolio).
+      </div>
+    </section>
+
+    <!-- Section 3: Penjelasan Parameter Form -->
+    <section id="sec-params" class="doc-card">
+      <div class="doc-title">⚙️ 3. Penjelasan Parameter Form Control Panel</div>
+      <p>Berikut adalah rincian lengkap setiap input field yang ada di form kontrol robot:</p>
+
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Parameter Form</th>
+            <th>Nilai Rekomendasi</th>
+            <th>Fungsi & Penjelasan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Target Pair (Indodax)</td>
+            <td>BTC, ETH, SOL, KOMA, XRP</td>
+            <td>Pasangan koin kripto & IDR (Rupiah) yang ingin di-tradingkan.</td>
+          </tr>
+          <tr>
+            <td>Mode Eksekusi</td>
+            <td>Full Auto</td>
+            <td><b>Full Auto:</b> Eksekusi langsung tanpa izin. <b>Semi Auto:</b> Minta konfirmasi pengguna.</td>
+          </tr>
+          <tr>
+            <td>Pilihan Strategi</td>
+            <td>Multi-Indicator</td>
+            <td>Kombinasi analisis indikator teknikal RSI, MACD, dan Bollinger Bands.</td>
+          </tr>
+          <tr>
+            <td>Modal Per Order (IDR)</td>
+            <td>Rp 60.000 - Rp 200.000</td>
+            <td>Total alokasi modal Rupiah disiapkan untuk koin tersebut.</td>
+          </tr>
+          <tr>
+            <td>Tipe Modal</td>
+            <td>Fixed IDR Amount</td>
+            <td>Nominal modal Rupiah tetap per transaksi order.</td>
+          </tr>
+          <tr>
+            <td>Stop Loss (%)</td>
+            <td><b>0%</b> (Di-lock)</td>
+            <td>Set <b>0%</b> untuk menjamin <b>TIDAK PERNAH JUAL RUGI</b>. Koin disimpan sampai profit.</td>
+          </tr>
+          <tr>
+            <td>Take Profit (%)</td>
+            <td><b>3.0%</b></td>
+            <td>Target keuntungan bersih dari rata-rata harga beli. Jual otomatis saat tercapai.</td>
+          </tr>
+          <tr>
+            <td>Trailing Stop (%)</td>
+            <td><b>0%</b> (Matikan)</td>
+            <td>Set 0% agar bot tidak menjual saat terjadi penurunan sementara (dip).</td>
+          </tr>
+          <tr>
+            <td>Cooldown (Menit)</td>
+            <td>15 Menit</td>
+            <td>Waktu jeda wajib setelah eksekusi order sebelum order berikutnya diperbolehkan.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 4: DCA Strategy -->
+    <section id="sec-dca" class="doc-card">
+      <div class="doc-title">🔄 4. Strategi & Cara Kerja DCA (Dollar Cost Averaging)</div>
+      <p>
+        Strategi DCA adalah metode terbaik dalam dunia trading otomatis. Modal total Anda (misal Rp 60.000) dibagi menjadi 4 slot order (masing-masing Rp 15.000 per slot).
+      </p>
+
+      <div class="doc-subtitle">Simulasi Skenario DCA:</div>
+      <div class="code-box">
+1. Beli Pertama (Slot 1): Bot beli KOMA di harga Rp 260 sebesar Rp 15.000.
+2. Pasar Turun 2%: Bot beli Slot 2 di harga Rp 254 sebesar Rp 15.000.
+   --> Harga Rata-Rata Beli (Avg Entry) TURUN menjadi Rp 257!
+3. Pasar Naik +3%: Ketika harga berbalik naik mencapai Rp 265 (+3% dari Rp 257),
+   --> Bot MENJUAL SELURUH KOIN SEKALIGUS & Mengunci Profit Tunai Rupiah!
+      </div>
+
+      <div class="callout-success">
+        <b>Keunggulan DCA:</b> Mengubah penurunan harga pasar menjadi peluang emas untuk menurunkan harga beli rata-rata sehingga target profit tercapai jauh lebih cepat!
+      </div>
+    </section>
+
+    <!-- Section 5: Anti Loss System -->
+    <section id="sec-antiloss" class="doc-card">
+      <div class="doc-title">🛡️ 5. Sistem Proteksi Anti-Loss (Prinsip Stop Loss 0%)</div>
+      <p>
+        Mengapa bot disetting <b>Stop Loss 0%</b>? Dalam trading aset fisik/spot di Indodax, penurunan harga bersifat sementara (*unrealized loss*). Selama koin tidak dijual rugi, jumlah koin Anda tetap utuh 100%.
+      </p>
+
+      <div class="grid-2">
+        <div class="grid-box">
+          <div class="grid-box-title">❌ Trading Manual (Manusia)</div>
+          <p style="font-size:11px;color:var(--muted)">Panik melihat grafik merah → Melakukan Cut-Loss (Jual Rugi) → Modal berkurang permanen.</p>
+        </div>
+        <div class="grid-box">
+          <div class="grid-box-title">✅ Robot Indodax Pro</div>
+          <p style="font-size:11px;color:var(--muted)">Disiplin sistem → Mengakumulasi koin saat turun → Menunggu pasar naik & Jual saat untung (+3%).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Telegram -->
+    <section id="sec-telegram" class="doc-card">
+      <div class="doc-title">📱 6. Notifikasi Telegram Instant Real-Time</div>
+      <p>Bot terhubung langsung ke Telegram untuk memberikan laporan instan transaksi:</p>
+
+      <div class="code-box">
+💰 SELL EXECUTED — UNTUNG 🟢
+
+Pair: KOMA_IDR
+Harga Jual: Rp 270
+Avg Entry: Rp 260
+Jumlah Koin: 57.69 KOMA
+Modal Masuk: Rp 15.000
+Hasil Jual: Rp 15.577
+───────────────
+UNTUNG: Rp 577 (+3.85%)
+DCA Orders: 1x | Hold: 11 menit
+      </div>
+
+      <p style="font-size:12px;color:var(--muted)">
+        *Notifikasi pesan gagal/error sengaja di-mute agar Telegram Anda hanya berisi laporan profit & pembelian sukses.
+      </p>
+    </section>
+
+    <!-- Section 7: FAQ -->
+    <section id="sec-faq" class="doc-card">
+      <div class="doc-title">❓ 7. Pertanyaan Sering Ditanyakan (FAQ)</div>
+      
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div style="font-weight:700;color:var(--accent2)">Q: Apakah aman jika tombol ⏹ Stop Bot diklik?</div>
+          <p style="color:var(--muted)">Aman 100%. Koin yang sudah dibeli tersimpan aman di akun Indodax Anda dan posisi harganya dicatat di VPS. Saat bot di-Start kembali, bot otomatis melanjutkan posisi tersebut sampai profit.</p>
+        </div>
+        <div>
+          <div style="font-weight:700;color:var(--accent2)">Q: Bagaimana cara mengubah nominal modal koin saat bot berjalan?</div>
+          <p style="color:var(--muted)">Ubah angka modal di form Control Panel, lalu klik <b>▶ Start Bot</b>. Pengeditan form tidak merusak koin yang sudah dibeli sebelumnya.</p>
+        </div>
+        <div>
+          <div style="font-weight:700;color:var(--accent2)">Q: Bagaimana jika listrik/laptop saya mati?</div>
+          <p style="color:var(--muted)">Bot berjalan di Cloud VPS Linux 24 jam nonstop. Laptop/HP Anda boleh dimatikan kapan saja, bot akan tetap bekerja 24/7 di server.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
