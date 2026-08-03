@@ -323,15 +323,10 @@
 
     <div class="menu-group">
       <a class="menu-item active">📊 Marketplace</a>
-      <a class="menu-item">👛 Wallet</a>
-      <a class="menu-item">🔄 Investasi Rutin</a>
-      <a class="menu-item">💱 Beli / Jual Instan</a>
-      <a class="menu-item">⚡ Quick Buy USDT</a>
-      <a class="menu-item">📈 Staking</a>
-      <a class="menu-item">🔐 Authenticator App</a>
-      <a class="menu-item">ℹ️ Informasi</a>
+      <a class="menu-item" onclick="openHelpModal()">❓ Panduan & Help</a>
+      <a class="menu-item" onclick="openAboutModal()">ℹ️ About App</a>
     </div>
-    <div style="margin-top: 20px; font-size: 10px; color: var(--muted); text-align: center;">Discord: Aktif via .env</div>
+    <div style="margin-top: 20px; font-size: 10px; color: var(--muted); text-align: center;">VPS Server: Active 24/7</div>
   </aside>
 
   <!-- Main Workspace -->
@@ -757,6 +752,144 @@
     <div id="modal-bot-body" style="font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
     <div style="margin-top:16px;text-align:right">
       <button onclick="closeBotDetailModal()" class="btn-blue" style="padding:6px 16px;font-size:12px">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Panduan & Help Lengkap -->
+<div id="help-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;justify-content:center;align-items:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:760px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 36px rgba(0,0,0,0.7);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <div style="font-size:16px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:8px">
+        <span>❓ Panduan Lengkap & Help User</span>
+      </div>
+      <button onclick="closeHelpModal()" class="btn-gray" style="padding:4px 10px;font-size:14px">✕</button>
+    </div>
+    
+    <div style="padding:20px;overflow-y:auto;font-size:13px;line-height:1.6;display:flex;flex-direction:column;gap:20px">
+      
+      <!-- Quick Start -->
+      <div style="background:var(--surface2);border-left:4px solid var(--header-blue);padding:14px;border-radius:6px">
+        <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:8px">🚀 Panduan Cepat (Quick Start)</div>
+        <ol style="margin-left:20px;display:flex;flex-direction:column;gap:6px">
+          <li><b>1. Pilih Pair Koin:</b> Pilih koin di Control Panel (misal KOMA/IDR, XRP/IDR, BTC/IDR).</li>
+          <li><b>2. Atur Parameter Form:</b> Masukkan Modal, Take Profit (rekomendasi 3%), Stop Loss (rekomendasi 0%).</li>
+          <li><b>3. Klik ▶ Start Bot:</b> Bot langsung aktif berjaga 24 jam nonstop di Cloud VPS!</li>
+        </ol>
+      </div>
+
+      <!-- Penjelasan Parameter Form -->
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent2);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:4px">⚙️ Penjelasan Parameter Form</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">Target Pair</div>
+            <div style="font-size:11px;color:var(--muted)">Pasangan koin & IDR yang ingin di-tradingkan otomatis.</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">Mode Eksekusi</div>
+            <div style="font-size:11px;color:var(--muted)"><b>Full Auto</b> (eksekusi langsung) atau <b>Semi Auto</b> (minta izin).</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">Modal Per Order</div>
+            <div style="font-size:11px;color:var(--muted)">Total modal IDR yang disiapkan untuk koin tersebut.</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">Take Profit (%)</div>
+            <div style="font-size:11px;color:var(--muted)">Target untung bersih (misal 3%). Bot otomatis jual saat untung!</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">Stop Loss (%)</div>
+            <div style="font-size:11px;color:var(--muted)">Set <b>0%</b> jika TANPA JUAL RUGI. Koin hanya dijual saat PROFIT!</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;border:1px solid var(--border)">
+            <div style="font-weight:700;color:var(--green)">DCA Step (%)</div>
+            <div style="font-size:11px;color:var(--muted)">Beli lagi tiap harga turun X% (averaging down) agar harga rata-rata makin murah.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cara Kerja DCA -->
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent2);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:4px">🔄 Cara Kerja Strategi DCA (Dollar Cost Averaging)</div>
+        <div style="background:var(--surface2);padding:12px;border-radius:6px;font-size:12px">
+          Modal Anda dibagi menjadi beberapa slot (misal 4 slot x Rp 15.000).<br>
+          • <b>Beli #1:</b> Beli slot 1 di harga pasar.<br>
+          • <b>Jika Harga Turun:</b> Bot beli slot 2 (DCA) sehingga harga rata-rata beli (Avg Entry) ikut TURUN mendekati harga pasar.<br>
+          • <b>Saat Harga Naik:</b> Bot menjual <b>SEMUA KOIN SEKALIGUS</b> begitu harga naik +3% di atas harga rata-rata!
+        </div>
+      </div>
+
+      <!-- FAQ & TroubleShooting -->
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent2);margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:4px">💡 Pertanyaan Sering Ditanyakan (FAQ)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-weight:700;color:var(--text)">❓ Apakah aman jika bot di-STOP?</div>
+            <div style="color:var(--muted);font-size:12px">Aman 100%. Koin yang sudah dibeli tersimpan aman di akun Indodax Anda dan data posisinya dicatat di Cloud VPS. Saat bot di-start lagi, bot melanjutkan posisi tersebut sampai PROFIT!</div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--text)">❓ Bagaimana cara edit setting saat bot berjalan?</div>
+            <div style="color:var(--muted);font-size:12px">Ubah angka di form Control Panel, lalu klik <b>▶ Start Bot</b>. Pengeditan form tidak merusak koin yang sudah dibeli sebelumnya.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--text)">❓ Mengapa Stop Loss disetting 0%?</div>
+            <div style="color:var(--muted);font-size:12px">Stop Loss 0% menjamin bot TIDAK AKAN PERNAH JUAL RUGI. Bot bersabar menyimpan koin sampai pasar berbalik naik & mencapai profit.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding:12px 20px;border-top:1px solid var(--border);background:var(--surface2);text-align:right">
+      <button onclick="closeHelpModal()" class="btn-blue" style="padding:6px 20px;font-size:12px">Tutup Panduan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal About Software -->
+<div id="about-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;justify-content:center;align-items:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;padding:20px;box-shadow:0 12px 36px rgba(0,0,0,0.7)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">
+      <div style="font-size:16px;font-weight:700;color:var(--header-blue);display:flex;align-items:center;gap:8px">
+        <span>🤖 About Indodax Trading Bot Pro</span>
+      </div>
+      <button onclick="closeAboutModal()" class="btn-gray" style="padding:2px 8px;font-size:14px">✕</button>
+    </div>
+    
+    <div style="font-size:12px;line-height:1.6;display:flex;flex-direction:column;gap:12px">
+      <div style="text-align:center;padding:12px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:18px;font-weight:800;color:var(--accent2)">Indodax Pro Robot v2.0</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Automated Quantitative Trading Engine</div>
+        <div style="font-size:10px;background:rgba(0,192,135,0.2);color:var(--green);padding:2px 8px;border-radius:10px;display:inline-block;margin-top:6px;font-weight:700">Cloud VPS Live 24/7 Managed</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+        <div style="background:var(--surface2);padding:8px 10px;border-radius:6px">
+          <div style="color:var(--muted)">Pemilik:</div>
+          <div style="font-weight:700;color:var(--text)">Yunus Susmanto</div>
+        </div>
+        <div style="background:var(--surface2);padding:8px 10px;border-radius:6px">
+          <div style="color:var(--muted)">Exchanger:</div>
+          <div style="font-weight:700;color:var(--header-blue)">Indodax Indonesia</div>
+        </div>
+        <div style="background:var(--surface2);padding:8px 10px;border-radius:6px">
+          <div style="color:var(--muted)">Enkripsi API:</div>
+          <div style="font-weight:700;color:var(--text)">HMAC-SHA512</div>
+        </div>
+        <div style="background:var(--surface2);padding:8px 10px;border-radius:6px">
+          <div style="color:var(--muted)">Database:</div>
+          <div style="font-weight:700;color:var(--text)">PostgreSQL + Disk</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">
+        Dilengkapi Proteksi Anti-Loss (SL 0%), Real-Time WebSocket, Multi-Pair DCA Engine, dan Integrasi Telegram Instant Alert.
+      </div>
+    </div>
+
+    <div style="margin-top:16px;text-align:right">
+      <button onclick="closeAboutModal()" class="btn-blue" style="padding:6px 16px;font-size:12px">Tutup</button>
     </div>
   </div>
 </div>
@@ -1630,6 +1763,26 @@ function showBotDetailModal(pair) {
 function closeBotDetailModal() {
   const modal = document.getElementById('bot-detail-modal');
   if (modal) modal.style.display = 'none';
+}
+
+function openHelpModal() {
+  const m = document.getElementById('help-modal');
+  if (m) m.style.display = 'flex';
+}
+
+function closeHelpModal() {
+  const m = document.getElementById('help-modal');
+  if (m) m.style.display = 'none';
+}
+
+function openAboutModal() {
+  const m = document.getElementById('about-modal');
+  if (m) m.style.display = 'flex';
+}
+
+function closeAboutModal() {
+  const m = document.getElementById('about-modal');
+  if (m) m.style.display = 'none';
 }
 
 async function quickStop(pair) {
