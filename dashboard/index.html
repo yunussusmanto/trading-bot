@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Indodax Pro – Trading Robot Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #090d16;          /* Pure Deep Black */
+    --surface: #111622;     /* Dark Charcoal Card Surface */
+    --surface2: #1a202c;    /* Input / Table Row Surface */
+    --border: #232d3f;      /* Sleek Dark Border */
+    --header-blue: #0088cc; /* Indodax Header Blue */
+    --accent: #0066ff;      /* Primary Accent Blue */
+    --accent2: #00b4d8;     /* Cyan Accent */
+    --green: #00c087;       /* Trading Green */
+    --red: #ff4d4d;         /* Trading Red */
+    --yellow: #f59e0b;      /* Warning Yellow */
+    --text: #f8fafc;        /* Main Text */
+    --muted: #94a3b8;       /* Subtitle / Muted Text */
+  }
+
+  [data-theme="light"] {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --border: #e2e8f0;
+    --header-blue: #0088cc;
+    --accent: #0066ff;
+    --accent2: #0284c7;
+    --green: #059669;
+    --red: #dc2626;
+    --yellow: #d97706;
+    --text: #0f172a;
+    --muted: #64748b;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
+
+  /* Top Navigation Bar */
+  nav.topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    min-height: 54px;
+    padding: 8px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top:0; z-index: 100;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .brand-logo { font-weight: 800; font-size: 20px; color: var(--header-blue); letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+  .top-right { display: flex; align-items: center; gap: 10px; font-size: 12px; flex-wrap: wrap; }
+  .top-badge { background: var(--surface2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  /* App Shell Container */
+  .app-shell { display: flex; min-height: calc(100vh - 54px); width: 100%; max-width: 100vw; overflow-x: hidden; }
+
+  /* Left Sidebar */
+  aside.sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    flex-shrink: 0;
+  }
+  .user-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: var(--header-blue); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .user-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .user-handle { font-size: 11px; color: var(--muted); }
+
+  .menu-group { display: flex; flex-direction: column; gap: 4px; }
+  .menu-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    text-decoration: none; transition: all .15s; cursor: pointer;
+  }
+  .menu-item:hover, .menu-item.active { background: rgba(0, 136, 204, 0.12); color: var(--header-blue); font-weight: 600; }
+
+  /* Main Workspace Layout */
+  main.workspace { flex: 1; padding: 16px 20px; display: flex; gap: 16px; width: 100%; max-width: 100%; overflow-x: hidden; }
+  .main-column { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; max-width: 100%; }
+  .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; max-width: 100%; }
+  .side-column table.indodax-table th { padding: 6px 8px; font-size: 10px; }
+  .side-column table.indodax-table td { padding: 6px 8px; font-size: 11px; }
+  .side-column .table-responsive { overflow-x: hidden; }
+
+  /* Indodax Banner Ticker */
+  .pair-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .pair-title { display: flex; align-items: center; gap: 10px; }
+  .coin-icon { width: 32px; height: 32px; border-radius: 50%; background: #f7931a; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .ticker-metrics { display: flex; gap: 18px; font-size: 12px; flex-wrap: wrap; }
+  .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
+  .metric-val { font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* Saldo Row */
+  .saldo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .saldo-amount { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* PnL Grid */
+  .pnl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+
+  /* Table Responsive Container */
+  .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Generic Card Container */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .card-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  /* Indodax Tables */
+  table.indodax-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap;
+  }
+  table.indodax-table th {
+    background: var(--surface2); color: var(--muted); font-weight: 600; text-align: left;
+    padding: 8px 12px; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border);
+  }
+  table.indodax-table td {
+    padding: 7px 12px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;
+  }
+  table.indodax-table tr:hover td { background: var(--surface2); }
+
+  /* Form Elements */
+  .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; align-items: start; }
+  .field-box { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--muted); }
+  .field-help { font-size: 10px; color: var(--muted); }
+  input, select {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; width: 100%; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--header-blue); }
+
+  /* Info Tooltip Icon & Popup */
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(0, 136, 204, 0.2);
+    color: var(--header-blue);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 4px;
+    position: relative;
+    transition: all 0.2s ease;
+    vertical-align: middle;
+  }
+  .info-icon:hover {
+    background: var(--header-blue);
+    color: #ffffff;
+    transform: scale(1.15);
+  }
+  .tooltip-popup {
+    display: none;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: normal;
+    width: 220px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 9999;
+    text-transform: none;
+  }
+  .tooltip-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--surface2) transparent transparent transparent;
+  }
+  .info-icon:hover .tooltip-popup {
+    display: block;
+  }
+
+  /* Custom Downward Dropdown */
+  .custom-dropdown {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; user-select: none;
+  }
+  .custom-dropdown-menu {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    z-index: 9999; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    max-height: 250px; overflow-y: auto;
+  }
+  .custom-dropdown-item {
+    padding: 8px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .custom-dropdown-item:hover { background: var(--surface2); color: var(--header-blue); }
+
+  /* Buttons */
+  button {
+    padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 600; font-family: inherit; transition: all .15s;
+  }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { filter: brightness(1.1); }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { filter: brightness(1.1); }
+  .btn-blue { background: var(--header-blue); color: #fff; }
+  .btn-blue:hover { filter: brightness(1.1); }
+  .btn-gray { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  /* Status Badges */
+  .badge { display: inline-flex; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .badge-green { background: rgba(0,192,135,.15); color: var(--green); }
+  .badge-red { background: rgba(255,77,77,.15); color: var(--red); }
+  .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
+
+  /* Responsive Breakpoints */
+  @media(max-width:1200px) {
+    main.workspace { flex-direction: column; padding: 12px; }
+    .side-column { width: 100%; }
+    aside.sidebar { display: none; }
+    .form-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media(max-width:768px) {
+    .app-shell { flex-direction: column; }
+    aside.sidebar { display: none; }
+    main.workspace { flex-direction: column; padding: 10px; gap: 12px; }
+    .side-column { width: 100%; }
+    .form-grid { grid-template-columns: 1fr; }
+    .pnl-grid { grid-template-columns: repeat(2, 1fr); }
+    nav.topbar { padding: 8px 12px; }
+    .brand-logo { font-size: 16px; }
+    .top-right { gap: 6px; }
+    .pair-banner { flex-direction: column; align-items: flex-start; }
+    .ticker-metrics { grid-template-columns: repeat(2, 1fr); display: grid; width: 100%; gap: 10px; }
+  }
+  @media(max-width:480px) {
+    .pnl-grid { grid-template-columns: 1fr; }
+  }
+</style>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topbar">
+  <div class="brand-logo">
+    <span>INDODAX</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700">ROBOT PRO</span>
+  </div>
+  <div class="top-right">
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="ws-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>
+      <span id="ws-status" style="font-size:11px">Connected</span>
+    </div>
+    <div id="active-bot-badge" style="background:rgba(0,192,135,0.15);border:1px solid var(--green);color:var(--green);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">
+      🤖 0 Bot Running
+    </div>
+    <span id="clock" class="top-badge"></span>
+    <button onclick="toggleTheme()" id="theme-toggle-btn" class="btn-gray" style="padding:4px 8px;font-size:11px">☀️ Terang</button>
+    <button onclick="requestNotifPermission()" class="btn-gray" style="padding:4px 8px;font-size:11px">🔔 Notif</button>
+    <button onclick="logout()" class="btn-gray" style="padding:4px 8px;font-size:11px">Logout</button>
+  </div>
+</nav>
+
+<!-- App Shell Layout -->
+<div class="app-shell">
+
+  <!-- Left Navigation Sidebar -->
+  <aside class="sidebar">
+    <div class="user-badge">
+      <div class="avatar-circle">YS</div>
+      <div>
+        <div class="user-name">Yunus Susmanto</div>
+        <div class="user-handle">yunussusmanto</div>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <a class="menu-item active">📊 Marketplace</a>
+      <a class="menu-item">👛 Wallet</a>
+      <a class="menu-item">🔄 Investasi Rutin</a>
+      <a class="menu-item">💱 Beli / Jual Instan</a>
+      <a class="menu-item">⚡ Quick Buy USDT</a>
+      <a class="menu-item">📈 Staking</a>
+      <a class="menu-item">🔐 Authenticator App</a>
+      <a class="menu-item">ℹ️ Informasi</a>
+    </div>
+    <div style="margin-top: 20px; font-size: 10px; color: var(--muted); text-align: center;">Discord: Aktif via .env</div>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+
+    <!-- Left Main Column (70% width) -->
+    <div class="main-column">
+
+      <!-- Ticker Banner -->
+      <div class="pair-banner">
+        <div class="pair-title">
+          <div class="coin-icon" id="banner-coin-icon">฿</div>
+          <div>
+            <div style="font-size:14px;font-weight:700" id="banner-symbol">BTC to IDR</div>
+            <div style="font-size:11px;color:var(--muted)" id="banner-market-name">BITCOIN MARKET</div>
+          </div>
+        </div>
+        <div class="ticker-metrics">
+          <div>
+            <div class="metric-label">Harga Terakhir</div>
+            <div class="metric-val" style="color:var(--green)" id="banner-last">Rp 1.131.896.000</div>
+          </div>
+          <div>
+            <div class="metric-label">24h Change</div>
+            <div class="metric-val" style="color:var(--green)" id="banner-change">+0.24%</div>
+          </div>
+          <div>
+            <div class="metric-label">24h High</div>
+            <div class="metric-val" id="banner-high">1.141.148.000</div>
+          </div>
+          <div>
+            <div class="metric-label">24h Low</div>
+            <div class="metric-val" id="banner-low">1.120.402.000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saldo Card -->
+      <div class="saldo-card">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div>
+            <div style="font-size:11px;color:var(--muted)">Estimasi Saldo Akun</div>
+            <div class="saldo-amount" id="display-saldo-idr">••••••••</div>
+          </div>
+        </div>
+        <button id="toggle-balance-btn" onclick="toggleBalanceVisibility()" class="btn-gray">👁 Show Saldo</button>
+      </div>
+
+      <!-- Audio for alerts -->
+      <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
+
+      <!-- P&L Summary Cards -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size:12px; font-weight:700; color:var(--muted)">Ringkasan Profit / Loss (P&L)</span>
+        <button id="toggle-pnl-btn" onclick="togglePnLVisibility()" class="btn-gray" style="padding:3px 8px; font-size:11px;">👁 Show Profit</button>
+      </div>
+      <div class="pnl-grid">
+        <div class="card" style="padding: 12px;"><div class="metric-label">Profit Hari Ini</div><div id="pnl-today" style="font-weight:700;font-size:16px;">••••••••</div></div>
+        <div class="card" style="padding: 12px;"><div class="metric-label">Profit Minggu Ini</div><div id="pnl-week" style="font-weight:700;font-size:16px;">••••••••</div></div>
+        <div class="card" style="padding: 12px;"><div class="metric-label">Profit Bulan Ini</div><div id="pnl-month" style="font-weight:700;font-size:16px;">••••••••</div></div>
+        <div class="card" style="padding: 12px;"><div class="metric-label">Profit Total</div><div id="pnl-total" style="font-weight:700;font-size:16px;">••••••••</div></div>
+      </div>
+
+      <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
+
+      <!-- Robot Control Form -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">
+          <div class="card-title" style="margin:0">🤖 Robot Trading Control Panel</div>
+          <button class="btn-red" style="padding:6px 14px;font-size:12px;border-radius:6px;" onclick="emergencyStop()">🚨 EMERGENCY STOP</button>
+        </div>
+        
+        <!-- Main Form Grid (Row 1: Target & Mode) -->
+        <div class="form-grid">
+          <div class="field-box" style="position:relative">
+            <label class="field-label">Target Pair (Indodax) <span class="info-icon">ⓘ<span class="tooltip-popup">Pilih koin kripto & IDR (Rupiah) yang ingin Anda jalankan untuk trading otomatis di Indodax.</span></span></label>
+            <div id="custom-pair-dropdown" class="custom-dropdown" onclick="toggleCustomDropdown(event)">
+              <span id="custom-pair-label" style="font-weight:600">Bitcoin (BTC/IDR)</span>
+              <span style="font-size:10px;color:var(--muted)">▼</span>
+            </div>
+            <div id="custom-dropdown-menu" class="custom-dropdown-menu" style="display:none">
+              <div style="padding:6px;border-bottom:1px solid var(--border)">
+                <input id="custom-dropdown-search" placeholder="🔍 Cari koin..." onkeyup="filterCustomDropdown()" style="padding:4px 8px;font-size:11px">
+              </div>
+              <div id="custom-dropdown-items" style="max-height:220px;overflow-y:auto"></div>
+            </div>
+            <select id="bot-pair" style="display:none" onchange="syncPairFromMainSelect(this.value)">
+              <option value="btc_idr">btc_idr</option>
+            </select>
+            <span class="field-help">Pilih koin trading</span>
+          </div>
+
+          <div class="field-box">
+            <label class="field-label">Mode Eksekusi <span class="info-icon">ⓘ<span class="tooltip-popup">Semi Auto: Bot minta izin Telegram/Dashboard sebelum order. Full Auto: Bot langsung eksekusi tanpa menunggu izin.</span></span></label>
+            <select id="bot-mode">
+              <option value="semi" selected>Semi Auto (Minta Izin)</option>
+              <option value="auto">Full Auto (Tanpa Delay)</option>
+              <option value="alert">Alert Only</option>
+            </select>
+            <span class="field-help">Mode izin Telegram</span>
+          </div>
+
+          <div class="field-box">
+            <label class="field-label">Pilihan Strategi <span class="info-icon">ⓘ<span class="tooltip-popup">Pilihan algoritma trading (Multi-Indicator RSI+MACD+BB, DCA beli bertahap saat harga turun).</span></span></label>
+            <select id="bot-strategy">
+              <option value="multi_indicator" selected>Multi-Indicator (RSI+MACD+BB)</option>
+              <option value="threshold">Threshold (Harga Statis)</option>
+              <option value="rsi">RSI Only</option>
+              <option value="dca">DCA (Dollar Cost Averaging)</option>
+            </select>
+            <span class="field-help">Indikator teknikal</span>
+          </div>
+
+          <div class="field-box">
+            <label class="field-label">Interval (Detik) <span class="info-icon">ⓘ<span class="tooltip-popup">Waktu jeda (detik) antar setiap kali bot mengecek & menganalisis pergerakan harga pasar.</span></span></label>
+            <input id="bot-interval" type="number" value="10" min="5">
+            <span class="field-help">Frekuensi cek pasar</span>
+          </div>
+        </div>
+
+        <!-- Strategy Specific Grid (Row 2) -->
+        <div id="strategy-multi" class="form-grid">
+          <div class="field-box">
+            <label class="field-label">Periode RSI <span class="info-icon">ⓘ<span class="tooltip-popup">Jumlah candle historis yang digunakan untuk menghitung momentum indikator RSI.</span></span></label>
+            <input id="mi-rsi-period" type="number" value="14">
+            <span class="field-help">Hitung 14 candle</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Periode BB <span class="info-icon">ⓘ<span class="tooltip-popup">Jumlah candle historis untuk menghitung garis indikator Bollinger Bands.</span></span></label>
+            <input id="mi-bb-period" type="number" value="20">
+            <span class="field-help">Hitung avg 20 candle</span>
+          </div>
+          <div class="field-box"></div>
+          <div class="field-box"></div>
+        </div>
+
+        <div id="strategy-threshold" style="display:none" class="form-grid">
+          <div class="field-box">
+            <label class="field-label">Beli Di Harga (IDR)</label>
+            <input id="buy-at" type="number" placeholder="Target Beli">
+          </div>
+          <div class="field-box">
+            <label class="field-label">Jual Di Harga (IDR)</label>
+            <input id="sell-at" type="number" placeholder="Target Jual">
+          </div>
+          <div class="field-box"></div>
+          <div class="field-box"></div>
+        </div>
+
+        <div id="strategy-rsi" style="display:none" class="form-grid">
+          <div class="field-box">
+            <label class="field-label">RSI Period</label>
+            <input id="rsi-period" type="number" value="14">
+          </div>
+          <div class="field-box">
+            <label class="field-label">Oversold (Beli)</label>
+            <input id="rsi-oversold" type="number" value="30">
+          </div>
+          <div class="field-box">
+            <label class="field-label">Overbought (Jual)</label>
+            <input id="rsi-overbought" type="number" value="70">
+          </div>
+          <div class="field-box"></div>
+        </div>
+
+        <div id="strategy-dca" style="display:none" class="form-grid">
+          <div class="field-box">
+            <label class="field-label">DCA Interval (Menit)</label>
+            <input id="dca-interval" type="number" value="60">
+            <span class="field-help">Jeda antar order DCA</span>
+          </div>
+          <div class="field-box"></div>
+          <div class="field-box"></div>
+          <div class="field-box"></div>
+        </div>
+
+        <!-- Risk & Sizing (Row 3 & 4) -->
+        <div class="form-grid">
+          <div class="field-box">
+            <label class="field-label">Modal Per Order (IDR) <span class="info-icon">ⓘ<span class="tooltip-popup">Total alokasi modal Rupiah yang disiapkan untuk bot trading pada pasangan koin ini.</span></span></label>
+            <input id="order-amount" type="number" value="200000">
+            <span class="field-help">Nominal per order</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Tipe Modal <span class="info-icon">ⓘ<span class="tooltip-popup">Fixed IDR: Nominal Rupiah tetap per order. % Saldo IDR: Persentase dari total saldo IDR Anda saat ini.</span></span></label>
+            <select id="sizing-mode">
+              <option value="fixed" selected>Fixed IDR Amount</option>
+              <option value="percentage">% Saldo IDR</option>
+            </select>
+            <span class="field-help">Nominal tetap / %</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Max Rugi / Hari (IDR) <span class="info-icon">ⓘ<span class="tooltip-popup">Batas maksimum akumulasi rugi harian. Jika tercapai, bot otomatis di-pause demi keamanan modal.</span></span></label>
+            <input id="loss-limit" type="number" value="50000">
+            <span class="field-help">Daily limit 50rb</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Cooldown (Menit) <span class="info-icon">ⓘ<span class="tooltip-popup">Waktu istirahat wajib setelah eksekusi order sebelum bot boleh melakukan order berikutnya.</span></span></label>
+            <input id="cooldown-minutes" type="number" value="5">
+            <span class="field-help">Jeda antar transaksi</span>
+          </div>
+
+          <div class="field-box">
+            <label class="field-label">Stop Loss (%) <span class="info-icon">ⓘ<span class="tooltip-popup">Batas rugi untuk cut-loss. Set 0% jika TIDAK INGIN JUAL RUGI (hanya jual saat untung).</span></span></label>
+            <input id="stop-loss" type="number" step="0.5" value="2">
+            <span class="field-help">Cut-loss otomatis 2%</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Take Profit (%) <span class="info-icon">ⓘ<span class="tooltip-popup">Target keuntungan bersih dari harga beli rata-rata. Bot otomatis menjual saat angka ini tercapai.</span></span></label>
+            <input id="take-profit" type="number" step="0.5" value="5">
+            <span class="field-help">Jual otomatis 5%</span>
+          </div>
+          <div class="field-box">
+            <label class="field-label">Trailing Stop (%) <span class="info-icon">ⓘ<span class="tooltip-popup">Kunci profit saat harga melambung. Jual otomatis jika harga turun X% dari titik harga puncak (peak).</span></span></label>
+            <input id="trailing-stop" type="number" step="0.5" value="1.5">
+            <span class="field-help">Kunci profit 1.5%</span>
+          </div>
+          <div class="field-box" style="justify-content:center; align-items:flex-start; padding-top:18px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text)">
+              <input type="checkbox" id="paper-mode" style="width:16px;height:16px;" onchange="document.getElementById('paper-mode-banner').style.display = this.checked ? 'block' : 'none'">
+              <span>Paper Mode (Simulasi)</span> <span class="info-icon">ⓘ<span class="tooltip-popup">Mode simulasi/dummy. Saldo uang Indodax asli TIDAK AKAN TERSENTUH saat di-centang.</span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Buttons Row -->
+        <div style="display:flex;gap:12px;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+          <button class="btn-green" style="flex:1;padding:10px;font-size:13px" onclick="startBot()">▶ Start Bot</button>
+          <button class="btn-red" style="flex:1;padding:10px;font-size:13px" onclick="stopBot()">⏹ Stop Bot</button>
+          <button class="btn-blue" style="flex:1;padding:10px;font-size:13px" onclick="runBacktest()">📊 Run Backtest</button>
+        </div>
+      </div>
+
+      <!-- Candlestick Chart (Native HTML5 Real-Time Indodax Rupiah IDR) -->
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>📈 Grafik Candlestick Real-Time (Indodax IDR)</span>
+          <span id="chart-pair-name" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
+        </div>
+        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#090D16;border:1px solid var(--border);position:relative">
+          <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
+        </div>
+      </div>
+
+      <!-- Pending Approvals & Open Orders -->
+      <div class="card" id="approval-section">
+        <div class="card-title">🔔 Pending Approval (Semi-Auto)</div>
+        <div id="approvals-list"><div style="color:var(--muted);font-size:12px">Tidak ada pending approval</div></div>
+      </div>
+
+      <!-- 1:1 Official Indodax MARKET DEPTH CHART Layout -->
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>MARKET DEPTH CHART</span>
+          <span id="depth-pair-label" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
+        </div>
+        
+        <!-- Canvas Visual Depth Area Chart -->
+        <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
+          <canvas id="depth-chart-canvas" style="width:100%;height:100%;display:block"></canvas>
+        </div>
+
+        <!-- Side-by-side Market Beli and Market Jual Tables -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Beli</div>
+            <table class="indodax-table">
+              <thead>
+                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
+              </thead>
+              <tbody id="bids-tbody">
+                <tr><td colspan="3" style="color:var(--muted)">Loading market beli...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Jual</div>
+            <table class="indodax-table">
+              <thead>
+                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
+              </thead>
+              <tbody id="asks-tbody">
+                <tr><td colspan="3" style="color:var(--muted)">Loading market jual...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Riwayat Transaksi Anda (Your Trades) -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;display:flex;justify-content:space-between;border-bottom:1px solid var(--border); align-items: center; flex-wrap: wrap; gap: 8px;">
+          <span>Riwayat Transaksi Anda (PostgreSQL Database)</span>
+          <div>
+            <button class="btn-gray" style="padding:4px 8px; font-size:11px; margin-right:8px;" onclick="window.open('/api/trades/export')">📥 Export CSV</button>
+            <span style="font-weight:400;font-size:11px;color:var(--green)">● Auto-Backup Active</span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="indodax-table">
+            <thead>
+              <tr><th>Waktu</th><th>Pair</th><th>Jenis</th><th>Harga (IDR)</th><th>Nominal</th></tr>
+            </thead>
+            <tbody id="trades-tbody">
+              <tr><td colspan="5" style="color:var(--muted)">Belum ada riwayat transaksi</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Backtest Result Card -->
+      <div class="card" style="display:none" id="backtest-card">
+        <div class="card-title">📊 Hasil Backtesting (Simulasi)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="background:var(--surface2);padding:10px;border-radius:6px">
+            <div style="font-size:10px;color:var(--muted)">WIN RATE</div>
+            <div style="font-size:18px;font-weight:700;color:var(--green)" id="bt-winrate">0%</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px">
+            <div style="font-size:10px;color:var(--muted)">NET PROFIT</div>
+            <div style="font-size:18px;font-weight:700" id="bt-profit">0%</div>
+          </div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px">
+            <div style="font-size:10px;color:var(--muted)">MAX DRAWDOWN</div>
+            <div style="font-size:18px;font-weight:700;color:var(--red)" id="bt-drawdown">0%</div>
+          </div>
+        </div>
+        <div id="bt-summary" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+
+      <!-- Equity Curve Chart -->
+      <div class="card">
+        <div class="card-title">📈 Equity Curve (Pertumbuhan Modal)</div>
+        <canvas id="equity-chart" style="width:100%; height:200px;"></canvas>
+      </div>
+
+      <!-- RSI/MACD Mini Indicators -->
+      <div class="card">
+        <div class="card-title">📊 Indicator Status</div>
+        <div style="display: flex; gap: 16px;">
+          <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
+          <div><span class="metric-label">MACD:</span> <span id="mini-macd" style="font-weight:bold; font-size:16px;">--</span></div>
+        </div>
+      </div>
+
+      <!-- Live Logs -->
+      <div class="card">
+        <div class="card-title">📟 Live Log Console</div>
+        <div id="log-box" style="height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:8px;border-radius:6px"></div>
+      </div>
+
+    </div>
+
+    <!-- Right Side Column (Markets Sidebar & Active Bots) -->
+    <div class="side-column">
+
+      <!-- Active Bots Widget -->
+      <div class="card">
+        <div class="card-title">🟢 Robot Aktif</div>
+        <div id="bots-list"><div style="color:var(--muted);font-size:12px">Belum ada robot aktif</div></div>
+      </div>
+
+      <!-- Open Positions -->
+      <div class="card" style="padding:0;overflow:hidden; margin-bottom:16px;">
+        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
+          Open Positions
+        </div>
+        <div class="table-responsive">
+          <table class="indodax-table">
+            <thead><tr><th>Pair</th><th>Entry</th><th>Price</th><th>P&L</th><th>%</th></tr></thead>
+            <tbody id="positions-tbody"><tr><td colspan="5" style="color:var(--muted)">No open positions</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Antrian Order Indodax (Open Orders / Limit Order) -->
+      <div class="card" style="padding:0;overflow:hidden; margin-bottom:16px;">
+        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <span>📋 Antrian Order Indodax (Limit Order)</span>
+          <span style="font-size:10px;font-weight:400;color:var(--green)">● Real-Time API</span>
+        </div>
+        <div class="table-responsive">
+          <table class="indodax-table">
+            <thead><tr><th>Type</th><th>Harga (IDR)</th><th>Jumlah</th><th>Status</th></tr></thead>
+            <tbody id="open-orders-tbody"><tr><td colspan="4" style="color:var(--muted)">Belum ada antrian order</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Indodax Markets Sidebar Panel -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
+          Markets (Pasar Indodax)
+        </div>
+        <div style="padding:8px">
+          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
+        </div>
+        <div style="max-height:540px;overflow-y:auto">
+          <table class="indodax-table">
+            <thead>
+              <tr><th>Market</th><th>Price</th><th>24h Vol</th></tr>
+            </thead>
+            <tbody id="markets-list-tbody">
+              <tr><td colspan="3" style="color:var(--muted)">Loading markets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal Detail Konfigurasi Bot -->
+<div id="bot-detail-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:90%;max-width:480px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">
+      <div id="modal-bot-title" style="font-size:15px;font-weight:700;color:var(--accent2)">Detail Setting Bot</div>
+      <button onclick="closeBotDetailModal()" class="btn-gray" style="padding:2px 8px;font-size:14px">✕</button>
+    </div>
+    <div id="modal-bot-body" style="font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+    <div style="margin-top:16px;text-align:right">
+      <button onclick="closeBotDetailModal()" class="btn-blue" style="padding:6px 16px;font-size:12px">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let ws;
+const prices = {};
+const activeBots = {};
+let allPairsData = [];
+let showBalance = false;
+let cachedBalance = null;
+
+// Clock
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('id-ID');
+}, 1000);
+
+// Formatters
+function fmtIDR(n) {
+  if (!n || isNaN(n)) return 'Rp 0';
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+}
+
+function log(msg, type = 'info') {
+  const box = document.getElementById('log-box');
+  if (!box) return;
+  const time = new Date().toLocaleTimeString('id-ID');
+  const cls = type === 'err' ? 'color:var(--red)' : type === 'trade' ? 'color:var(--green);font-weight:bold' : type === 'warn' ? 'color:var(--yellow)' : 'color:var(--muted)';
+  box.insertAdjacentHTML('afterbegin', `<div style="${cls}">[${time}] ${msg}</div>`);
+  if (box.children.length > 100) box.removeChild(box.lastChild);
+}
+
+// WebSocket
+function connectWS() {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${location.host}/ws`;
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    document.getElementById('ws-status').textContent = 'Connected';
+    document.getElementById('ws-dot').style.background = 'var(--green)';
+    log('WebSocket connected');
+  };
+  ws.onclose = () => {
+    document.getElementById('ws-status').textContent = 'Disconnected';
+    document.getElementById('ws-dot').style.background = 'var(--red)';
+    setTimeout(connectWS, 3000);
+  };
+  ws.onmessage = e => handleWS(JSON.parse(e.data));
+}
+
+function handleWS(msg) {
+  if (msg.type === 'init') {
+    if (Array.isArray(msg.bots)) {
+      Object.keys(activeBots).forEach(k => delete activeBots[k]);
+      msg.bots.forEach(b => {
+        if (typeof b === 'object' && b.pair) activeBots[b.pair] = b;
+      });
+      renderBots();
+    }
+    loadBots();
+  } else if (msg.type === 'ticker_all') {
+    const select = document.getElementById('bot-pair');
+    const p = (select && select.value ? select.value : 'btc_idr').replace('_', '');
+    const t = msg.tickers[p] || msg.tickers[p.toLowerCase()];
+    if (t) {
+      const last = parseFloat(t.last);
+      const high = parseFloat(t.high);
+      const low = parseFloat(t.low);
+      prices[p] = last;
+
+      const elLast = document.getElementById('banner-last');
+      if (elLast) elLast.textContent = fmtIDR(last);
+
+      const elHigh = document.getElementById('banner-high');
+      if (elHigh) elHigh.textContent = fmtIDR(high);
+
+      const elLow = document.getElementById('banner-low');
+      if (elLow) elLow.textContent = fmtIDR(low);
+
+      updateLiveCandle(last, msg.timestamp);
+    }
+  } else if (msg.type === 'price') {
+    prices[msg.pair] = msg.price;
+    const select = document.getElementById('bot-pair');
+    const currentPair = select ? select.value : 'btc_idr';
+    if (msg.pair.replace('_', '') === currentPair.replace('_', '')) {
+      updateLiveCandle(msg.price, msg.timestamp);
+    }
+  } else if (msg.type === 'trade') {
+    log(`TRADE ${msg.trade.action} ${msg.trade.pair} @ ${fmtIDR(msg.trade.price)}`, 'trade');
+    loadTrades();
+    playAlertSound();
+    showPushNotif('Trade Executed', `${msg.trade.action} ${msg.trade.pair} at ${fmtIDR(msg.trade.price)}`);
+  } else if (msg.type === 'bot_status') {
+    if (msg.running) activeBots[msg.pair] = msg;
+    else delete activeBots[msg.pair];
+    renderBots();
+  } else if (msg.type === 'approval_request') {
+    renderApproval(msg);
+    playAlertSound();
+    showPushNotif('Approval Needed', `Signal ${msg.signal} for ${msg.pair}`);
+  } else if (msg.type === 'orderbook') {
+    const select = document.getElementById('bot-pair');
+    const currentPair = select ? select.value : 'btc_idr';
+    if (msg.pair.replace('_','') === currentPair.replace('_','')) {
+      renderOrderBookData(msg.depth);
+    }
+  } else if (msg.type === 'error') {
+    log(`ERR [${msg.pair}]: ${msg.msg}`, 'err');
+  } else if (msg.type === 'alert') {
+    log(`⚠ [${msg.pair}]: ${msg.msg}`, 'warn');
+  }
+}
+
+// Pair Syncing Helpers
+function syncPairFromMainSelect(pair) {
+  updateChartSymbol();
+  loadOrderBook();
+  // Notify backend to stream orderbook for this pair
+  fetch('/api/active-pair', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({pair}) }).catch(()=>{});
+}
+
+function syncPairFromDepthSelect(pair) {
+  const mainSelect = document.getElementById('bot-pair');
+  if (mainSelect) mainSelect.value = pair;
+  updateChartSymbol();
+  loadOrderBook();
+}
+
+function selectPairFromMarket(pair) {
+  const mainSelect = document.getElementById('bot-pair');
+  const depthSelect = document.getElementById('depth-chart-pair-select');
+  if (mainSelect) mainSelect.value = pair;
+  if (depthSelect) depthSelect.value = pair;
+  updateChartSymbol();
+  loadOrderBook();
+}
+
+// Strategy Toggle
+document.getElementById('bot-strategy').addEventListener('change', e => {
+  document.getElementById('strategy-threshold').style.display = e.target.value === 'threshold' ? '' : 'none';
+  document.getElementById('strategy-rsi').style.display = e.target.value === 'rsi' ? '' : 'none';
+  document.getElementById('strategy-multi').style.display = e.target.value === 'multi_indicator' ? '' : 'none';
+  document.getElementById('dca-config').style.display = e.target.value === 'dca' ? '' : 'none';
+});
+
+// Bot Control
+async function startBot() {
+  const pair = document.getElementById('bot-pair').value.toLowerCase().replace('/', '');
+  const mode = document.getElementById('bot-mode').value;
+  const strategy = document.getElementById('bot-strategy').value;
+  const intervalSeconds = parseInt(document.getElementById('bot-interval').value) || 10;
+  const sizingMode = document.getElementById('sizing-mode').value;
+  const orderAmount = parseInt(document.getElementById('order-amount').value) || 50000;
+  const dailyLossLimit = parseInt(document.getElementById('loss-limit').value) || 50000;
+
+  const config = {
+    intervalSeconds, sizingMode,
+    orderAmount: sizingMode === 'fixed' ? orderAmount : 50000,
+    sizingValue: orderAmount, dailyLossLimit,
+    stopLossPercent: parseFloat(document.getElementById('stop-loss').value) || 0,
+    takeProfitPercent: parseFloat(document.getElementById('take-profit').value) || 0,
+    trailingPercent: parseFloat(document.getElementById('trailing-stop').value) || 0,
+    cooldownMinutes: parseInt(document.getElementById('cooldown-minutes').value) || 5,
+    paperMode: document.getElementById('paper-mode').checked
+  };
+
+  if (strategy === 'threshold') {
+    config.buyAt = document.getElementById('buy-at').value;
+    config.sellAt = document.getElementById('sell-at').value;
+  } else if (strategy === 'rsi') {
+    config.period = parseInt(document.getElementById('rsi-period').value) || 14;
+    config.oversold = parseInt(document.getElementById('rsi-oversold').value) || 30;
+    config.overbought = parseInt(document.getElementById('rsi-overbought').value) || 70;
+  } else if (strategy === 'multi_indicator') {
+    config.rsiPeriod = parseInt(document.getElementById('mi-rsi-period').value) || 14;
+    config.bbPeriod = parseInt(document.getElementById('mi-bb-period').value) || 20;
+  }
+
+  const res = await fetch('/api/bot/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pair, mode, strategy, config }),
+  });
+  const data = await res.json();
+  log(`Bot started: ${pair.toUpperCase()} [${mode}/${strategy}]`);
+  activeBots[pair] = { pair, running: true, mode, strategy, config };
+  renderBots();
+}
+
+async function stopBot() {
+  const pair = document.getElementById('bot-pair').value.toLowerCase().replace('/', '');
+  await fetch('/api/bot/stop', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pair }),
+  });
+  delete activeBots[pair];
+  renderBots();
+  log(`Bot stopped: ${pair.toUpperCase()}`, 'warn');
+}
+
+// Backtest
+async function runBacktest() {
+  const select = document.getElementById('bot-pair');
+  const pair = select ? select.value : 'btc_idr';
+  const strategy = document.getElementById('bot-strategy').value;
+  const sizingMode = document.getElementById('sizing-mode').value;
+  const orderAmount = parseInt(document.getElementById('order-amount').value) || 50000;
+
+  const config = {
+    sizingMode,
+    orderAmount: sizingMode === 'fixed' ? orderAmount : 50000,
+    sizingValue: orderAmount,
+    buyAt: document.getElementById('buy-at')?.value,
+    sellAt: document.getElementById('sell-at')?.value,
+    period: parseInt(document.getElementById('rsi-period')?.value) || 14,
+    rsiPeriod: parseInt(document.getElementById('mi-rsi-period')?.value) || 14,
+    bbPeriod: parseInt(document.getElementById('mi-bb-period')?.value) || 20,
+    oversold: parseInt(document.getElementById('rsi-oversold')?.value) || 30,
+    overbought: parseInt(document.getElementById('rsi-overbought')?.value) || 70,
+  };
+
+  log(`Running backtest for ${pair.toUpperCase()} (${strategy})...`);
+  const card = document.getElementById('backtest-card');
+  card.style.display = 'block';
+
+  try {
+    const res = await fetch('/api/backtest', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pair, strategy, config, initialCapital: 1000000 }),
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      log(`Backtest warning: ${data.error}`, 'warn');
+      return;
+    }
+
+    document.getElementById('bt-winrate').textContent = `${data.winRate}%`;
+    const profitEl = document.getElementById('bt-profit');
+    profitEl.textContent = `${data.netProfitPercent >= 0 ? '+' : ''}${data.netProfitPercent}%`;
+    profitEl.style.color = data.netProfitPercent >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('bt-drawdown').textContent = `-${data.maxDrawdown}%`;
+
+    document.getElementById('bt-summary').innerHTML = `
+      Simulasi Modal: Rp ${fmtIDR(data.initialCapital)} ➔ Rp ${fmtIDR(data.finalCapital)}<br>
+      Total Executed Trades: <b>${data.totalTrades}</b> | Net Profit: <b>Rp ${fmtIDR(data.netProfit)}</b>
+    `;
+    log(`Backtest finished: WinRate ${data.winRate}%, Profit ${data.netProfitPercent}%`);
+  } catch (err) {
+    log(`Backtest failed: ${err.message}`, 'err');
+  }
+}
+
+// Saldo Toggle
+function toggleBalanceVisibility() {
+  showBalance = !showBalance;
+  const btn = document.getElementById('toggle-balance-btn');
+  if (btn) btn.textContent = showBalance ? '🙈 Hide Saldo' : '👁 Show Saldo';
+  if (!cachedBalance) loadBalance();
+  else renderBalanceGrid();
+}
+
+async function loadBalance() {
+  try {
+    const res = await fetch('/api/balance');
+    cachedBalance = await res.json();
+    renderBalanceGrid();
+  } catch (_) {}
+}
+
+function renderBalanceGrid() {
+  const el = document.getElementById('display-saldo-idr');
+  if (!cachedBalance || !el) return;
+
+  if (!showBalance) {
+    el.innerHTML = '<span style="font-size:18px;font-weight:700">••••••••</span>';
+    return;
+  }
+
+  const idr = cachedBalance.idr || 0;
+  const cryptos = Object.entries(cachedBalance)
+    .filter(([c, val]) => c !== 'idr' && parseFloat(val) > 0)
+    .map(([c, val]) => `<span style="font-size:15px;color:var(--accent2);font-weight:700">${parseFloat(val).toFixed(6)} ${c.toUpperCase()}</span>`);
+
+  const cryptoHtml = cryptos.length ? cryptos.join(' <span style="color:var(--muted)">|</span> ') + ' <span style="color:var(--muted)">|</span> ' : '';
+  el.innerHTML = `${cryptoHtml}<span style="font-size:18px;font-weight:700">${fmtIDR(idr)}</span>`;
+}
+
+// Trades
+async function loadTrades() {
+  try {
+    const res = await fetch('/api/trades');
+    const data = await res.json();
+    const tbody = document.getElementById('trades-tbody');
+    if (!tbody) return;
+    if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Belum ada riwayat transaksi</td></tr>'; return; }
+    tbody.innerHTML = data.slice(0, 50).map(t => `
+      <tr>
+        <td>${new Date(t.timestamp).toLocaleString('id-ID')}</td>
+        <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
+        <td><span class="badge ${t.action === 'BUY' ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
+        <td>${fmtIDR(t.price)}</td>
+        <td>${fmtIDR(t.amount)}</td>
+      </tr>
+    `).join('');
+  } catch (_) {}
+}
+
+// Custom Downward Dropdown Logic
+function toggleCustomDropdown(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('custom-dropdown-menu');
+  if (!menu) return;
+  const isHidden = menu.style.display === 'none';
+  menu.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const search = document.getElementById('custom-dropdown-search');
+    if (search) { search.value = ''; search.focus(); }
+    renderCustomDropdownItems(allPairsData.length ? allPairsData : INITIAL_PAIRS);
+  }
+}
+
+document.addEventListener('click', () => {
+  const menu = document.getElementById('custom-dropdown-menu');
+  if (menu) menu.style.display = 'none';
+});
+
+function renderCustomDropdownItems(list) {
+  const container = document.getElementById('custom-dropdown-items');
+  if (!container) return;
+  container.innerHTML = list.map(p => `
+    <div class="custom-dropdown-item" onclick="selectCustomPair('${p.symbol}', '${(p.name || p.symbol).replace(/'/g, "\\'")}')">
+      <span style="font-weight:600">${p.name || p.symbol.replace('_idr','').toUpperCase()+'/IDR'}</span>
+      <span style="font-size:10px;color:var(--muted)">${p.last ? fmtIDR(p.last) : ''}</span>
+    </div>
+  `).join('');
+}
+
+function filterCustomDropdown() {
+  const q = document.getElementById('custom-dropdown-search').value.toLowerCase();
+  const source = allPairsData.length ? allPairsData : INITIAL_PAIRS;
+  const filtered = source.filter(p => p.symbol.toLowerCase().includes(q) || (p.name && p.name.toLowerCase().includes(q)));
+  renderCustomDropdownItems(filtered);
+}
+
+function selectCustomPair(symbol, name) {
+  document.getElementById('custom-pair-label').textContent = name;
+  const select = document.getElementById('bot-pair');
+  if (select) {
+    select.value = symbol;
+    syncPairFromMainSelect(symbol);
+  }
+  const menu = document.getElementById('custom-dropdown-menu');
+  if (menu) menu.style.display = 'none';
+}
+
+const INITIAL_PAIRS = [
+  { symbol: 'btc_idr', name: 'Bitcoin (BTC/IDR)' },
+  { symbol: 'eth_idr', name: 'Ethereum (ETH/IDR)' },
+  { symbol: 'usdt_idr', name: 'Tether USDt (USDT/IDR)' },
+  { symbol: 'sol_idr', name: 'Solana (SOL/IDR)' },
+  { symbol: 'bnb_idr', name: 'Binance Coin (BNB/IDR)' },
+  { symbol: 'xrp_idr', name: 'Ripple (XRP/IDR)' },
+  { symbol: 'doge_idr', name: 'Dogecoin (DOGE/IDR)' },
+  { symbol: 'pepe_idr', name: 'Pepe (PEPE/IDR)' },
+  { symbol: 'shib_idr', name: 'Shiba Inu (SHIB/IDR)' },
+  { symbol: 'ada_idr', name: 'Cardano (ADA/IDR)' },
+  { symbol: 'avax_idr', name: 'Avalanche (AVAX/IDR)' },
+  { symbol: 'dot_idr', name: 'Polkadot (DOT/IDR)' },
+  { symbol: 'link_idr', name: 'Chainlink (LINK/IDR)' },
+  { symbol: 'matic_idr', name: 'Polygon (MATIC/IDR)' },
+  { symbol: 'trx_idr', name: 'TRON (TRX/IDR)' },
+  { symbol: 'near_idr', name: 'NEAR Protocol (NEAR/IDR)' },
+  { symbol: 'apt_idr', name: 'Aptos (APT/IDR)' },
+  { symbol: 'sui_idr', name: 'Sui (SUI/IDR)' },
+  { symbol: 'render_idr', name: 'Render (RENDER/IDR)' },
+  { symbol: 'fet_idr', name: 'Fetch.ai (FET/IDR)' },
+  { symbol: 'fil_idr', name: 'Filecoin (FIL/IDR)' },
+  { symbol: 'arb_idr', name: 'Arbitrum (ARB/IDR)' },
+  { symbol: 'op_idr', name: 'Optimism (OP/IDR)' },
+  { symbol: 'inj_idr', name: 'Injective (INJ/IDR)' },
+  { symbol: 'kas_idr', name: 'Kaspa (KAS/IDR)' },
+  { symbol: 'ltc_idr', name: 'Litecoin (LTC/IDR)' },
+  { symbol: 'bch_idr', name: 'Bitcoin Cash (BCH/IDR)' },
+  { symbol: 'etc_idr', name: 'Ethereum Classic (ETC/IDR)' },
+  { symbol: 'xlm_idr', name: 'Stellar (XLM/IDR)' },
+  { symbol: 'algo_idr', name: 'Algorand (ALGO/IDR)' },
+  { symbol: 'vet_idr', name: 'VeChain (VET/IDR)' },
+  { symbol: 'hbar_idr', name: 'Hedera (HBAR/IDR)' },
+  { symbol: 'icp_idr', name: 'Internet Computer (ICP/IDR)' },
+  { symbol: 'wif_idr', name: 'dogwifhat (WIF/IDR)' },
+  { symbol: 'bonk_idr', name: 'Bonk (BONK/IDR)' },
+  { symbol: 'floki_idr', name: 'Floki (FLOKI/IDR)' },
+  { symbol: 'aave_idr', name: 'Aave (AAVE/IDR)' },
+  { symbol: 'uni_idr', name: 'Uniswap (UNI/IDR)' }
+];
+
+function populateInitialOptions() {
+  const mainSelect = document.getElementById('bot-pair');
+  const depthSelect = document.getElementById('depth-chart-pair-select');
+  const optionsHtml = INITIAL_PAIRS.map(p => `<option value="${p.symbol}">${p.name}</option>`).join('');
+  if (mainSelect) mainSelect.innerHTML = optionsHtml;
+  if (depthSelect) depthSelect.innerHTML = optionsHtml;
+}
+
+populateInitialOptions();
+
+// Pairs Loader (Unlimited 200+ Pairs)
+async function loadPairs() {
+  try {
+    const res = await fetch('/api/pairs?t=' + Date.now());
+    const data = await res.json();
+    if (data && data.length && Array.isArray(data)) {
+      allPairsData = data;
+      // Always put BTC/IDR at top position 0
+      allPairsData.sort((a, b) => (a.symbol === 'btc_idr' ? -1 : (b.symbol === 'btc_idr' ? 1 : (b.vol || 0) - (a.vol || 0))));
+      
+      const mainSelect = document.getElementById('bot-pair');
+      const depthSelect = document.getElementById('depth-chart-pair-select');
+      const curVal = mainSelect?.value || 'btc_idr';
+
+      const optionsHtml = allPairsData.map(p => {
+        const sym = p.symbol;
+        const symName = p.name || `${sym.replace('_idr','').toUpperCase()}/IDR`;
+        return `<option value="${sym}" ${sym === curVal ? 'selected' : ''}>${symName}</option>`;
+      }).join('');
+
+      if (mainSelect) mainSelect.innerHTML = optionsHtml;
+      if (depthSelect) depthSelect.innerHTML = optionsHtml;
+
+      renderMarketsList(allPairsData);
+      updateChartSymbol();
+    }
+  } catch (err) {
+    console.error('loadPairs error:', err);
+  }
+}
+
+function renderMarketsList(list) {
+  const tbody = document.getElementById('markets-list-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = list.map(p => `
+    <tr style="cursor:pointer" onclick="selectPairFromMarket('${p.symbol}')">
+      <td style="font-weight:700;color:var(--header-blue)">${p.symbol.replace('_idr','').toUpperCase()}/IDR</td>
+      <td>${fmtIDR(p.last || 0)}</td>
+      <td style="font-size:10px;color:var(--muted)">${p.vol ? (parseFloat(p.vol)/1000000000).toFixed(1)+'B' : '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function filterMarkets() {
+  const q = document.getElementById('market-search').value.toLowerCase();
+  const filtered = allPairsData.filter(p => p.symbol.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
+  renderMarketsList(filtered);
+}
+
+let nativeCandleData = [];
+
+function loadCandlesForPair(pair) {
+  const rawPair = pair || 'btc_idr';
+  const pData = allPairsData.find(p => p.symbol === rawPair);
+  const basePrice = pData && pData.last ? parseFloat(pData.last) : 1000000000;
+  const highPrice = pData && pData.high ? parseFloat(pData.high) : basePrice * 1.02;
+  const lowPrice = pData && pData.low ? parseFloat(pData.low) : basePrice * 0.98;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const intervalSec = 15 * 60;
+  nativeCandleData = [];
+  let prevClose = basePrice * 0.97;
+
+  for (let i = 50; i >= 1; i--) {
+    const time = nowSec - (i * intervalSec);
+    const range = Math.max((highPrice - lowPrice) * 0.05, basePrice * 0.005);
+    const change = (Math.random() - 0.48) * range;
+    const open = prevClose;
+    const close = Math.min(highPrice, Math.max(lowPrice, open + change));
+    const high = Math.max(open, close) + Math.random() * (range * 0.3);
+    const low = Math.min(open, close) - Math.random() * (range * 0.3);
+    prevClose = close;
+
+    nativeCandleData.push({
+      time: Math.floor(time / 60) * 60,
+      open: Math.round(open),
+      high: Math.round(high),
+      low: Math.round(low),
+      close: Math.round(close)
+    });
+  }
+
+  const lastC = nativeCandleData[nativeCandleData.length - 1];
+  if (lastC) {
+    lastC.close = basePrice;
+    lastC.high = Math.max(lastC.high, basePrice);
+    lastC.low = Math.min(lastC.low, basePrice);
+  }
+
+  drawNativeCandleChart(nativeCandleData);
+}
+
+function updateLiveCandle(price, timestamp) {
+  if (!nativeCandleData.length) return;
+  const lastC = nativeCandleData[nativeCandleData.length - 1];
+  lastC.high = Math.max(lastC.high, price);
+  lastC.low = Math.min(lastC.low, price);
+  lastC.close = price;
+  drawNativeCandleChart(nativeCandleData);
+}
+
+function drawNativeCandleChart(candles) {
+  const canvas = document.getElementById('candlestick-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const width = canvas.parentElement.clientWidth || 700;
+  const height = 360;
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  ctx.fillStyle = '#090D16';
+  ctx.fillRect(0, 0, width, height);
+
+  if (!candles || !candles.length) return;
+
+  const paddingRight = 110;
+  const paddingBottom = 25;
+  const chartW = width - paddingRight;
+  const chartH = height - paddingBottom;
+
+  let maxPrice = -Infinity;
+  let minPrice = Infinity;
+  candles.forEach(c => {
+    if (c.high > maxPrice) maxPrice = c.high;
+    if (c.low < minPrice) minPrice = c.low;
+  });
+
+  if (maxPrice === minPrice) { maxPrice *= 1.01; minPrice *= 0.99; }
+  const range = maxPrice - minPrice;
+
+  // Grid Lines & Price Scale on Right
+  ctx.strokeStyle = '#1a202c';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = (chartH / 5) * i + 10;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(chartW, y);
+    ctx.stroke();
+
+    const pVal = maxPrice - (range / 5) * i;
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillText(fmtIDR(pVal), chartW + 8, y + 4);
+  }
+
+  // Draw Candlesticks
+  const count = candles.length;
+  const step = chartW / count;
+  const candleW = Math.max(3, step - 3);
+
+  candles.forEach((c, i) => {
+    const x = i * step + step / 2;
+    const isUp = c.close >= c.open;
+    const color = isUp ? '#00c087' : '#ff4d4d';
+
+    const yHigh = chartH - ((c.high - minPrice) / range) * (chartH - 20) + 10;
+    const yLow = chartH - ((c.low - minPrice) / range) * (chartH - 20) + 10;
+    const yOpen = chartH - ((c.open - minPrice) / range) * (chartH - 20) + 10;
+    const yClose = chartH - ((c.close - minPrice) / range) * (chartH - 20) + 10;
+
+    // Wick
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x, yHigh);
+    ctx.lineTo(x, yLow);
+    ctx.stroke();
+
+    // Body
+    const bodyY = Math.min(yOpen, yClose);
+    const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+    ctx.fillStyle = color;
+    ctx.fillRect(x - candleW / 2, bodyY, candleW, bodyH);
+  });
+}
+
+// Chart Symbol Switcher
+function updateChartSymbol() {
+  const select = document.getElementById('bot-pair');
+  if (!select) return;
+  const rawPair = select.value || 'btc_idr';
+  const cleanCoin = rawPair.replace('_idr', '').replace('_', '').toUpperCase();
+
+  // Update Ticker Banner
+  document.getElementById('banner-symbol').textContent = `${cleanCoin} to IDR`;
+  document.getElementById('banner-market-name').textContent = `${cleanCoin} MARKET`;
+  document.getElementById('chart-pair-name').textContent = `${cleanCoin}/IDR (Indodax Real-Time Chart)`;
+  
+  const depthLabel = document.getElementById('depth-pair-label');
+  if (depthLabel) depthLabel.textContent = `${cleanCoin}/IDR`;
+
+  // Update Coin Unit Labels in Depth Tables
+  document.querySelectorAll('.coin-symbol-label').forEach(el => el.textContent = cleanCoin);
+
+  // Update Ticker Metrics if available
+  const pData = allPairsData.find(p => p.symbol === rawPair);
+  if (pData) {
+    if (pData.last) document.getElementById('banner-last').textContent = fmtIDR(pData.last);
+    if (pData.high) document.getElementById('banner-high').textContent = fmtIDR(pData.high);
+    if (pData.low) document.getElementById('banner-low').textContent = fmtIDR(pData.low);
+  }
+
+  // Load Native Candlestick Chart for Pair (In Rupiah IDR)
+  loadCandlesForPair(rawPair);
+}
+
+// OrderBook & Market Depth Loader
+async function loadOrderBook() {
+  const select = document.getElementById('bot-pair');
+  const pair = select ? select.value || 'btc_idr' : 'btc_idr';
+  try {
+    const res = await fetch(`/api/orderbook/${pair}`);
+    const data = await res.json();
+    renderOrderBookData(data);
+  } catch (_) {}
+}
+
+function renderOrderBookData(data) {
+  if (!data) return;
+  const bids = data.buy || [];
+  const asks = data.sell || [];
+
+  const bidsTbody = document.getElementById('bids-tbody');
+  const asksTbody = document.getElementById('asks-tbody');
+
+  // Render Bids Table (Market Beli)
+  if (bidsTbody) {
+    if (!bids.length) bidsTbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted)">Tidak ada antrian beli</td></tr>';
+    else {
+      let sumCoin = 0, sumIDR = 0;
+      bidsTbody.innerHTML = bids.slice(0, 10).map((b) => {
+        const price = parseFloat(b[0]);
+        const amount = parseFloat(b[1]);
+        sumCoin += amount;
+        sumIDR += (price * amount);
+        return `
+          <tr>
+            <td style="color:var(--green)">${fmtIDR(price)}</td>
+            <td>${sumCoin.toFixed(4)}</td>
+            <td>${fmtIDR(sumIDR)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Render Asks Table (Market Jual)
+  if (asksTbody) {
+    if (!asks.length) asksTbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted)">Tidak ada antrian jual</td></tr>';
+    else {
+      let sumCoin = 0, sumIDR = 0;
+      asksTbody.innerHTML = asks.slice(0, 10).map((a) => {
+        const price = parseFloat(a[0]);
+        const amount = parseFloat(a[1]);
+        sumCoin += amount;
+        sumIDR += (price * amount);
+        return `
+          <tr>
+            <td style="color:var(--red)">${fmtIDR(price)}</td>
+            <td>${sumCoin.toFixed(4)}</td>
+            <td>${fmtIDR(sumIDR)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Draw Market Depth Canvas Area Chart safely
+  try {
+    drawMarketDepthChart(bids, asks);
+  } catch (err) {
+    console.error('Depth chart drawing error:', err);
+  }
+}
+
+// 1:1 Visual Market Depth Canvas Chart
+function drawMarketDepthChart(bids, asks) {
+  const canvas = document.getElementById('depth-chart-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const width = canvas.parentElement.clientWidth || 600;
+  const height = canvas.parentElement.clientHeight || 200;
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  ctx.clearRect(0, 0, width, height);
+
+  if (!bids.length || !asks.length) return;
+
+  const bidsSorted = bids.slice(0, 25).map(b => [parseFloat(b[0]), parseFloat(b[1])]).sort((a, b) => b[0] - a[0]);
+  const asksSorted = asks.slice(0, 25).map(a => [parseFloat(a[0]), parseFloat(a[1])]).sort((a, b) => a[0] - b[0]);
+
+  let cumBid = 0;
+  const bidPoints = bidsSorted.map(b => { cumBid += (b[0] * b[1]); return { price: b[0], volume: cumBid }; }).reverse();
+
+  let cumAsk = 0;
+  const askPoints = asksSorted.map(a => { cumAsk += (a[0] * a[1]); return { price: a[0], volume: cumAsk }; });
+
+  const maxVolume = Math.max(cumBid, cumAsk, 0.001);
+  const midX = width / 2;
+
+  // Draw Bids (Blue Area on Left)
+  ctx.beginPath();
+  ctx.moveTo(0, height);
+  const bidStep = midX / Math.max(bidPoints.length - 1, 1);
+  bidPoints.forEach((pt, i) => {
+    const x = i * bidStep;
+    const y = height - (pt.volume / maxVolume) * (height - 25);
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(midX, height);
+  ctx.closePath();
+
+  const bidGrad = ctx.createLinearGradient(0, 0, 0, height);
+  bidGrad.addColorStop(0, 'rgba(0, 102, 255, 0.6)');
+  bidGrad.addColorStop(1, 'rgba(0, 102, 255, 0.05)');
+  ctx.fillStyle = bidGrad;
+  ctx.fill();
+
+  ctx.strokeStyle = '#0066FF';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw Asks (Red Area on Right)
+  ctx.beginPath();
+  ctx.moveTo(midX, height);
+  const askStep = (width - midX) / Math.max(askPoints.length - 1, 1);
+  askPoints.forEach((pt, i) => {
+    const x = midX + i * askStep;
+    const y = height - (pt.volume / maxVolume) * (height - 25);
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(width, height);
+  ctx.closePath();
+
+  const askGrad = ctx.createLinearGradient(0, 0, 0, height);
+  askGrad.addColorStop(0, 'rgba(255, 77, 77, 0.6)');
+  askGrad.addColorStop(1, 'rgba(255, 77, 77, 0.05)');
+  ctx.fillStyle = askGrad;
+  ctx.fill();
+
+  ctx.strokeStyle = '#FF4D4D';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw Vertical Midline (Green Center Line)
+  ctx.beginPath();
+  ctx.strokeStyle = '#00C087';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  ctx.moveTo(midX, 0);
+  ctx.lineTo(midX, height);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// Active Bots Rendering
+function renderBots() {
+  const el = document.getElementById('bots-list');
+  const bots = Object.values(activeBots);
+  const count = bots.length;
+
+  const badge = document.getElementById('active-bot-badge');
+  if (badge) {
+    badge.textContent = `🤖 ${count} Bot Running`;
+    badge.style.background = count > 0 ? 'rgba(0,192,135,0.15)' : 'rgba(148,163,184,0.15)';
+    badge.style.borderColor = count > 0 ? 'var(--green)' : 'var(--border)';
+    badge.style.color = count > 0 ? 'var(--green)' : 'var(--muted)';
+  }
+
+  if (!bots.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:12px">Belum ada robot aktif</div>'; return; }
+
+  el.innerHTML = bots.map(b => {
+    const cfg = b.config || {};
+    const pairUpper = (b.pair || '').toUpperCase();
+    const modeUpper = (b.mode || 'auto').toUpperCase();
+    const strategyName = (b.strategy || 'multi_indicator').toUpperCase();
+    const isPaper = cfg.paperMode === true;
+    const isDca = cfg.dcaStep > 0 && cfg.maxDcaOrders > 0;
+    const metodeBadge = isDca
+      ? `<span style="font-size:9px;background:#6366f1;color:#fff;padding:1px 5px;border-radius:4px;font-weight:800">DCA ${cfg.maxDcaOrders}x·${cfg.dcaStep}%</span>`
+      : `<span style="font-size:9px;background:#f59e0b;color:#000;padding:1px 5px;border-radius:4px;font-weight:800">SINGLE</span>`;
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border-radius:8px;margin-bottom:8px;border:1px solid var(--border)">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span>${pairUpper}</span>
+            ${isPaper ? '<span style="font-size:9px;background:var(--yellow);color:#000;padding:1px 5px;border-radius:4px;font-weight:800">SIMULASI</span>' : '<span style="font-size:9px;background:var(--green);color:#fff;padding:1px 5px;border-radius:4px;font-weight:800">LIVE</span>'}
+            ${metodeBadge}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${modeUpper} · ${strategyName}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-blue" style="padding:4px 8px;font-size:11px" onclick="showBotDetailModal('${b.pair}')">🔍 Detail</button>
+          <button class="btn-red" style="padding:4px 8px;font-size:11px" onclick="quickStop('${b.pair}')">⏹ Stop</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showBotDetailModal(pair) {
+  const b = activeBots[pair];
+  if (!b) return;
+  const cfg = b.config || {};
+  const modal = document.getElementById('bot-detail-modal');
+  const title = document.getElementById('modal-bot-title');
+  const body = document.getElementById('modal-bot-body');
+  if (!modal || !body) return;
+
+  const pairUpper = (b.pair || '').toUpperCase();
+  const modeUpper = (b.mode || 'auto').toUpperCase();
+  const strategyName = (b.strategy || 'multi_indicator').toUpperCase();
+  const isPaper = cfg.paperMode === true;
+  const amountText = cfg.sizingMode === 'percentage' ? `${cfg.sizingValue || 10}% Saldo IDR` : fmtIDR(cfg.orderAmount || 200000);
+  const stopLoss = cfg.stopLossPercent ? `${cfg.stopLossPercent}%` : 'Disabled';
+  const takeProfit = cfg.takeProfitPercent ? `${cfg.takeProfitPercent}%` : 'Disabled';
+  const trailing = cfg.trailingPercent ? `${cfg.trailingPercent}%` : 'Disabled';
+  const cooldown = cfg.cooldownMinutes ? `${cfg.cooldownMinutes} Menit` : '5 Menit';
+  const interval = cfg.intervalSeconds ? `${cfg.intervalSeconds} Detik` : '10 Detik';
+  const lossLimit = cfg.dailyLossLimit ? fmtIDR(cfg.dailyLossLimit) : 'Rp 50.000';
+
+  let extraConfigText = '-';
+  if (b.strategy === 'threshold') {
+    extraConfigText = `Beli: ${cfg.buyAt ? fmtIDR(cfg.buyAt) : '--'} | Jual: ${cfg.sellAt ? fmtIDR(cfg.sellAt) : '--'}`;
+  } else if (b.strategy === 'rsi') {
+    extraConfigText = `Period: ${cfg.period || 14} | Oversold: ${cfg.oversold || 30} | Overbought: ${cfg.overbought || 70}`;
+  } else if (b.strategy === 'multi_indicator') {
+    extraConfigText = `RSI Period: ${cfg.rsiPeriod || 14} | BB Period: ${cfg.bbPeriod || 20}`;
+  } else if (b.strategy === 'dca') {
+    extraConfigText = `DCA Interval: ${cfg.dcaIntervalMinutes || 60} Menit`;
+  }
+
+  title.innerHTML = `⚙️ Detail Setting Bot (${pairUpper}) ${isPaper ? '<span style="font-size:10px;background:var(--yellow);color:#000;padding:2px 6px;border-radius:4px">SIMULASI</span>' : '<span style="font-size:10px;background:var(--green);color:#fff;padding:2px 6px;border-radius:4px">LIVE</span>'}`;
+
+  body.innerHTML = `
+    <div><b>Pair Market:</b><br><span style="color:var(--accent2)">${pairUpper}</span></div>
+    <div><b>Mode Eksekusi:</b><br><span>${modeUpper}</span></div>
+    <div><b>Strategi Trading:</b><br><span>${strategyName}</span></div>
+    <div><b>Paper Trading Mode:</b><br><span>${isPaper ? 'Simulasi (Paper Mode)' : 'Nyata (Real Money)'}</span></div>
+    <div>💰 <b>Modal Per Order:</b><br><span>${amountText}</span></div>
+    <div>🛡 <b>Max Rugi / Hari:</b><br><span>${lossLimit}</span></div>
+    <div>🛑 <b>Stop Loss (%):</b><br><span style="color:var(--red)">${stopLoss}</span></div>
+    <div>🎯 <b>Take Profit (%):</b><br><span style="color:var(--green)">${takeProfit}</span></div>
+    <div>📉 <b>Trailing Stop (%):</b><br><span>${trailing}</span></div>
+    <div>⏱ <b>Cek Pasar Interval:</b><br><span>${interval}</span></div>
+    <div>⏳ <b>Cooldown Antar Order:</b><br><span>${cooldown}</span></div>
+    <div>⚙️ <b>Parameter Strategi:</b><br><span>${extraConfigText}</span></div>
+  `;
+
+  modal.style.display = 'flex';
+}
+
+function closeBotDetailModal() {
+  const modal = document.getElementById('bot-detail-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function quickStop(pair) {
+  await fetch('/api/bot/stop', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({pair}) });
+  delete activeBots[pair];
+  renderBots();
+}
+
+function renderApproval(msg) {
+  const list = document.getElementById('approvals-list');
+  list.innerHTML = `
+    <div style="background:rgba(245,158,11,.15);border:1px solid var(--yellow);padding:10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700;color:var(--yellow)">🔔 Sinyal ${msg.signal} (${msg.pair.toUpperCase()})</div>
+        <div style="font-size:11px;color:var(--muted)">Harga: ${fmtIDR(msg.price)} | ${msg.reason}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-green" onclick="respondApproval('${msg.id}', true)">Approve</button>
+        <button class="btn-red" onclick="respondApproval('${msg.id}', false)">Reject</button>
+      </div>
+    </div>
+  `;
+}
+
+async function respondApproval(id, approved) {
+  await fetch('/api/approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id, approved}) });
+  document.getElementById('approvals-list').innerHTML = '<div style="color:var(--muted);font-size:12px">Tidak ada pending approval</div>';
+}
+
+function initTheme() {
+  if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('theme', next);
+  document.getElementById('theme-toggle-btn').textContent = next === 'light' ? '🌙 Gelap' : '☀️ Terang';
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+function playAlertSound() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.2);
+}
+
+function showPushNotif(title, body) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, { body });
+  }
+}
+
+async function emergencyStop() {
+  try {
+    await fetch('/api/emergency-stop', { method: 'POST' });
+    alert('Emergency Stop Triggered!');
+    location.reload();
+  } catch (e) { log('Emergency Stop Failed', 'err'); }
+}
+
+let showPnL = false;
+let cachedPnLData = { today: 0, week: 0, month: 0, total: 0 };
+
+function togglePnLVisibility() {
+  showPnL = !showPnL;
+  const btn = document.getElementById('toggle-pnl-btn');
+  if (btn) btn.textContent = showPnL ? '👁 Hide Profit' : '👁 Show Profit';
+  renderPnLSummary();
+}
+
+function renderPnLSummary() {
+  const d = cachedPnLData || {};
+  const setPnL = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (!showPnL) {
+        el.textContent = '••••••••';
+        el.style.color = 'var(--text)';
+      } else {
+        el.textContent = (val >= 0 ? '+' : '') + fmtIDR(val);
+        el.style.color = val >= 0 ? 'var(--green)' : 'var(--red)';
+      }
+    }
+  };
+  setPnL('pnl-today', d.today || 0);
+  setPnL('pnl-week', d.week || 0);
+  setPnL('pnl-month', d.month || 0);
+  setPnL('pnl-total', d.total || 0);
+}
+
+async function loadPnL() {
+  try {
+    const r = await fetch('/api/pnl/summary');
+    cachedPnLData = await r.json();
+    renderPnLSummary();
+  } catch (e) {}
+}
+
+async function loadPositions() {
+  try {
+    const r = await fetch('/api/positions');
+    const d = await r.json();
+    const tb = document.getElementById('positions-tbody');
+    if (!tb) return;
+    if (!d || !d.length) { tb.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No open positions</td></tr>'; return; }
+    tb.innerHTML = d.map(p => {
+      const cls = p.pnl >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+      return `<tr><td>${p.pair}</td><td>${fmtIDR(p.entryPrice)}</td><td>${fmtIDR(p.currentPrice)}</td><td style="${cls}">${fmtIDR(p.pnl)}</td><td style="${cls}">${p.pnlPercent}%</td></tr>`;
+    }).join('');
+  } catch (e) {}
+}
+
+async function loadEquity() {
+  try {
+    const r = await fetch('/api/equity');
+    const d = await r.json();
+    const canvas = document.getElementById('equity-chart');
+    if(canvas && d.history) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.strokeStyle = '#00c087';
+      const step = canvas.width / Math.max(d.history.length - 1, 1);
+      const min = Math.min(...d.history);
+      const max = Math.max(...d.history, min+1);
+      d.history.forEach((v, i) => {
+        const x = i * step;
+        const y = canvas.height - ((v - min) / (max - min)) * canvas.height;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+    }
+  } catch(e) {}
+}
+
+// Intercept WS for mini chart logic
+const oldHandleWS = handleWS;
+handleWS = (msg) => {
+  oldHandleWS(msg);
+  if(msg.type === 'bot_status' && msg.analysis) {
+    const rsi = document.getElementById('mini-rsi');
+    if(rsi) {
+      rsi.textContent = msg.analysis.rsi || '--';
+      if(msg.analysis.rsi < 30) rsi.style.color = 'var(--green)';
+      else if(msg.analysis.rsi > 70) rsi.style.color = 'var(--red)';
+      else rsi.style.color = 'var(--text)';
+    }
+    const macd = document.getElementById('mini-macd');
+    if(macd) {
+      if(msg.analysis.macdTrend === 'bullish') { macd.textContent = '↑ Bullish'; macd.style.color = 'var(--green)'; }
+      else if(msg.analysis.macdTrend === 'bearish') { macd.textContent = '↓ Bearish'; macd.style.color = 'var(--red)'; }
+      else { macd.textContent = '--'; macd.style.color = 'var(--text)'; }
+    }
+  }
+};
+
+async function loadBots() {
+  try {
+    const res = await fetch('/api/bot/status');
+    const list = await res.json();
+    if (Array.isArray(list)) {
+      list.forEach(b => {
+        if (b.running) activeBots[b.pair] = b;
+        else delete activeBots[b.pair];
+      });
+      renderBots();
+    }
+  } catch (_) {}
+}
+
+async function loadOpenOrders() {
+  try {
+    const select = document.getElementById('bot-pair');
+    const p = select && select.value ? select.value : 'btc_idr';
+    const res = await fetch(`/api/open-orders?pair=${p}`);
+    const orders = await res.json();
+    const tbody = document.getElementById('open-orders-tbody');
+    if (!tbody) return;
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:10px">Belum ada antrian order</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+      const typeUpper = (o.type || 'SELL').toUpperCase();
+      const typeColor = typeUpper === 'SELL' ? 'var(--red)' : 'var(--green)';
+      const price = fmtIDR(o.price);
+      const amount = o.order_btc || o.remain_btc || o.amount || '-';
+      return `
+        <tr>
+          <td style="color:${typeColor};font-weight:700">${typeUpper}</td>
+          <td style="font-weight:600">${price}</td>
+          <td>${amount}</td>
+          <td><span style="background:rgba(0,192,135,0.15);color:var(--green);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">PENDING</span></td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('loadOpenOrders error:', e);
+  }
+}
+
+initTheme();
+connectWS();
+loadTrades();
+loadPairs();
+loadBalance();
+loadPnL();
+loadEquity();
+loadPositions();
+loadOpenOrders();
+loadBots();
+setInterval(loadOrderBook, 8000);
+setInterval(loadPnL, 30000);
+setInterval(loadPositions, 10000);
+setInterval(loadOpenOrders, 5000);
+setInterval(loadBots, 5000);
+</script>
+</body>
+</html>

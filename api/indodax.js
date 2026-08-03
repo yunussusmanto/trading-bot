@@ -89,4 +89,4 @@ async function orderHistory(pair) {
   return privateRequest('orderHistory', { pair });
 }
 
-module.exports = { getTicker, getOrderBook, getTrades, getInfo, trade, openOrders, cancelOrder, orderHistory };
+module.exports = { getTicker, getOrderBook, getTrades, getInfo, trade, openOrders, cancelOrder, orderHistory, privateRequest };
