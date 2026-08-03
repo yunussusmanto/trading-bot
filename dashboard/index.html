@@ -11,10 +11,10 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #000000;          /* Pure Pitch Black */
-    --surface: #0a0d14;     /* Pure Dark Card Surface */
-    --surface2: #121722;    /* Dark Input Surface */
-    --border: #1c2433;      /* Dark Border */
+    --bg: #090d16;          /* Deep Black */
+    --surface: #111622;     /* Dark Card Surface */
+    --surface2: #1a202c;    /* Row / Input Surface */
+    --border: #232d3f;      /* Sleek Dark Border */
     --header-blue: #0088cc; /* Indodax Header Blue */
     --accent: #0066ff;      /* Primary Accent Blue */
     --accent2: #00b4d8;     /* Cyan Accent */
@@ -26,22 +26,22 @@
   }
 
   [data-theme="light"] {
-    --bg: #f1f5f9;
-    --surface: #ffffff;
-    --surface2: #f8fafc;
-    --border: #e2e8f0;
-    --header-blue: #0088cc;
-    --accent: #0066ff;
-    --accent2: #0284c7;
-    --green: #059669;
-    --red: #dc2626;
-    --yellow: #d97706;
-    --text: #0f172a;
-    --muted: #64748b;
+    --bg: #f8fafc;          /* Crisp Clean Light Background */
+    --surface: #ffffff;     /* Pure White Card Surface */
+    --surface2: #f1f5f9;    /* Light Gray Input Surface */
+    --border: #cbd5e1;      /* Slate Border */
+    --header-blue: #0088cc; /* Indodax Blue */
+    --accent: #0066ff;      /* Accent Blue */
+    --accent2: #0284c7;     /* Dark Cyan Accent */
+    --green: #059669;       /* Light Mode Trading Green */
+    --red: #dc2626;         /* Light Mode Trading Red */
+    --yellow: #d97706;      /* Light Mode Warning Yellow */
+    --text: #0f172a;        /* Deep Slate Dark Text */
+    --muted: #64748b;       /* Slate Subtitle Text */
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { background: #000000; color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; transition: background 0.2s ease, color 0.2s ease; }
 
   /* Top Navigation Bar */
   nav.topbar {
@@ -127,21 +127,20 @@
   /* Table Responsive Container */
   .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  /* Generic Card Container with Scroll-Based Parallax */
+  /* Generic Card Container */
   .card {
-    background: #0a0d14;
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 16px;
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
-    transition: transform 0.1s ease-out, border-color 0.2s, box-shadow 0.2s;
-    will-change: transform;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .card:hover {
-    border-color: rgba(0, 136, 204, 0.45);
-    box-shadow: 0 8px 24px rgba(0, 136, 204, 0.15);
+    border-color: var(--header-blue);
   }
   .card-title {
     font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
@@ -909,18 +908,6 @@ const activeBots = {};
 let allPairsData = [];
 let showBalance = false;
 let cachedBalance = null;
-
-// Scroll-based Panel Parallax Effect
-function updateScrollParallax() {
-  const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-  const cards = document.querySelectorAll('.card');
-  cards.forEach((card, idx) => {
-    const factor = (idx % 2 === 0) ? 0.025 : -0.02;
-    const yOffset = scrolled * factor;
-    card.style.transform = `translate3d(0, ${yOffset.toFixed(1)}px, 0)`;
-  });
-}
-window.addEventListener('scroll', updateScrollParallax, { passive: true });
 
 // Clock
 setInterval(() => {
@@ -1833,16 +1820,30 @@ async function respondApproval(id, approved) {
 }
 
 function initTheme() {
-  if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  const t = localStorage.getItem('theme') || 'dark';
+  if (t === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = '🌙 Gelap';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = '☀️ Terang';
+  }
 }
+window.addEventListener('DOMContentLoaded', initTheme);
 
 function toggleTheme() {
   const cur = document.documentElement.getAttribute('data-theme');
   const next = cur === 'light' ? 'dark' : 'light';
-  if (next === 'light') document.documentElement.setAttribute('data-theme', 'light');
-  else document.documentElement.removeAttribute('data-theme');
+  if (next === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
   localStorage.setItem('theme', next);
-  document.getElementById('theme-toggle-btn').textContent = next === 'light' ? '🌙 Gelap' : '☀️ Terang';
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = next === 'light' ? '🌙 Gelap' : '☀️ Terang';
 }
 
 async function logout() {
