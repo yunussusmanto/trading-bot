@@ -405,9 +405,9 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     } catch (_) {}
   }
 
-  // Min order check — Indodax minimum ~Rp 10.000
-  if (idrAmount < 10000) {
-    log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 10.000`);
+  // Min order check — Indodax minimum ~Rp 15.000 (Rp 10.000 + buffer untuk fee)
+  if (idrAmount < 15000) {
+    log(`[${pair.toUpperCase()}] order amount Rp ${idrAmount} terlalu kecil, minimum Rp 15.000`);
     return null;
   }
 
@@ -421,13 +421,35 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
       if (isBuy) {
         order = await indodax.trade({ pair, type: 'buy', price, amount: idrAmount });
       } else {
-        // SELL all accumulated DCA coins
-        const totalCoins = positions[pair]?.totalCoin || slotCoinAmount;
-        order = await indodax.trade({ pair, type: 'sell', price, amount: totalCoins });
+        // SELL: gunakan saldo koin AKTUAL dari Indodax API (bukan kalkulasi)
+        // Alasan: fee 0.3% saat BUY mengurangi koin actual vs koin yang dicatat
+        let actualCoinAmount = positions[pair]?.totalCoin || slotCoinAmount;
+        try {
+          const info = await indodax.getInfo();
+          const coinKey = pair.replace('_idr', '');
+          const actualBalance = parseFloat(info.balance?.[coinKey] || 0);
+          if (actualBalance > 0 && actualBalance >= actualCoinAmount * 0.9) {
+            // Pakai saldo aktual jika masuk akal (tidak jauh berbeda)
+            actualCoinAmount = parseFloat(actualBalance.toFixed(8));
+          }
+        } catch (_) {}
+
+        // Validasi minimum coin value >= Rp 10.000
+        const coinValueIdr = actualCoinAmount * price;
+        if (coinValueIdr < 10000) {
+          const msg = `SELL skipped — nilai koin Rp ${Math.round(coinValueIdr).toLocaleString('id-ID')} di bawah minimum Indodax`;
+          log(`[${pair.toUpperCase()}] ${msg}`);
+          broadcast({ type: 'alert', pair, msg });
+          lastTradeTime[pair] = Date.now(); // Cooldown agar tidak retry terus
+          return null;
+        }
+
+        order = await indodax.trade({ pair, type: 'sell', price, amount: actualCoinAmount });
       }
     }
 
     let pnl = 0;
+    let sellSnapshot = null; // Capture before delete for notification
     if (isBuy) {
       if (!positions[pair]) {
         // First BUY — init DCA position
@@ -456,7 +478,21 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     } else if (signal === 'SELL' && positions[pair]) {
       const avgEntry = positions[pair].avgEntry;
       const totalCoins = positions[pair].totalCoin;
+      const totalIdr = positions[pair].totalIdr;
       pnl = (price - avgEntry) * totalCoins;
+      const sellResult = totalCoins * price;
+      const pnlPct = totalIdr > 0 ? ((pnl / totalIdr) * 100) : 0;
+      // Save snapshot BEFORE delete
+      sellSnapshot = {
+        avgEntry,
+        totalCoins,
+        totalIdr,
+        sellResult,
+        pnl,
+        pnlPct,
+        dcaCount: positions[pair].entries?.length || 1,
+        openedAt: positions[pair].openedAt,
+      };
       delete positions[pair];
       savePositions();
     }
@@ -478,12 +514,39 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     await db.addTrade(trade);
     lastTradeTime[pair] = Date.now();
     broadcast({ type: 'trade', trade });
+
+    // Build Telegram notification
     const actionLabel = isDcaBuy ? `DCA BUY #${pos?.entries?.length || '?'}` : signal;
-    sendTelegram(`✅ <b>TRADE EXECUTED (${actionLabel})</b>\n\nPair: <b>${pair.toUpperCase()}</b>\nPrice: Rp ${price.toLocaleString('id-ID')}\nAmount: Rp ${idrAmount.toLocaleString('id-ID')}${dcaInfo}${pnl !== 0 ? `\nPnL: Rp ${Math.round(pnl).toLocaleString('id-ID')}` : ''}\nOrder ID: ${trade.id}`);
+    if (signal === 'SELL' && sellSnapshot) {
+      const { avgEntry, totalCoins, totalIdr, sellResult, pnlPct, dcaCount } = sellSnapshot;
+      const pnlAbs = Math.round(pnl);
+      const isUntung = pnl >= 0;
+      const emoji = isUntung ? '🟢' : '🔴';
+      const label = isUntung ? 'UNTUNG' : 'RUGI';
+      const holdMs = sellSnapshot.openedAt ? Date.now() - sellSnapshot.openedAt : 0;
+      const holdMin = Math.round(holdMs / 60000);
+      sendTelegram(
+        `💰 <b>SELL EXECUTED — ${label} ${emoji}</b>\n\n` +
+        `Pair: <b>${pair.toUpperCase()}</b>\n` +
+        `Harga Jual: Rp ${price.toLocaleString('id-ID')}\n` +
+        `Avg Entry: Rp ${Math.round(avgEntry).toLocaleString('id-ID')}\n` +
+        `Jumlah Koin: ${totalCoins.toFixed(8)}\n` +
+        `Modal Masuk: Rp ${Math.round(totalIdr).toLocaleString('id-ID')}\n` +
+        `Hasil Jual: Rp ${Math.round(sellResult).toLocaleString('id-ID')}\n` +
+        `───────────────\n` +
+        `<b>${label}: Rp ${Math.abs(pnlAbs).toLocaleString('id-ID')} (${pnlPct.toFixed(2)}%)</b>\n` +
+        `DCA Orders: ${dcaCount}x | Hold: ${holdMin} menit\n` +
+        `Order ID: ${trade.id}`
+      );
+    } else {
+      sendTelegram(`✅ <b>TRADE EXECUTED (${actionLabel})</b>\n\nPair: <b>${pair.toUpperCase()}</b>\nPrice: Rp ${price.toLocaleString('id-ID')}\nAmount: Rp ${idrAmount.toLocaleString('id-ID')}${dcaInfo}${pnl !== 0 ? `\nPnL: Rp ${Math.round(pnl).toLocaleString('id-ID')}` : ''}\nOrder ID: ${trade.id}`);
+    }
     return trade;
   } catch (err) {
     broadcast({ type: 'error', pair, msg: `Order failed: ${err.message}` });
     sendTelegram(`❌ <b>ORDER FAILED (${signal})</b>\n\nPair: <b>${pair.toUpperCase()}</b>\nError: ${err.message}`);
+    // Cooldown setelah gagal agar tidak retry terus-menerus
+    lastTradeTime[pair] = Date.now();
   }
 }
 
