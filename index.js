@@ -279,11 +279,16 @@ async function botTick(pair) {
       const avgEntry = pos.avgEntry || pos.entryPrice;
       if (price > (pos.peakPrice || avgEntry)) pos.peakPrice = price;
 
-      // Trailing SL from peak
+      // Calculate initial SL price
       let slPrice = (pos.stopLossPercent || 0) > 0 ? avgEntry * (1 - pos.stopLossPercent / 100) : 0;
-      if ((pos.trailingPercent || 0) > 0) {
+      
+      // Trailing SL: if stopLossPercent is 0 (no cut loss), trailing SL must NEVER drop below avgEntry (only lock profit)
+      if ((pos.trailingPercent || 0) > 0 && pos.peakPrice > avgEntry) {
         const trailSL = pos.peakPrice * (1 - pos.trailingPercent / 100);
-        if (trailSL > slPrice) slPrice = trailSL;
+        // Only allow trailing SL if stopLoss > 0 OR if trailSL >= avgEntry (in profit)
+        if (pos.stopLossPercent > 0 || trailSL >= avgEntry) {
+          if (trailSL > slPrice) slPrice = trailSL;
+        }
       }
       const tpPrice = (pos.takeProfitPercent || 0) > 0 ? avgEntry * (1 + pos.takeProfitPercent / 100) : 0;
 
@@ -292,11 +297,9 @@ async function botTick(pair) {
       const isCooldown = lastTradeTime[pair] && (Date.now() - lastTradeTime[pair] < Math.min(tradeCooldownMs, 60000));
 
       if (!isCooldown) {
-        // Check Stop Loss Trigger
+        // Check Stop Loss / Trailing Stop Trigger
         if (slPrice > 0 && price <= slPrice) {
           const reason = pos.peakPrice > avgEntry ? `Trailing Stop triggered @ Rp ${price.toLocaleString('id-ID')}` : `Stop Loss triggered @ Rp ${price.toLocaleString('id-ID')}`;
-          broadcast({ type: 'alert', pair, msg: reason });
-          sendTelegram(`🛑 <b>[${pair.toUpperCase()}] ${reason}</b>`);
           await executeOrder(pair, 'SELL', price, bot.config, reason);
           return;
         }
@@ -304,8 +307,6 @@ async function botTick(pair) {
         // Check Take Profit Trigger
         if (tpPrice > 0 && price >= tpPrice) {
           const reason = `Take Profit triggered @ Rp ${price.toLocaleString('id-ID')} (Avg Entry: Rp ${Math.round(avgEntry).toLocaleString('id-ID')})`;
-          broadcast({ type: 'alert', pair, msg: reason });
-          sendTelegram(`🎯 <b>[${pair.toUpperCase()}] ${reason}</b>`);
           await executeOrder(pair, 'SELL', price, bot.config, reason);
           return;
         }
@@ -445,10 +446,13 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
         // Validasi minimum coin value >= Rp 10.000
         const coinValueIdr = actualCoinAmount * price;
         if (coinValueIdr < 10000) {
-          const msg = `SELL skipped — nilai koin Rp ${Math.round(coinValueIdr).toLocaleString('id-ID')} di bawah minimum Indodax`;
+          const msg = `SELL skipped — nilai koin Rp ${Math.round(coinValueIdr).toLocaleString('id-ID')} di bawah minimum Indodax (Rp 10.000)`;
           log(`[${pair.toUpperCase()}] ${msg}`);
           broadcast({ type: 'alert', pair, msg });
-          lastTradeTime[pair] = Date.now(); // Cooldown agar tidak retry terus
+          // Clear position dust if paper or sub-minimum to prevent endless trigger spam
+          delete positions[pair];
+          savePositions();
+          lastTradeTime[pair] = Date.now();
           return null;
         }
 
