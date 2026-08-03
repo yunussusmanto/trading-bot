@@ -127,7 +127,7 @@
   /* Table Responsive Container */
   .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-  /* Generic Card Container with Per-Card 3D Parallax Tilt */
+  /* Generic Card Container with Scroll-Based Parallax */
   .card {
     background: #0a0d14;
     border: 1px solid var(--border);
@@ -136,14 +136,12 @@
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
-    transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s, box-shadow 0.2s;
-    transform-style: preserve-3d;
-    perspective: 1000px;
+    transition: transform 0.1s ease-out, border-color 0.2s, box-shadow 0.2s;
     will-change: transform;
   }
   .card:hover {
     border-color: rgba(0, 136, 204, 0.45);
-    box-shadow: 0 10px 28px rgba(0, 136, 204, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 136, 204, 0.15);
   }
   .card-title {
     font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
@@ -912,30 +910,17 @@ let allPairsData = [];
 let showBalance = false;
 let cachedBalance = null;
 
-// Per-Card 3D Parallax Tilt Effect
-function initCardParallax() {
-  document.querySelectorAll('.card').forEach(card => {
-    if (card.dataset.parallaxInit) return;
-    card.dataset.parallaxInit = 'true';
-
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = ((y - centerY) / centerY) * -5;
-      const rotateY = ((x - centerX) / centerX) * 5;
-      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    });
+// Scroll-based Panel Parallax Effect
+function updateScrollParallax() {
+  const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card, idx) => {
+    const factor = (idx % 2 === 0) ? 0.025 : -0.02;
+    const yOffset = scrolled * factor;
+    card.style.transform = `translate3d(0, ${yOffset.toFixed(1)}px, 0)`;
   });
 }
-window.addEventListener('DOMContentLoaded', initCardParallax);
-setTimeout(initCardParallax, 500);
+window.addEventListener('scroll', updateScrollParallax, { passive: true });
 
 // Clock
 setInterval(() => {
