@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Indodax Trading Bot",
+  "version": "1.0.0",
+  "description": "Remote control untuk trading bot Indodax di VPS",
+  "permissions": ["storage", "notifications", "alarms"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": { "32": "icon.png" },
+    "default_badge_background_color": "#f59e0b"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": { "32": "icon.png", "128": "icon.png" }
+}

@@ -1,0 +1,20 @@
+node_modules/
+.env
+*.db
+bots_state.json
+positions_state.json
+trades.db
+*.log
+.DS_Store
+Thumbs.db
+# One-off scripts (tidak perlu di git)
+fix_*.js
+check_*.js
+get_*.js
+debug_*.js
+test_*.js
+inject_*.js
+update_exact_6.js
+update_pos_fixed.js
+limit_sell.js
+index.html
