@@ -287,20 +287,28 @@ async function botTick(pair) {
       }
       const tpPrice = (pos.takeProfitPercent || 0) > 0 ? avgEntry * (1 + pos.takeProfitPercent / 100) : 0;
 
-      if (slPrice > 0 && price <= slPrice) {
-        const reason = pos.peakPrice > avgEntry ? `Trailing Stop triggered @ Rp ${price.toLocaleString('id-ID')}` : `Stop Loss triggered @ Rp ${price.toLocaleString('id-ID')}`;
-        broadcast({ type: 'alert', pair, msg: reason });
-        sendTelegram(`🛑 <b>[${pair.toUpperCase()}] ${reason}</b>`);
-        await executeOrder(pair, 'SELL', price, bot.config, reason);
-        return;
-      }
+      // Check SL / TP / Trailing Stop with cooldown guard
+      const tradeCooldownMs = (bot.config.cooldownMinutes || 5) * 60 * 1000;
+      const isCooldown = lastTradeTime[pair] && (Date.now() - lastTradeTime[pair] < Math.min(tradeCooldownMs, 60000));
 
-      if (tpPrice > 0 && price >= tpPrice) {
-        const reason = `Take Profit triggered @ Rp ${price.toLocaleString('id-ID')} (Avg Entry: Rp ${Math.round(avgEntry).toLocaleString('id-ID')})`;
-        broadcast({ type: 'alert', pair, msg: reason });
-        sendTelegram(`🎯 <b>[${pair.toUpperCase()}] ${reason}</b>`);
-        await executeOrder(pair, 'SELL', price, bot.config, reason);
-        return;
+      if (!isCooldown) {
+        // Check Stop Loss Trigger
+        if (slPrice > 0 && price <= slPrice) {
+          const reason = pos.peakPrice > avgEntry ? `Trailing Stop triggered @ Rp ${price.toLocaleString('id-ID')}` : `Stop Loss triggered @ Rp ${price.toLocaleString('id-ID')}`;
+          broadcast({ type: 'alert', pair, msg: reason });
+          sendTelegram(`🛑 <b>[${pair.toUpperCase()}] ${reason}</b>`);
+          await executeOrder(pair, 'SELL', price, bot.config, reason);
+          return;
+        }
+
+        // Check Take Profit Trigger
+        if (tpPrice > 0 && price >= tpPrice) {
+          const reason = `Take Profit triggered @ Rp ${price.toLocaleString('id-ID')} (Avg Entry: Rp ${Math.round(avgEntry).toLocaleString('id-ID')})`;
+          broadcast({ type: 'alert', pair, msg: reason });
+          sendTelegram(`🎯 <b>[${pair.toUpperCase()}] ${reason}</b>`);
+          await executeOrder(pair, 'SELL', price, bot.config, reason);
+          return;
+        }
       }
 
       // ── DCA: Beli lagi jika harga turun dcaStep% dari entry terakhir ──
