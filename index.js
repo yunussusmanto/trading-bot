@@ -356,7 +356,6 @@ async function botTick(pair) {
     if (todayLoss > (bot.config.dailyLossLimit || 100000)) {
       const msg = `⚠️ Daily Loss Limit Rp ${(bot.config.dailyLossLimit || 100000).toLocaleString('id-ID')} tercapai! Bot ${pair.toUpperCase()} di-pause.`;
       broadcast({ type: 'alert', pair, msg });
-      sendTelegram(`🚨 <b>${msg}</b>`);
       bot.running = false;
       clearInterval(bot.interval);
       return;
@@ -556,7 +555,6 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     return trade;
   } catch (err) {
     broadcast({ type: 'error', pair, msg: `Order failed: ${err.message}` });
-    sendTelegram(`❌ <b>ORDER FAILED (${signal})</b>\n\nPair: <b>${pair.toUpperCase()}</b>\nError: ${err.message}`);
     // Cooldown setelah gagal agar tidak retry terus-menerus
     lastTradeTime[pair] = Date.now();
   }
