@@ -43,6 +43,25 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; max-width: 100vw; overflow-x: hidden; }
 
+  /* Subtle Parallax Background Layer */
+  .parallax-bg {
+    position: fixed;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    z-index: -1;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, rgba(0, 136, 204, 0.25), rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 40px 70px, rgba(0, 192, 135, 0.2), rgba(0,0,0,0)),
+      radial-gradient(3px 3px at 90px 40px, rgba(0, 180, 216, 0.2), rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 160px 120px, rgba(99, 102, 241, 0.25), rgba(0,0,0,0));
+    background-size: 240px 240px;
+    pointer-events: none;
+    will-change: transform;
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
   /* Top Navigation Bar */
   nav.topbar {
     background: var(--surface);
@@ -116,10 +135,10 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px 18px;
+    padding: 12px 16px;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   }
-  .saldo-amount { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .saldo-amount { font-size: 15px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent2); }
 
   /* PnL Grid */
   .pnl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -286,6 +305,9 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
+
+<!-- Parallax Layer -->
+<div id="parallax-bg-layer" class="parallax-bg"></div>
 
 <!-- Top Navigation -->
 <nav class="topbar">
@@ -902,6 +924,15 @@ const activeBots = {};
 let allPairsData = [];
 let showBalance = false;
 let cachedBalance = null;
+
+// Parallax Mousemove Effect
+document.addEventListener('mousemove', (e) => {
+  const bg = document.getElementById('parallax-bg-layer');
+  if (!bg) return;
+  const x = (window.innerWidth / 2 - e.clientX) / 45;
+  const y = (window.innerHeight / 2 - e.clientY) / 45;
+  bg.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+});
 
 // Clock
 setInterval(() => {
