@@ -345,6 +345,17 @@ async function botTick(pair) {
       return;
     }
 
+    // ── GUARD 1B: Jangan SELL jika harga <= avgEntry saat stopLossPercent = 0 (No Cut Loss) ──
+    if (result.signal === 'SELL' && positions[pair]) {
+      const pos = positions[pair];
+      const avgEntry = pos.avgEntry || pos.entryPrice;
+      const slPercent = bot.config.stopLossPercent ?? pos.stopLossPercent ?? 0;
+      if (slPercent === 0 && price <= avgEntry) {
+        console.log(`[${pair.toUpperCase()}] Indicator SELL IGNORED — price Rp ${price} <= avgEntry Rp ${Math.round(avgEntry)} (SL=0%, NO CUT LOSS)`);
+        return;
+      }
+    }
+
     // ── GUARD 2: Cooldown Period ──
     const cooldownMs = (bot.config.cooldownMinutes || 5) * 60 * 1000;
     if (lastTradeTime[pair] && (Date.now() - lastTradeTime[pair] < cooldownMs)) {
@@ -388,10 +399,21 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
   const isDcaBuy = signal === 'DCA_BUY';
   const isBuy = signal === 'BUY' || isDcaBuy;
 
-  // === GUARD: SELL only if we have an open position ===
-  if (signal === 'SELL' && !positions[pair]) {
-    console.log(`[${pair.toUpperCase()}] SELL skipped — no open position`);
-    return null;
+  // === GUARD: SELL only if open position AND strictly NO-LOSS if stopLossPercent = 0 ===
+  if (signal === 'SELL') {
+    if (!positions[pair]) {
+      console.log(`[${pair.toUpperCase()}] SELL skipped — no open position`);
+      return null;
+    }
+    const pos = positions[pair];
+    const avgEntry = pos.avgEntry || pos.entryPrice;
+    const slPercent = config.stopLossPercent ?? pos.stopLossPercent ?? 0;
+    if (slPercent === 0 && price <= avgEntry) {
+      const msg = `🚫 SELL BLOCKED — Proteksi Anti-Loss Aktif! Harga Rp ${price.toLocaleString('id-ID')} <= Avg Entry Rp ${Math.round(avgEntry).toLocaleString('id-ID')} (SL = 0%). Bot wajib HOLD sampai PROFIT!`;
+      console.log(`[${pair.toUpperCase()}] ${msg}`);
+      broadcast({ type: 'alert', pair, msg });
+      return null;
+    }
   }
 
   // === GUARD: BUY — check sufficient IDR balance ===
