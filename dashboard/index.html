@@ -2050,15 +2050,19 @@ async function fetchDailyReportByDate() {
       } else {
         tbody.innerHTML = data.trades.map(t => {
           const timeStr = new Date(t.timestamp).toLocaleTimeString('id-ID');
+          const isBuy = t.action === 'BUY' || t.action === 'DCA_BUY';
           const pnlVal = t.pnl || 0;
-          const pnlCls = pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+          const pnlDisplay = isBuy 
+            ? '<span style="color:var(--muted)">-</span>' 
+            : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`;
+
           return `
             <tr>
               <td>${timeStr}</td>
               <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
-              <td><span class="badge ${t.action === 'BUY' || t.action === 'DCA_BUY' ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
+              <td><span class="badge ${isBuy ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
               <td>${fmtIDR(t.price)}</td>
-              <td style="${pnlCls};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</td>
+              <td>${pnlDisplay}</td>
             </tr>
           `;
         }).join('');
