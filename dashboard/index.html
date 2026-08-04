@@ -339,6 +339,24 @@
   .card.card-collapsed {
     padding-bottom: 0 !important;
   }
+  .card.card-collapsed button:not(.card-toggle-btn),
+  .card.card-collapsed .pnl-timeframe-pills,
+  .card.card-collapsed #toggle-pnl-btn,
+  .card.card-collapsed #toggle-expand-report-btn,
+  .card.card-collapsed #btn-report-mode-date,
+  .card.card-collapsed #btn-report-mode-all,
+  .card.card-collapsed select,
+  .card.card-collapsed input {
+    display: none !important;
+  }
+  .card.card-collapsed .daily-report-header {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  .card.card-collapsed [style*="border-bottom"] {
+    border-bottom: none !important;
+  }
 </style>
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
@@ -2581,66 +2599,72 @@ async function makeCardsCollapsible() {
   }
 
   document.querySelectorAll('.card').forEach((card, idx) => {
-    if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
-    
-    // Assign a persistent id if not present
-    if (!card.id) {
-      card.id = `card-collapsible-${idx}`;
-    }
-
-    // Bulletproof header container detection
-    let header = null;
-    const titleEl = card.querySelector('.card-title');
-    if (titleEl) {
-      if (titleEl.parentElement === card) {
-        header = titleEl;
-      } else {
-        let parent = titleEl.parentElement;
-        while (parent && parent.parentElement !== card) {
-          parent = parent.parentElement;
-        }
-        header = parent;
+    try {
+      if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
+      
+      // Assign a persistent id if not present
+      if (!card.id) {
+        card.id = `card-collapsible-${idx}`;
       }
-    } else {
-      header = card.querySelector('.daily-report-header');
-    }
-    if (!header || header.parentElement !== card) {
-      header = card.firstElementChild;
-    }
 
-    if (!header) return;
+      // Bulletproof header container detection
+      let header = null;
+      const titleEl = card.querySelector('.card-title');
+      if (titleEl) {
+        if (titleEl.parentElement === card) {
+          header = titleEl;
+        } else {
+          let parent = titleEl.parentElement;
+          while (parent && parent.parentElement !== card) {
+            parent = parent.parentElement;
+          }
+          header = parent;
+        }
+      } else {
+        header = card.querySelector('.daily-report-header');
+      }
+      if (!header || header.parentElement !== card) {
+        header = card.firstElementChild;
+      }
 
-    // Create toggle button
-    const btn = document.createElement('button');
-    btn.className = 'card-toggle-btn';
-    btn.innerHTML = '➖';
-    btn.title = 'Minimize Panel';
-    btn.style.marginLeft = 'auto';
-    btn.style.cursor = 'pointer';
-    btn.style.background = 'transparent';
-    btn.style.border = 'none';
-    btn.style.color = 'var(--muted)';
-    btn.style.fontSize = '14px';
-    btn.style.padding = '2px 6px';
-    btn.style.borderRadius = '4px';
+      if (!header) return;
 
-    if (header.style.display !== 'flex' && !header.classList.contains('daily-report-header')) {
-      header.style.display = 'flex';
-      header.style.justifyContent = 'space-between';
-      header.style.alignItems = 'center';
-    }
+      // Create toggle button
+      const btn = document.createElement('button');
+      btn.className = 'card-toggle-btn';
+      btn.innerHTML = '➖';
+      btn.title = 'Minimize Panel';
+      btn.style.marginLeft = 'auto';
+      btn.style.cursor = 'pointer';
+      btn.style.background = 'transparent';
+      btn.style.border = 'none';
+      btn.style.color = 'var(--muted)';
+      btn.style.fontSize = '14px';
+      btn.style.padding = '2px 6px';
+      btn.style.borderRadius = '4px';
 
-    header.appendChild(btn);
+      if (header.style.display !== 'flex' && !header.classList.contains('daily-report-header')) {
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+      }
 
-    // Create wrapper for body elements
-    const wrapper = document.createElement('div');
-    wrapper.className = 'card-body-collapsible';
-    wrapper.style.transition = 'all 0.3s ease';
-    
-    while (header.nextSibling) {
-      wrapper.appendChild(header.nextSibling);
-    }
-    card.appendChild(wrapper);
+      header.appendChild(btn);
+
+      // Create wrapper for body elements
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card-body-collapsible';
+      wrapper.style.transition = 'all 0.3s ease';
+      
+      // Collect siblings in array first to avoid loop mutation side effects
+      const siblings = [];
+      let next = header.nextSibling;
+      while (next) {
+        siblings.push(next);
+        next = next.nextSibling;
+      }
+      siblings.forEach(sib => wrapper.appendChild(sib));
+      card.appendChild(wrapper);
 
     // Restore state (server value takes precedence)
     const isCollapsed = serverStates[card.id] !== undefined
@@ -2676,6 +2700,9 @@ async function makeCardsCollapsible() {
         console.error('Failed to save collapsed states to server:', err);
       }
     });
+    } catch (err) {
+      console.error('Error making card collapsible:', card, err);
+    }
   });
 }
 
