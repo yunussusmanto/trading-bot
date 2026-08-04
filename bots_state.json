@@ -12,11 +12,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -33,11 +33,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -54,11 +54,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -75,11 +75,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -96,11 +96,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -117,11 +117,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -138,11 +138,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -159,11 +159,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -180,11 +180,11 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 2,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   },
@@ -201,11 +201,116 @@
       "stopLossPercent": 0,
       "takeProfitPercent": 3,
       "trailingPercent": 0,
-      "cooldownMinutes": 10,
+      "cooldownMinutes": 3,
       "paperMode": false,
       "rsiPeriod": 14,
       "bbPeriod": 20,
-      "dcaStep": 3,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "pepe_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 200000,
+      "sizingValue": 200000,
+      "dailyLossLimit": 200000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
+      "maxDcaOrders": 5
+    }
+  },
+  "doge_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 200000,
+      "sizingValue": 200000,
+      "dailyLossLimit": 200000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
+      "maxDcaOrders": 5
+    }
+  },
+  "ada_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 200000,
+      "sizingValue": 200000,
+      "dailyLossLimit": 200000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
+      "maxDcaOrders": 5
+    }
+  },
+  "near_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 200000,
+      "sizingValue": 200000,
+      "dailyLossLimit": 200000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
+      "maxDcaOrders": 5
+    }
+  },
+  "shib_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 200000,
+      "sizingValue": 200000,
+      "dailyLossLimit": 200000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
       "maxDcaOrders": 5
     }
   }
