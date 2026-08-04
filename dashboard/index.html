@@ -440,7 +440,7 @@
       <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
       <!-- P&L Performance Summary Card (Trading Best Practice) -->
-      <div class="card" style="padding: 16px; margin-bottom: 16px;">
+      <div id="pnl-summary-card" class="card" style="padding: 16px; margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
           <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
             <span>📊 Ringkasan Performa Profit (P&L)</span>
@@ -581,7 +581,7 @@
       </div>
 
       <!-- Open Positions (Pro Trading Dashboard Card) -->
-      <div class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
+      <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
         <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
@@ -627,7 +627,7 @@
       <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
 
       <!-- Robot Control Form -->
-      <div class="card">
+      <div id="robot-control-card" class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">
           <div class="card-title" style="margin:0">🤖 Robot Trading Control Panel</div>
         </div>
@@ -892,13 +892,13 @@
       </div>
 
       <!-- Equity Curve Chart -->
-      <div class="card">
+      <div id="equity-curve-card" class="card">
         <div class="card-title">📈 Equity Curve (Pertumbuhan Modal)</div>
         <canvas id="equity-chart" style="width:100%; height:200px;"></canvas>
       </div>
 
       <!-- RSI/MACD Mini Indicators -->
-      <div class="card">
+      <div id="indicator-status-card" class="card">
         <div class="card-title">📊 Indicator Status</div>
         <div style="display: flex; gap: 16px;">
           <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
@@ -907,7 +907,7 @@
       </div>
 
       <!-- Live Logs -->
-      <div class="card">
+      <div id="live-log-card" class="card">
         <div class="card-title">📟 Live Log Console</div>
         <div id="log-box" style="height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:8px;border-radius:6px"></div>
       </div>
@@ -918,13 +918,13 @@
     <div class="side-column">
 
       <!-- Active Bots Widget -->
-      <div class="card">
+      <div id="active-bots-card" class="card">
         <div class="card-title">🟢 Robot Aktif</div>
         <div id="bots-list"><div style="color:var(--muted);font-size:12px">Belum ada robot aktif</div></div>
       </div>
 
       <!-- Antrian Order Indodax (Open Orders / Limit Order) -->
-      <div class="card" style="padding:0;overflow:hidden; margin-bottom:16px;">
+      <div id="open-orders-card" class="card" style="padding:0;overflow:hidden; margin-bottom:16px;">
         <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
           <span>📋 Antrian Order Indodax (Limit Order)</span>
           <span style="font-size:10px;font-weight:400;color:var(--green)">● Real-Time API</span>
@@ -938,7 +938,7 @@
       </div>
 
       <!-- Indodax Markets Sidebar Panel -->
-      <div class="card" style="padding:0;overflow:hidden">
+      <div id="markets-card" class="card" style="padding:0;overflow:hidden">
         <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
           Markets (Pasar Indodax)
         </div>
@@ -2568,7 +2568,18 @@ async function loadOpenOrders() {
   }
 }
 
-function makeCardsCollapsible() {
+async function makeCardsCollapsible() {
+  let serverStates = {};
+  try {
+    const res = await fetch('/api/settings/collapsed_states');
+    const data = await res.json();
+    if (data && data.value) {
+      serverStates = JSON.parse(data.value) || {};
+    }
+  } catch (e) {
+    console.error('Failed to load collapsed states from server:', e);
+  }
+
   document.querySelectorAll('.card').forEach((card, idx) => {
     if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
     
@@ -2577,9 +2588,20 @@ function makeCardsCollapsible() {
       card.id = `card-collapsible-${idx}`;
     }
 
-    // Identify header container element (must be direct child of card)
-    let header = card.querySelector('.card-title')?.parentElement;
-    if (!header || header.parentElement !== card) {
+    // Bulletproof header container detection
+    let header = null;
+    const titleEl = card.querySelector('.card-title');
+    if (titleEl) {
+      if (titleEl.parentElement === card) {
+        header = titleEl;
+      } else {
+        let parent = titleEl.parentElement;
+        while (parent && parent.parentElement !== card) {
+          parent = parent.parentElement;
+        }
+        header = parent;
+      }
+    } else {
       header = card.querySelector('.daily-report-header');
     }
     if (!header || header.parentElement !== card) {
@@ -2620,8 +2642,11 @@ function makeCardsCollapsible() {
     }
     card.appendChild(wrapper);
 
-    // Restore state
-    const isCollapsed = localStorage.getItem(`collapsed_${card.id}`) === 'true';
+    // Restore state (server value takes precedence)
+    const isCollapsed = serverStates[card.id] !== undefined
+      ? serverStates[card.id] === true
+      : localStorage.getItem(`collapsed_${card.id}`) === 'true';
+
     if (isCollapsed) {
       card.classList.add('card-collapsed');
       wrapper.style.display = 'none';
@@ -2629,13 +2654,27 @@ function makeCardsCollapsible() {
       btn.title = 'Maximize Panel';
     }
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const collapsed = card.classList.toggle('card-collapsed');
       wrapper.style.display = collapsed ? 'none' : 'block';
       btn.innerHTML = collapsed ? '➕' : '➖';
       btn.title = collapsed ? 'Maximize Panel' : 'Minimize Panel';
+      
+      // Update local storage
       localStorage.setItem(`collapsed_${card.id}`, collapsed ? 'true' : 'false');
+      
+      // Update server state
+      serverStates[card.id] = collapsed;
+      try {
+        await fetch('/api/settings/collapsed_states', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value: JSON.stringify(serverStates) })
+        });
+      } catch (err) {
+        console.error('Failed to save collapsed states to server:', err);
+      }
     });
   });
 }

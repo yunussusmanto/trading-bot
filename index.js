@@ -257,6 +257,10 @@ async function checkOrphanPositions() {
     const pos = positions[pair];
     if (!pos) continue;
     try {
+      // Cooldown check to prevent spamming failed orders
+      const lastTime = lastTradeTime[pair] || 0;
+      if (Date.now() - lastTime < 60000) continue;
+
       await waitRateLimit();
       const ticker = await indodax.getTicker(pair);
       if (!ticker || !ticker.last) continue;
@@ -798,6 +802,22 @@ app.get('/api/trades/export', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// Get user setting
+app.get('/api/settings/:key', async (req, res) => {
+  try {
+    const value = await db.getSetting(req.params.key);
+    res.json({ key: req.params.key, value });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Save user setting
+app.post('/api/settings/:key', async (req, res) => {
+  try {
+    await db.saveSetting(req.params.key, req.body.value);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // P&L Summary
