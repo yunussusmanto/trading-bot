@@ -250,6 +250,39 @@ setInterval(async () => {
   } catch (_) {}
 }, 2000);
 
+// ── Global Position Safety Monitor (Monitors ALL positions in positions_state.json) ──
+async function checkOrphanPositions() {
+  const activePairs = Object.keys(positions);
+  for (const pair of activePairs) {
+    const pos = positions[pair];
+    if (!pos) continue;
+    try {
+      await waitRateLimit();
+      const ticker = await indodax.getTicker(pair);
+      if (!ticker || !ticker.last) continue;
+      const currentPrice = parseFloat(ticker.last);
+      const avgEntry = pos.avgEntry || pos.entryPrice;
+      if (!avgEntry) continue;
+
+      if (currentPrice > (pos.peakPrice || avgEntry)) pos.peakPrice = currentPrice;
+
+      const baseTp = pos.takeProfitPercent || 3;
+      const tpPrice = avgEntry * (1 + baseTp / 100);
+
+      // Check if price reached Take Profit (+3%)
+      if (currentPrice >= tpPrice) {
+        const reason = `Auto Take Profit triggered @ Rp ${currentPrice.toLocaleString('id-ID')} (+${(((currentPrice-avgEntry)/avgEntry)*100).toFixed(2)}%)`;
+        console.log(`🚀 [SELL TRIGGERED FOR ${pair.toUpperCase()}] Current: ${currentPrice} >= TP: ${tpPrice}. Selling now!`);
+        const cfg = bots[pair]?.config || { paperMode: false, mode: 'auto' };
+        await executeOrder(pair, 'SELL', currentPrice, cfg, reason);
+      }
+    } catch (e) {
+      console.error(`checkOrphanPositions error for ${pair}:`, e.message);
+    }
+  }
+}
+setInterval(checkOrphanPositions, 8000);
+
 // ── Bot Loop ─────────────────────────────────────────────────────
 async function botTick(pair) {
   const bot = bots[pair];
