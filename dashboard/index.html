@@ -1969,6 +1969,8 @@ function togglePnLVisibility() {
   const btn = document.getElementById('toggle-pnl-btn');
   if (btn) btn.textContent = showPnL ? '🙈 Hide Profit' : '👁 Show Profit';
   renderPnLSummary();
+}
+
 async function fetchDailyReportByDate() {
   const picker = document.getElementById('report-date-picker');
   if (!picker) return;
