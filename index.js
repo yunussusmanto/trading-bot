@@ -839,14 +839,16 @@ app.get('/api/positions', async (req, res) => {
       const avgEntry = pos.avgEntry || pos.entryPrice || currentPrice;
       const totalIdr = pos.totalIdr || pos.amount || (avgEntry * (pos.totalCoin || 0));
       const totalCoin = pos.totalCoin || pos.coinAmount || 0;
-      const pnlVal = (currentPrice - avgEntry) * totalCoin;
+      const liveValue = currentPrice * totalCoin;
+      const pnlVal = liveValue - totalIdr;
       const pnlPercent = avgEntry > 0 ? ((currentPrice - avgEntry) / avgEntry) * 100 : 0;
 
       result.push({
         pair: pair.toUpperCase(),
         entryPrice: avgEntry,
         currentPrice: currentPrice,
-        amount: totalIdr,
+        amount: Math.round(totalIdr),
+        liveValue: Math.round(liveValue),
         coinAmount: totalCoin,
         pnl: Math.round(pnlVal),
         pnlPercent: parseFloat(pnlPercent.toFixed(2)),
