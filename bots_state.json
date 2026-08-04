@@ -1,4 +1,25 @@
 {
+  "bico_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 5,
+      "sizingMode": "fixed",
+      "orderAmount": 1000000,
+      "sizingValue": 1000000,
+      "dailyLossLimit": 300000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 3,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 1.5,
+      "maxDcaOrders": 5
+    }
+  },
   "koma_idr": {
     "running": true,
     "mode": "auto",

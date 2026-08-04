@@ -8,8 +8,9 @@ if (fs.existsSync(statePath)) {
   botsState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
 }
 
-// Focused High-Yield Capital Config (Top 5 Coins @ Rp 1.000.000 IDR Modal Each = Rp 200.000 / Slot)
+// Upgrade BICO_IDR along with top high-yield coins to Rp 1.000.000 modal each (Rp 200.000 / slot)
 const focusedConfigs = {
+  bico_idr: { orderAmount: 1000000, maxDcaOrders: 5, dcaStep: 1.5, takeProfitPercent: 3, stopLossPercent: 0, trailingPercent: 0, cooldownMinutes: 3, paperMode: false, mode: 'auto' },
   koma_idr: { orderAmount: 1000000, maxDcaOrders: 5, dcaStep: 1.5, takeProfitPercent: 3, stopLossPercent: 0, trailingPercent: 0, cooldownMinutes: 3, paperMode: false, mode: 'auto' },
   xrp_idr:  { orderAmount: 1000000, maxDcaOrders: 5, dcaStep: 1.5, takeProfitPercent: 3, stopLossPercent: 0, trailingPercent: 0, cooldownMinutes: 3, paperMode: false, mode: 'auto' },
   sol_idr:  { orderAmount: 1000000, maxDcaOrders: 5, dcaStep: 1.5, takeProfitPercent: 3, stopLossPercent: 0, trailingPercent: 0, cooldownMinutes: 3, paperMode: false, mode: 'auto' },
@@ -17,7 +18,6 @@ const focusedConfigs = {
   eth_idr:  { orderAmount: 1000000, maxDcaOrders: 5, dcaStep: 1.5, takeProfitPercent: 3, stopLossPercent: 0, trailingPercent: 0, cooldownMinutes: 3, paperMode: false, mode: 'auto' },
 };
 
-// Reset state to exclusively 5 focused high-yield bots
 const newBotsState = {};
 
 Object.keys(focusedConfigs).forEach(pair => {
@@ -46,10 +46,8 @@ Object.keys(focusedConfigs).forEach(pair => {
 });
 
 fs.writeFileSync(statePath, JSON.stringify(newBotsState, null, 2));
-console.log('🔥 TOP 5 CONCENTRATED HIGH-YIELD BOTS SETUP COMPLETED (TOTAL Rp 5.000.000 IDR):');
+console.log('🚀 BICO_IDR UPGRADED TO Rp 1.000.000 MODAL (Rp 200.000 / SLOT):');
 Object.keys(newBotsState).forEach(pair => {
   const c = newBotsState[pair].config;
-  const slotRp = Math.round(c.orderAmount / c.maxDcaOrders);
-  const minProfitRp = Math.round(slotRp * 0.03);
-  console.log(`- ${pair.toUpperCase()}: Modal Rp ${c.orderAmount.toLocaleString('id-ID')} | Slot Entry Rp ${slotRp.toLocaleString('id-ID')} | Est. Profit Rp ${minProfitRp.toLocaleString('id-ID')}+ / trade`);
+  console.log(`- ${pair.toUpperCase()}: Modal Rp ${c.orderAmount.toLocaleString('id-ID')} | Entry Slot Rp ${Math.round(c.orderAmount/c.maxDcaOrders).toLocaleString('id-ID')}`);
 });
