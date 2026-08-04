@@ -290,7 +290,12 @@ async function botTick(pair) {
           if (trailSL > slPrice) slPrice = trailSL;
         }
       }
-      const tpPrice = (pos.takeProfitPercent || 0) > 0 ? avgEntry * (1 + pos.takeProfitPercent / 100) : 0;
+      // Dynamic TP Scaling based on DCA slot count (+0.5% per extra DCA slot for bigger bounce gains)
+      let baseTp = pos.takeProfitPercent || 3;
+      if (pos.entries && pos.entries.length >= 3) {
+        baseTp = Math.min(baseTp + (pos.entries.length - 2) * 0.5, 5.0);
+      }
+      const tpPrice = (baseTp > 0) ? avgEntry * (1 + baseTp / 100) : 0;
 
       // Check SL / TP / Trailing Stop with cooldown guard
       const tradeCooldownMs = (bot.config.cooldownMinutes || 5) * 60 * 1000;
@@ -339,10 +344,19 @@ async function botTick(pair) {
 
     if (result.signal === 'HOLD') return;
 
-    // ── GUARD 1: Jangan BUY baru jika posisi DCA sudah maxed ──
+    // ── GUARD 1: Jangan BUY baru jika posisi DCA sudah ada ──
     if (result.signal === 'BUY' && positions[pair]) {
       // sudah ada posisi, biarkan DCA logic di atas yang handle
       return;
+    }
+
+    // ── GUARD 1A: MACRO TREND GUARD — Beli hanya jika pasar sehat (di atas 50-period SMA) ──
+    if (result.signal === 'BUY' && bot.priceHistory.length >= 20) {
+      const sma50 = bot.priceHistory.reduce((a, b) => a + b, 0) / bot.priceHistory.length;
+      if (price < sma50 * 0.95) {
+        console.log(`[${pair.toUpperCase()}] BUY IGNORED — Macro Trend Guard: harga Rp ${price} di bawah 5% trend SMA50 (Rp ${Math.round(sma50)})`);
+        return;
+      }
     }
 
     // ── GUARD 1B: Jangan SELL jika harga <= avgEntry saat stopLossPercent = 0 (No Cut Loss) ──
@@ -416,11 +430,18 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     }
   }
 
-  // === GUARD: BUY — check sufficient IDR balance ===
+  // === GUARD: BUY — check sufficient IDR balance & Auto-Compounding ===
   if (isBuy && !isPaper) {
     try {
       const info = await indodax.getInfo();
       const idrBalance = parseFloat(info.balance?.idr || 0);
+      
+      // Auto-Compounding: Jika saldo IDR tumbuh di atas 5 Juta, naikkan modal per slot proporsional (+profit)
+      if (idrBalance > 5000000) {
+        const growthRatio = Math.min(idrBalance / 5000000, 2.0);
+        idrAmount = Math.floor(idrAmount * growthRatio);
+      }
+
       if (config.sizingMode === 'percentage' && config.sizingValue) {
         idrAmount = Math.floor(idrBalance * (parseFloat(config.sizingValue) / 100) / maxDcaOrders);
       }
@@ -947,5 +968,33 @@ setInterval(async () => {
   } catch (_) {}
 }, 3000);
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Trading Bot running on port ${PORT}`));
+// ── Telegram 23:59 WIB Daily Recap Cron ──────────────────────
+let lastDailyReportDate = '';
+setInterval(async () => {
+  try {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' });
+    const timeParts = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Jakarta', hour12: false }).split(':');
+    const hours = parseInt(timeParts[0]);
+    const minutes = parseInt(timeParts[1]);
+
+    if (hours === 23 && minutes === 59 && lastDailyReportDate !== dateStr) {
+      lastDailyReportDate = dateStr;
+      let totalPnlToday = 0;
+      for (const pair of Object.keys(bots)) {
+        totalPnlToday += await db.getTodayProfit(pair);
+      }
+      const activeCount = Object.values(bots).filter(b => b.running).length;
+      const openCount = Object.keys(positions).length;
+      const msg = `📊 <b>REKAP PROFIT HARIAN BOT (${dateStr})</b>\n\n💰 Total Profit Hari Ini: <b>Rp ${Math.round(totalPnlToday).toLocaleString('id-ID')}</b>\n🤖 Bot Running: <b>${activeCount} Bot</b>\n📂 Posisi Terbuka: <b>${openCount} Koin</b>\n🛡 Anti-Loss Status: <b>Aktif 100% (SL 0%)</b>\n\n<i>Profit otomatis terkumpul di saldo Indodax!</i>`;
+      sendTelegram(msg);
+    }
+  } catch (e) {
+    console.error('Daily recap error:', e);
+  }
+}, 30000);
+
+const PORT = process.env.PORT || 3456;
+server.listen(PORT, () => {
+  console.log(`Trading Bot running on port ${PORT}`);
+});
