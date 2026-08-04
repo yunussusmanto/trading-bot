@@ -174,4 +174,39 @@ async function getActiveBotConfigs() {
   }
 }
 
-module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs };
+async function getDailyReportByDate(dateStr) {
+  try {
+    const targetDate = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+    const startTs = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0).getTime();
+    const endTs = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 23, 59, 59, 999).getTime();
+
+    const summaryRes = await pool.query(`
+      SELECT 
+        COALESCE(SUM(pnl), 0) as total_pnl,
+        COUNT(*) as total_trades,
+        COUNT(CASE WHEN pnl >= 0 THEN 1 END) as win_trades
+      FROM trades
+      WHERE timestamp >= $1 AND timestamp <= $2
+    `, [startTs, endTs]);
+
+    const tradesRes = await pool.query(`
+      SELECT id, pair, action, price::float, amount::float, pnl::float, reason, timestamp::bigint 
+      FROM trades 
+      WHERE timestamp >= $1 AND timestamp <= $2 
+      ORDER BY timestamp DESC
+    `, [startTs, endTs]);
+
+    const row = summaryRes.rows[0] || {};
+    return {
+      date: dateStr || new Date().toISOString().split('T')[0],
+      totalPnl: parseFloat(row.total_pnl || 0),
+      totalTrades: parseInt(row.total_trades || 0),
+      winTrades: parseInt(row.win_trades || 0),
+      trades: tradesRes.rows.map(r => ({ ...r, timestamp: parseInt(r.timestamp) }))
+    };
+  } catch (err) {
+    return { date: dateStr, totalPnl: 0, totalTrades: 0, winTrades: 0, trades: [] };
+  }
+}
+
+module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs };

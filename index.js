@@ -833,6 +833,17 @@ app.post('/api/approve', async (req, res) => {
 // Get pending approvals
 app.get('/api/approvals', (req, res) => res.json(Object.entries(pendingApprovals).map(([id, v]) => ({ id, ...v }))));
 
+// Get Daily Report by Date (YYYY-MM-DD)
+app.get('/api/reports/daily', async (req, res) => {
+  try {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const report = await db.getDailyReportByDate(date);
+    res.json(report);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Get available pairs from Indodax (200+ pairs)
 app.get('/api/pairs', async (req, res) => {
   try {

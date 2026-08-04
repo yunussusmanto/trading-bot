@@ -430,6 +430,52 @@
             <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
           </div>
         </div>
+      <!-- Historical Daily Report Card (Cek Laporan Per Tanggal) -->
+      <div class="card" style="padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+            <span>📅 Laporan Profit Harian Per Tanggal</span>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="date" id="report-date-picker" onchange="fetchDailyReportByDate()" style="padding: 4px 8px; font-size: 11px; width: auto; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+            <button onclick="fetchDailyReportByDate()" class="btn-blue" style="padding: 4px 12px; font-size: 11px;">🔍 Cek Laporan</button>
+          </div>
+        </div>
+
+        <div id="daily-report-content" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Profit Tanggal Ini</div>
+              <div id="daily-report-pnl" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">Rp 0</div>
+            </div>
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Eksekusi Trade</div>
+              <div id="daily-report-trades-count" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text); margin-top: 2px;">0 Transaksi</div>
+            </div>
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Win Rate / SL Status</div>
+              <div id="daily-report-winrate" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">100% (SL 0%)</div>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-top: 4px;">
+            <table class="indodax-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pair</th>
+                  <th>Tipe</th>
+                  <th>Harga Beli/Jual</th>
+                  <th>Profit (Rp)</th>
+                </tr>
+              </thead>
+              <tbody id="daily-report-trades-tbody">
+                <tr><td colspan="5" style="color:var(--muted); text-align:center;">Pilih tanggal & klik Cek Laporan</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
@@ -1923,7 +1969,67 @@ function togglePnLVisibility() {
   const btn = document.getElementById('toggle-pnl-btn');
   if (btn) btn.textContent = showPnL ? '🙈 Hide Profit' : '👁 Show Profit';
   renderPnLSummary();
+async function fetchDailyReportByDate() {
+  const picker = document.getElementById('report-date-picker');
+  if (!picker) return;
+  
+  if (!picker.value) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    picker.value = todayStr;
+  }
+  
+  const dateStr = picker.value;
+  try {
+    const res = await fetch(`/api/reports/daily?date=${dateStr}`);
+    const data = await res.json();
+    
+    const pnlEl = document.getElementById('daily-report-pnl');
+    const countEl = document.getElementById('daily-report-trades-count');
+    const tbody = document.getElementById('daily-report-trades-tbody');
+    
+    if (pnlEl) {
+      const pnlVal = data.totalPnl || 0;
+      pnlEl.textContent = (pnlVal >= 0 ? '+' : '') + fmtIDR(pnlVal);
+      pnlEl.style.color = pnlVal >= 0 ? 'var(--green)' : 'var(--red)';
+    }
+    
+    if (countEl) {
+      countEl.textContent = `${data.totalTrades || 0} Transaksi`;
+    }
+    
+    if (tbody) {
+      if (!data.trades || !data.trades.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted); text-align:center;">Tidak ada riwayat transaksi pada tanggal ini</td></tr>';
+      } else {
+        tbody.innerHTML = data.trades.map(t => {
+          const timeStr = new Date(t.timestamp).toLocaleTimeString('id-ID');
+          const pnlVal = t.pnl || 0;
+          const pnlCls = pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+          return `
+            <tr>
+              <td>${timeStr}</td>
+              <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
+              <td><span class="badge ${t.action === 'BUY' || t.action === 'DCA_BUY' ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
+              <td>${fmtIDR(t.price)}</td>
+              <td style="${pnlCls};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+  } catch (err) {
+    console.error('Fetch daily report error:', err);
+  }
 }
+
+// Auto-set today date on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const picker = document.getElementById('report-date-picker');
+  if (picker && !picker.value) {
+    picker.value = new Date().toISOString().split('T')[0];
+    setTimeout(fetchDailyReportByDate, 800);
+  }
+});
 
 function switchPnLTimeframe(tf, btn) {
   selectedPnLTimeframe = tf;
