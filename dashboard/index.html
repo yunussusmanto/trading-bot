@@ -496,12 +496,13 @@
                   <th>Waktu</th>
                   <th>Pair</th>
                   <th>Tipe</th>
-                  <th>Harga Beli/Jual</th>
+                  <th>Harga (Rp)</th>
+                  <th>Total Modal (Rp)</th>
                   <th>Profit (Rp)</th>
                 </tr>
               </thead>
               <tbody id="daily-report-trades-tbody">
-                <tr><td colspan="5" style="color:var(--muted); text-align:center;">Pilih tanggal & klik Cek Laporan</td></tr>
+                <tr><td colspan="6" style="color:var(--muted); text-align:center;">Pilih tanggal & klik Cek Laporan</td></tr>
               </tbody>
             </table>
           </div>
@@ -2046,12 +2047,13 @@ async function fetchDailyReportByDate() {
     
     if (tbody) {
       if (!data.trades || !data.trades.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted); text-align:center;">Tidak ada riwayat transaksi pada tanggal ini</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted); text-align:center;">Tidak ada riwayat transaksi pada tanggal ini</td></tr>';
       } else {
         tbody.innerHTML = data.trades.map(t => {
           const timeStr = new Date(t.timestamp).toLocaleTimeString('id-ID');
           const isBuy = t.action === 'BUY' || t.action === 'DCA_BUY';
           const pnlVal = t.pnl || 0;
+          const modalVal = t.amount || 0;
           const pnlDisplay = isBuy 
             ? '<span style="color:var(--muted)">-</span>' 
             : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`;
@@ -2062,6 +2064,7 @@ async function fetchDailyReportByDate() {
               <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
               <td><span class="badge ${isBuy ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
               <td>${fmtIDR(t.price)}</td>
+              <td style="font-weight:600">${fmtIDR(modalVal)}</td>
               <td>${pnlDisplay}</td>
             </tr>
           `;
