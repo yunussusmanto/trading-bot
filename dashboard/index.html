@@ -550,10 +550,22 @@
           <!-- Pagination Bar (Only active when reportMode === 'all') -->
           <div id="report-pagination-bar" style="display: none; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 10px; background: var(--surface2); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
             <div id="report-pagination-info" style="font-size: 11px; color: var(--muted); font-weight: 600;">Menampilkan 0-0 dari 0 transaksi</div>
-            <div style="display: flex; gap: 6px; align-items: center;">
-              <button id="report-prev-page-btn" onclick="changeReportPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
-              <span id="report-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
-              <button id="report-next-page-btn" onclick="changeReportPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
+            
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 11px; color: var(--muted);">Tampilkan:</span>
+                <select id="report-items-per-page" onchange="onReportItemsPerPageChange()" style="padding: 2px 6px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 4px; outline: none; cursor: pointer;">
+                  <option value="50" selected>50 Baris</option>
+                  <option value="100">100 Baris</option>
+                  <option value="200">200 Baris</option>
+                </select>
+              </div>
+
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="report-prev-page-btn" onclick="changeReportPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
+                <span id="report-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
+                <button id="report-next-page-btn" onclick="changeReportPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
+              </div>
             </div>
           </div>
         </div>
@@ -2069,7 +2081,7 @@ function toggleExpandDailyReport() {
 
 let reportMode = 'date'; // 'date' or 'all'
 let reportCurrentPage = 1;
-const reportItemsPerPage = 10;
+let reportItemsPerPage = 50;
 let reportSortCol = 'timestamp';
 let reportSortDir = 'desc';
 let rawReportTrades = [];
@@ -2101,6 +2113,15 @@ function switchReportMode(mode) {
 function onReportFilterChange() {
   reportCurrentPage = 1;
   fetchDailyReportByDate();
+}
+
+function onReportItemsPerPageChange() {
+  const sel = document.getElementById('report-items-per-page');
+  if (sel) {
+    reportItemsPerPage = parseInt(sel.value) || 50;
+  }
+  reportCurrentPage = 1;
+  renderReportTableAndMetrics();
 }
 
 function handleReportSort(col) {
