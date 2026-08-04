@@ -2577,10 +2577,14 @@ function makeCardsCollapsible() {
       card.id = `card-collapsible-${idx}`;
     }
 
-    // Identify header element
-    const header = card.querySelector('.card-title') || 
-                   card.querySelector('.daily-report-header') ||
-                   card.firstElementChild;
+    // Identify header container element (must be direct child of card)
+    let header = card.querySelector('.card-title')?.parentElement;
+    if (!header || header.parentElement !== card) {
+      header = card.querySelector('.daily-report-header');
+    }
+    if (!header || header.parentElement !== card) {
+      header = card.firstElementChild;
+    }
 
     if (!header) return;
 
