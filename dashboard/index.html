@@ -329,6 +329,16 @@
   @media(max-width:480px) {
     .pnl-grid { grid-template-columns: 1fr; }
   }
+  .card-toggle-btn {
+    transition: all 0.2s ease;
+  }
+  .card-toggle-btn:hover {
+    background: var(--surface2) !important;
+    color: var(--text) !important;
+  }
+  .card.card-collapsed {
+    padding-bottom: 0 !important;
+  }
 </style>
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
@@ -2558,6 +2568,74 @@ async function loadOpenOrders() {
   }
 }
 
+function makeCardsCollapsible() {
+  document.querySelectorAll('.card').forEach((card, idx) => {
+    if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
+    
+    // Assign a persistent id if not present
+    if (!card.id) {
+      card.id = `card-collapsible-${idx}`;
+    }
+
+    // Identify header element
+    const header = card.querySelector('.card-title') || 
+                   card.querySelector('.daily-report-header') ||
+                   card.firstElementChild;
+
+    if (!header) return;
+
+    // Create toggle button
+    const btn = document.createElement('button');
+    btn.className = 'card-toggle-btn';
+    btn.innerHTML = '➖';
+    btn.title = 'Minimize Panel';
+    btn.style.marginLeft = 'auto';
+    btn.style.cursor = 'pointer';
+    btn.style.background = 'transparent';
+    btn.style.border = 'none';
+    btn.style.color = 'var(--muted)';
+    btn.style.fontSize = '14px';
+    btn.style.padding = '2px 6px';
+    btn.style.borderRadius = '4px';
+
+    if (header.style.display !== 'flex' && !header.classList.contains('daily-report-header')) {
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+    }
+
+    header.appendChild(btn);
+
+    // Create wrapper for body elements
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card-body-collapsible';
+    wrapper.style.transition = 'all 0.3s ease';
+    
+    while (header.nextSibling) {
+      wrapper.appendChild(header.nextSibling);
+    }
+    card.appendChild(wrapper);
+
+    // Restore state
+    const isCollapsed = localStorage.getItem(`collapsed_${card.id}`) === 'true';
+    if (isCollapsed) {
+      card.classList.add('card-collapsed');
+      wrapper.style.display = 'none';
+      btn.innerHTML = '➕';
+      btn.title = 'Maximize Panel';
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const collapsed = card.classList.toggle('card-collapsed');
+      wrapper.style.display = collapsed ? 'none' : 'block';
+      btn.innerHTML = collapsed ? '➕' : '➖';
+      btn.title = collapsed ? 'Maximize Panel' : 'Minimize Panel';
+      localStorage.setItem(`collapsed_${card.id}`, collapsed ? 'true' : 'false');
+    });
+  });
+}
+
 initTheme();
 connectWS();
 loadTrades();
@@ -2568,6 +2646,7 @@ loadEquity();
 loadPositions();
 loadOpenOrders();
 loadBots();
+makeCardsCollapsible();
 setInterval(loadOrderBook, 8000);
 setInterval(loadPnL, 30000);
 setInterval(loadPositions, 10000);
