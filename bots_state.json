@@ -1,0 +1,212 @@
+{
+  "btc_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 300000,
+      "sizingValue": 300000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "eth_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 300000,
+      "sizingValue": 300000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "sol_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 300000,
+      "sizingValue": 300000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "koma_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 300000,
+      "sizingValue": 300000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "xrp_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 300000,
+      "sizingValue": 300000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "bico_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 100000,
+      "sizingValue": 100000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "beat_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 100000,
+      "sizingValue": 100000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "bank_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 100000,
+      "sizingValue": 100000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "home_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 100000,
+      "sizingValue": 100000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 2,
+      "maxDcaOrders": 5
+    }
+  },
+  "hype_idr": {
+    "running": true,
+    "mode": "auto",
+    "strategy": "multi_indicator",
+    "config": {
+      "intervalSeconds": 10,
+      "sizingMode": "fixed",
+      "orderAmount": 100000,
+      "sizingValue": 100000,
+      "dailyLossLimit": 100000,
+      "stopLossPercent": 0,
+      "takeProfitPercent": 3,
+      "trailingPercent": 0,
+      "cooldownMinutes": 15,
+      "paperMode": false,
+      "rsiPeriod": 14,
+      "bbPeriod": 20,
+      "dcaStep": 5,
+      "maxDcaOrders": 5
+    }
+  }
+}
