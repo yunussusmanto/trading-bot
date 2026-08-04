@@ -886,6 +886,28 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Trades Pagination Bar -->
+        <div id="trades-pagination-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 0px; flex-wrap: wrap; gap: 10px; background: var(--surface2); padding: 8px 12px; border-top: 1px solid var(--border);">
+          <div id="trades-pagination-info" style="font-size: 11px; color: var(--muted); font-weight: 600;">Menampilkan 0-0 dari 0 transaksi</div>
+          
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 11px; color: var(--muted);">Tampilkan:</span>
+              <select id="trades-items-per-page" onchange="onTradesPageChange()" style="padding: 2px 6px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 4px; outline: none; cursor: pointer;">
+                <option value="50" selected>50 Baris</option>
+                <option value="100">100 Baris</option>
+                <option value="200">200 Baris</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button id="trades-prev-page-btn" onclick="changeTradesPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
+              <span id="trades-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
+              <button id="trades-next-page-btn" onclick="changeTradesPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Backtest Result Card -->
@@ -1416,24 +1438,84 @@ function renderBalanceGrid() {
   el.innerHTML = `${cryptoHtml}<span style="font-size:12px;font-weight:700;color:var(--green)">${fmtIDR(idr)}</span>`;
 }
 
-// Trades
+// Trades Pagination State
+let tradesData = [];
+let tradesCurrentPage = 1;
+let tradesItemsPerPage = 50;
+
 async function loadTrades() {
   try {
     const res = await fetch('/api/trades');
-    const data = await res.json();
-    const tbody = document.getElementById('trades-tbody');
-    if (!tbody) return;
-    if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Belum ada riwayat transaksi</td></tr>'; return; }
-    tbody.innerHTML = data.slice(0, 50).map(t => `
-      <tr>
-        <td>${new Date(t.timestamp).toLocaleString('id-ID')}</td>
-        <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
-        <td><span class="badge ${t.action === 'BUY' ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
-        <td>${fmtIDR(t.price)}</td>
-        <td>${fmtIDR(t.amount)}</td>
-      </tr>
-    `).join('');
-  } catch (_) {}
+    tradesData = await res.json();
+    if (!Array.isArray(tradesData)) tradesData = [];
+    tradesCurrentPage = 1;
+    renderTradesPage();
+  } catch (e) {
+    console.error('loadTrades error:', e);
+  }
+}
+
+function renderTradesPage() {
+  const tbody = document.getElementById('trades-tbody');
+  if (!tbody) return;
+
+  const total = tradesData.length;
+  const selectLimit = document.getElementById('trades-items-per-page');
+  if (selectLimit) {
+    tradesItemsPerPage = parseInt(selectLimit.value) || 50;
+  }
+  
+  if (total === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px;">Belum ada riwayat transaksi</td></tr>';
+    const info = document.getElementById('trades-pagination-info');
+    if (info) info.textContent = 'Menampilkan 0-0 dari 0 transaksi';
+    const pageNum = document.getElementById('trades-page-num');
+    if (pageNum) pageNum.textContent = 'Page 1 of 1';
+    return;
+  }
+
+  const totalPages = Math.ceil(total / tradesItemsPerPage);
+  if (tradesCurrentPage < 1) tradesCurrentPage = 1;
+  if (tradesCurrentPage > totalPages) tradesCurrentPage = totalPages;
+
+  const start = (tradesCurrentPage - 1) * tradesItemsPerPage;
+  const end = Math.min(start + tradesItemsPerPage, total);
+  
+  const pageData = tradesData.slice(start, end);
+
+  tbody.innerHTML = pageData.map(t => `
+    <tr>
+      <td>${new Date(t.timestamp).toLocaleString('id-ID')}</td>
+      <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
+      <td><span class="badge ${t.action === 'BUY' ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
+      <td>${fmtIDR(t.price)}</td>
+      <td>${fmtIDR(t.amount)}</td>
+    </tr>
+  `).join('');
+
+  // Update pagination info
+  const info = document.getElementById('trades-pagination-info');
+  if (info) info.textContent = `Menampilkan ${start + 1}-${end} dari ${total} transaksi`;
+
+  const pageNum = document.getElementById('trades-page-num');
+  if (pageNum) pageNum.textContent = `Page ${tradesCurrentPage} of ${totalPages}`;
+
+  // Disable/enable buttons
+  const prevBtn = document.getElementById('trades-prev-page-btn');
+  if (prevBtn) prevBtn.disabled = tradesCurrentPage === 1;
+
+  const nextBtn = document.getElementById('trades-next-page-btn');
+  if (nextBtn) nextBtn.disabled = tradesCurrentPage === totalPages;
+}
+
+function changeTradesPage(dir) {
+  tradesCurrentPage += dir;
+  renderTradesPage();
+}
+
+function onTradesPageChange() {
+  tradesCurrentPage = 1;
+  renderTradesPage();
 }
 
 // Custom Downward Dropdown Logic
