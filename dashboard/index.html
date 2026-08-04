@@ -2704,11 +2704,23 @@ async function makeCardsCollapsible() {
     console.error('Failed to load collapsed states from server:', e);
   }
 
+  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card'];
+  excludedIds.forEach(id => {
+    const cardEl = document.getElementById(id);
+    if (cardEl) {
+      cardEl.classList.remove('card-collapsed');
+      const wrapperEl = cardEl.querySelector('.card-body-collapsible');
+      if (wrapperEl) {
+        wrapperEl.style.display = 'block';
+      }
+      const btnEl = cardEl.querySelector('.card-toggle-btn');
+      if (btnEl) btnEl.remove();
+    }
+  });
+
   document.querySelectorAll('.card').forEach((card, idx) => {
     try {
       if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
-      
-      const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card'];
       if (excludedIds.includes(card.id)) return;
       
       // Assign a persistent id if not present
