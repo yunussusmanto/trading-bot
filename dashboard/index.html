@@ -1999,6 +1999,7 @@ function togglePnLVisibility() {
   const btn = document.getElementById('toggle-pnl-btn');
   if (btn) btn.textContent = showPnL ? '🙈 Hide Profit' : '👁 Show Profit';
   renderPnLSummary();
+  fetchDailyReportByDate();
 }
 
 let isReportExpanded = false;
@@ -2036,8 +2037,13 @@ async function fetchDailyReportByDate() {
     
     if (pnlEl) {
       const pnlVal = data.totalPnl || 0;
-      pnlEl.textContent = (pnlVal >= 0 ? '+' : '') + fmtIDR(pnlVal);
-      pnlEl.style.color = pnlVal >= 0 ? 'var(--green)' : 'var(--red)';
+      if (!showPnL) {
+        pnlEl.textContent = '••••••••';
+        pnlEl.style.color = 'var(--text)';
+      } else {
+        pnlEl.textContent = (pnlVal >= 0 ? '+' : '') + fmtIDR(pnlVal);
+        pnlEl.style.color = pnlVal >= 0 ? 'var(--green)' : 'var(--red)';
+      }
     }
     
     if (countEl) {
@@ -2055,7 +2061,9 @@ async function fetchDailyReportByDate() {
           const modalVal = t.amount || 0;
           const pnlDisplay = isBuy 
             ? '<span style="color:var(--muted)">-</span>' 
-            : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`;
+            : (!showPnL 
+                ? '<span style="color:var(--muted)">••••••••</span>' 
+                : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`);
 
           return `
             <tr>
