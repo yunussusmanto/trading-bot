@@ -2557,12 +2557,44 @@ async function loadPositions() {
       const capitalStr = !showPnL ? '••••••••' : fmtIDR(p.amount);
       const liveValStr = !showPnL ? '••••••••' : fmtIDR(p.liveValue || (p.amount + p.pnl));
 
+      // Dynamic price progress bar calculation (Break-even at center 50%)
+      const diffPct = p.pnlPercent !== undefined ? parseFloat(p.pnlPercent) : (((p.currentPrice - p.entryPrice) / p.entryPrice) * 100);
+      let pointerLeft = 50 + (diffPct * 2.5); // Multiplier maps 20% diff to 50% offset
+      pointerLeft = Math.max(0, Math.min(100, pointerLeft));
+      
+      let fillLeft = 50;
+      let fillWidth = 0;
+      let barColor = 'var(--muted)';
+      let dotColor = 'var(--muted)';
+      
+      if (diffPct > 0) {
+        fillLeft = 50;
+        fillWidth = Math.min(diffPct * 2.5, 50);
+        barColor = 'var(--green)';
+        dotColor = 'var(--green)';
+      } else if (diffPct < 0) {
+        fillLeft = Math.max(0, 50 + (diffPct * 2.5));
+        fillWidth = Math.min(Math.abs(diffPct * 2.5), 50);
+        barColor = 'var(--red)';
+        dotColor = 'var(--red)';
+      }
+
       return `
         <tr>
           <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
           <td style="font-weight:600">${capitalStr}</td>
           <td>${fmtIDR(p.entryPrice)}</td>
-          <td>${fmtIDR(p.currentPrice)}</td>
+          <td>
+            <div style="font-weight:600">${fmtIDR(p.currentPrice)}</div>
+            <div style="width: 80px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; position: relative; margin-top: 5px; overflow: visible;">
+              <!-- Center break-even line -->
+              <div style="position: absolute; left: 50%; top: -2px; width: 1px; height: 7px; background: rgba(255,255,255,0.35);"></div>
+              <!-- Fill colored line -->
+              <div style="position: absolute; left: ${fillLeft}%; width: ${fillWidth}%; height: 100%; background: ${barColor}; border-radius: 2px;"></div>
+              <!-- Glowing pointer dot -->
+              <div style="position: absolute; left: calc(${pointerLeft}% - 3px); top: -2px; width: 7px; height: 7px; border-radius: 50%; background: ${dotColor}; box-shadow: 0 0 5px ${dotColor};"></div>
+            </div>
+          </td>
           <td style="font-weight:600">${liveValStr}</td>
           <td>
             <span style="background:${bgBadge}; ${cls}; padding:3px 8px; border-radius:4px; font-weight:800; display:inline-block; font-size:11px;">
