@@ -121,8 +121,25 @@
   }
   .saldo-amount { font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--accent2); }
 
-  /* PnL Grid */
-  .pnl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+  /* Segmented Timeframe Pills (Best Practice Trading UI) */
+  .pnl-pill {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .pnl-pill:hover { color: var(--text); }
+  .pnl-pill.active {
+    background: var(--header-blue);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0, 136, 204, 0.35);
+  }
 
   /* Table Responsive Container */
   .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -385,26 +402,33 @@
       <!-- Audio for alerts -->
       <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
 
-      <!-- P&L Summary Cards -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size:12px; font-weight:700; color:var(--muted)">Ringkasan Profit / Loss (P&L)</span>
-        <button id="toggle-pnl-btn" onclick="togglePnLVisibility()" class="btn-gray" style="padding:3px 8px; font-size:11px;">👁 Show Profit</button>
-      </div>
-      <div class="pnl-grid">
-        <div class="card" style="padding: 12px;">
-          <div class="metric-label">Profit Hari Ini</div>
-          <div id="pnl-today" style="font-weight:700;font-size:16px;">••••••••</div>
-        </div>
-        <div class="card" style="padding: 12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <div id="pnl-filtered-label" class="metric-label" style="margin:0">Profit Minggu Ini</div>
-            <select id="pnl-timeframe-filter" onchange="updateFilteredPnL()" style="width:auto; padding:2px 6px; font-size:10px; border-radius:4px; background:var(--surface2); color:var(--text); border:1px solid var(--border); outline:none; cursor:pointer;">
-              <option value="week" selected>Minggu Ini</option>
-              <option value="month">Bulan Ini</option>
-              <option value="total">Total All-Time</option>
-            </select>
+      <!-- P&L Performance Summary Card (Trading Best Practice) -->
+      <div class="card" style="padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+            <span>📊 Ringkasan Performa Profit (P&L)</span>
           </div>
-          <div id="pnl-filtered-val" style="font-weight:700;font-size:16px;">••••••••</div>
+          
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
+              <button class="pnl-pill active" onclick="switchPnLTimeframe('today', this)">1D (Hari Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('week', this)">7D (Minggu Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('month', this)">30D (Bulan Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('total', this)">All (Total)</button>
+            </div>
+            <button id="toggle-pnl-btn" onclick="togglePnLVisibility()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">👁 Show Profit</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px;">
+          <div>
+            <div id="pnl-display-label" style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600;">Profit Hari Ini (1D)</div>
+            <div id="pnl-display-amount" style="font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text);">••••••••</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px;">Status Anti-Loss</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
+          </div>
         </div>
       </div>
 
@@ -1892,6 +1916,7 @@ async function emergencyStop() {
 
 let showPnL = false;
 let cachedPnLData = null;
+let selectedPnLTimeframe = 'today';
 
 function togglePnLVisibility() {
   showPnL = !showPnL;
@@ -1900,41 +1925,33 @@ function togglePnLVisibility() {
   renderPnLSummary();
 }
 
+function switchPnLTimeframe(tf, btn) {
+  selectedPnLTimeframe = tf;
+  document.querySelectorAll('.pnl-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderPnLSummary();
+}
+
 function renderPnLSummary() {
   if (!cachedPnLData) return;
-  setPnL('pnl-today', cachedPnLData.today || 0);
-  updateFilteredPnL();
-}
+  const labels = {
+    today: 'Profit Hari Ini (1D)',
+    week: 'Profit Minggu Ini (7D)',
+    month: 'Profit Bulan Ini (30D)',
+    total: 'Profit Total All-Time'
+  };
+  const labelEl = document.getElementById('pnl-display-label');
+  if (labelEl) labelEl.textContent = labels[selectedPnLTimeframe] || 'Profit Hari Ini (1D)';
 
-function updateFilteredPnL() {
-  if (!cachedPnLData) return;
-  const filter = document.getElementById('pnl-timeframe-filter')?.value || 'week';
-  const labelEl = document.getElementById('pnl-filtered-label');
-  
-  let val = 0;
-  if (filter === 'week') {
-    val = cachedPnLData.week || 0;
-    if (labelEl) labelEl.textContent = 'Profit Minggu Ini';
-  } else if (filter === 'month') {
-    val = cachedPnLData.month || 0;
-    if (labelEl) labelEl.textContent = 'Profit Bulan Ini';
-  } else if (filter === 'total') {
-    val = cachedPnLData.total || 0;
-    if (labelEl) labelEl.textContent = 'Profit Total';
-  }
-  
-  setPnL('pnl-filtered-val', val);
-}
-
-function setPnL(id, val) {
-  const el = document.getElementById(id);
-  if (el) {
+  const val = cachedPnLData[selectedPnLTimeframe] || 0;
+  const amountEl = document.getElementById('pnl-display-amount');
+  if (amountEl) {
     if (!showPnL) {
-      el.textContent = '••••••••';
-      el.style.color = 'var(--text)';
+      amountEl.textContent = '••••••••';
+      amountEl.style.color = 'var(--text)';
     } else {
-      el.textContent = (val >= 0 ? '+' : '') + fmtIDR(val);
-      el.style.color = val >= 0 ? 'var(--green)' : 'var(--red)';
+      amountEl.textContent = (val >= 0 ? '+' : '') + fmtIDR(val);
+      amountEl.style.color = val >= 0 ? 'var(--green)' : 'var(--red)';
     }
   }
 }
