@@ -431,15 +431,16 @@
           </div>
         </div>
       <!-- Historical Daily Report Card (Cek Laporan Per Tanggal) -->
-      <div class="card" style="padding: 16px; margin-bottom: 16px;">
+      <div id="daily-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
           <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
             <span>📅 Laporan Profit Harian Per Tanggal</span>
           </div>
           
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <input type="date" id="report-date-picker" onchange="fetchDailyReportByDate()" style="padding: 4px 8px; font-size: 11px; width: auto; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
             <button onclick="fetchDailyReportByDate()" class="btn-blue" style="padding: 4px 12px; font-size: 11px;">🔍 Cek Laporan</button>
+            <button id="toggle-expand-report-btn" onclick="toggleExpandDailyReport()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">↔️ Expand View</button>
           </div>
         </div>
 
@@ -459,7 +460,7 @@
             </div>
           </div>
 
-          <div class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-top: 4px;">
+          <div id="daily-report-table-wrapper" class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-top: 4px; transition: max-height 0.3s ease;">
             <table class="indodax-table">
               <thead>
                 <tr>
@@ -1969,6 +1970,21 @@ function togglePnLVisibility() {
   const btn = document.getElementById('toggle-pnl-btn');
   if (btn) btn.textContent = showPnL ? '🙈 Hide Profit' : '👁 Show Profit';
   renderPnLSummary();
+}
+
+let isReportExpanded = false;
+
+function toggleExpandDailyReport() {
+  isReportExpanded = !isReportExpanded;
+  const wrapper = document.getElementById('daily-report-table-wrapper');
+  const btn = document.getElementById('toggle-expand-report-btn');
+  
+  if (wrapper) {
+    wrapper.style.maxHeight = isReportExpanded ? '650px' : '200px';
+  }
+  if (btn) {
+    btn.textContent = isReportExpanded ? '↙️ Shrink View' : '↔️ Expand View';
+  }
 }
 
 async function fetchDailyReportByDate() {
