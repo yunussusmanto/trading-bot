@@ -220,6 +220,7 @@ const bots = {}; // { pair: { running, mode, strategy, config, priceHistory, int
 const positions = {};
 const pendingApprovals = {}; // { id: { pair, signal, price, resolve } }
 const lastTradeTime = {}; // { pair: timestamp }
+const lastLoggedAlert = {}; // { key: timestamp }
 
 // ── Rate Limiter ─────────────────────────────────────────────────
 let lastApiCall = 0;
@@ -460,9 +461,14 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
     const avgEntry = pos.avgEntry || pos.entryPrice;
     const slPercent = config.stopLossPercent ?? pos.stopLossPercent ?? 0;
     if (slPercent === 0 && price <= avgEntry) {
-      const msg = `🚫 SELL BLOCKED — Proteksi Anti-Loss Aktif! Harga Rp ${price.toLocaleString('id-ID')} <= Avg Entry Rp ${Math.round(avgEntry).toLocaleString('id-ID')} (SL = 0%). Bot wajib HOLD sampai PROFIT!`;
-      console.log(`[${pair.toUpperCase()}] ${msg}`);
-      broadcast({ type: 'alert', pair, msg });
+      const alertKey = `${pair}-sell-blocked`;
+      const now = Date.now();
+      if (!lastLoggedAlert[alertKey] || (now - lastLoggedAlert[alertKey] > 600000)) {
+        lastLoggedAlert[alertKey] = now;
+        const msg = `🚫 SELL BLOCKED — Proteksi Anti-Loss Aktif! Harga Rp ${price.toLocaleString('id-ID')} <= Avg Entry Rp ${Math.round(avgEntry).toLocaleString('id-ID')} (SL = 0%). Bot wajib HOLD sampai PROFIT!`;
+        console.log(`[${pair.toUpperCase()}] ${msg}`);
+        broadcast({ type: 'alert', pair, msg });
+      }
       return null;
     }
   }
@@ -483,9 +489,14 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
         idrAmount = Math.floor(idrBalance * (parseFloat(config.sizingValue) / 100) / maxDcaOrders);
       }
       if (idrBalance < idrAmount) {
-        const msg = `BUY skipped — IDR saldo Rp ${idrBalance.toLocaleString('id-ID')} tidak cukup (butuh Rp ${idrAmount.toLocaleString('id-ID')})`;
-        console.log(`[${pair.toUpperCase()}] ${msg}`);
-        broadcast({ type: 'alert', pair, msg });
+        const alertKey = `${pair}-buy-insufficient`;
+        const now = Date.now();
+        if (!lastLoggedAlert[alertKey] || (now - lastLoggedAlert[alertKey] > 600000)) {
+          lastLoggedAlert[alertKey] = now;
+          const msg = `BUY skipped — IDR saldo Rp ${idrBalance.toLocaleString('id-ID')} tidak cukup (butuh Rp ${idrAmount.toLocaleString('id-ID')})`;
+          console.log(`[${pair.toUpperCase()}] ${msg}`);
+          broadcast({ type: 'alert', pair, msg });
+        }
         lastTradeTime[pair] = Date.now();
         return null;
       }
