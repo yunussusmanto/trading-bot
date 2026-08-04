@@ -709,18 +709,27 @@ app.get('/api/bot/status', (req, res) => {
   res.json(status);
 });
 
-// Get open orders directly from Indodax API
+// Get open orders directly from Indodax API (supports all pairs query)
 app.get('/api/open-orders', async (req, res) => {
   try {
-    const pair = req.query.pair || 'btc_idr';
-    const data = await indodax.openOrders(pair);
-    res.json(data.orders || []);
-  } catch (e) { res.json([]); }
-});
+    const targetPair = req.query.pair;
+    const pairsToCheck = (targetPair && targetPair !== 'all') 
+      ? [targetPair.toLowerCase()] 
+      : (Object.keys(activeBots).length ? Object.keys(activeBots) : ['bico_idr', 'koma_idr', 'xrp_idr', 'sol_idr', 'btc_idr', 'eth_idr']);
 
-// Get internal open positions
-app.get('/api/positions', (req, res) => {
-  res.json(positions);
+    let allOrders = [];
+    for (const pair of pairsToCheck) {
+      try {
+        await waitRateLimit();
+        const data = await indodax.openOrders(pair);
+        if (data && data.orders && data.orders.length) {
+          const formatted = data.orders.map(o => ({ ...o, pair: pair.toUpperCase() }));
+          allOrders = allOrders.concat(formatted);
+        }
+      } catch (e) {}
+    }
+    res.json(allOrders);
+  } catch (e) { res.json([]); }
 });
 
 // Get balance
@@ -783,20 +792,36 @@ app.get('/api/equity', async (req, res) => {
 app.get('/api/positions', async (req, res) => {
   try {
     const activePairs = Object.keys(positions);
-    const enriched = {};
+    const result = [];
     for (const pair of activePairs) {
-      await waitRateLimit();
+      const pos = positions[pair];
+      if (!pos) continue;
+      let currentPrice = pos.avgEntry || pos.entryPrice || 0;
       try {
+        await waitRateLimit();
         const ticker = await indodax.getTicker(pair);
-        const currentPrice = parseFloat(ticker.last);
-        const pos = positions[pair];
-        const unrealizedPnl = ((currentPrice - pos.entryPrice) / pos.entryPrice) * pos.amount;
-        enriched[pair] = { ...pos, currentPrice, unrealizedPnl };
-      } catch (err) {
-        enriched[pair] = { ...positions[pair] }; // fallback
-      }
+        if (ticker && ticker.last) currentPrice = parseFloat(ticker.last);
+      } catch (err) {}
+
+      const avgEntry = pos.avgEntry || pos.entryPrice || currentPrice;
+      const totalIdr = pos.totalIdr || pos.amount || (avgEntry * (pos.totalCoin || 0));
+      const totalCoin = pos.totalCoin || pos.coinAmount || 0;
+      const pnlVal = (currentPrice - avgEntry) * totalCoin;
+      const pnlPercent = avgEntry > 0 ? ((currentPrice - avgEntry) / avgEntry) * 100 : 0;
+
+      result.push({
+        pair: pair.toUpperCase(),
+        entryPrice: avgEntry,
+        currentPrice: currentPrice,
+        amount: totalIdr,
+        coinAmount: totalCoin,
+        pnl: Math.round(pnlVal),
+        pnlPercent: parseFloat(pnlPercent.toFixed(2)),
+        dcaOrders: pos.entries ? pos.entries.length : 1,
+        openedAt: pos.openedAt || Date.now()
+      });
     }
-    res.json(enriched);
+    res.json(result);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

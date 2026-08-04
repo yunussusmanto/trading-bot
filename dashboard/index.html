@@ -2371,10 +2371,25 @@ async function loadPositions() {
     const d = await r.json();
     const tb = document.getElementById('positions-tbody');
     if (!tb) return;
-    if (!d || !d.length) { tb.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No open positions</td></tr>'; return; }
+    if (!Array.isArray(d) || !d.length) { 
+      tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px">
+        <span style="color:var(--green);font-weight:700">🟢 6 Bot Trading Aktif Standby 24/7 (BICO, KOMA, XRP, SOL, BTC, ETH)</span><br>
+        <span style="font-size:10px">Semua modal aman di IDR — Siap otomatis beli saat harga terdiskon (Dip Buying)</span>
+      </td></tr>`; 
+      return; 
+    }
     tb.innerHTML = d.map(p => {
       const cls = p.pnl >= 0 ? 'color:var(--green)' : 'color:var(--red)';
-      return `<tr><td>${p.pair}</td><td>${fmtIDR(p.entryPrice)}</td><td>${fmtIDR(p.currentPrice)}</td><td style="${cls}">${fmtIDR(p.pnl)}</td><td style="${cls}">${p.pnlPercent}%</td></tr>`;
+      const pnlStr = !showPnL ? '••••••••' : `${p.pnl >= 0 ? '+' : ''}${fmtIDR(p.pnl)}`;
+      return `
+        <tr>
+          <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
+          <td>${fmtIDR(p.entryPrice)}</td>
+          <td>${fmtIDR(p.currentPrice)}</td>
+          <td style="${cls};font-weight:700">${pnlStr}</td>
+          <td style="${cls};font-weight:700">${p.pnlPercent >= 0 ? '+' : ''}${p.pnlPercent}%</td>
+        </tr>
+      `;
     }).join('');
   } catch (e) {}
 }
@@ -2439,15 +2454,16 @@ async function loadBots() {
 
 async function loadOpenOrders() {
   try {
-    const select = document.getElementById('bot-pair');
-    const p = select && select.value ? select.value : 'btc_idr';
-    const res = await fetch(`/api/open-orders?pair=${p}`);
+    const res = await fetch('/api/open-orders?pair=all');
     const orders = await res.json();
     const tbody = document.getElementById('open-orders-tbody');
     if (!tbody) return;
 
     if (!Array.isArray(orders) || orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:10px">Belum ada antrian order</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:12px">
+        <span style="color:var(--green);font-weight:700">⚡ Auto Instant Execution (Limit/Market Liquid)</span><br>
+        <span style="font-size:10px">Tidak ada antrian order tertahan — Bot mengeksekusi order secara cepat & langsung terisi di Indodax</span>
+      </td></tr>`;
       return;
     }
 
@@ -2458,10 +2474,10 @@ async function loadOpenOrders() {
       const amount = o.order_btc || o.remain_btc || o.amount || '-';
       return `
         <tr>
+          <td style="font-weight:700;color:var(--accent2)">${o.pair || 'CRYPTO'}</td>
           <td style="color:${typeColor};font-weight:700">${typeUpper}</td>
           <td style="font-weight:600">${price}</td>
-          <td>${amount}</td>
-          <td><span style="background:rgba(0,192,135,0.15);color:var(--green);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">PENDING</span></td>
+          <td><span style="background:rgba(0,192,135,0.15);color:var(--green);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">PENDING IN MARKET</span></td>
         </tr>
       `;
     }).join('');
