@@ -2590,26 +2590,12 @@ async function loadPositions() {
       candleList.innerHTML = d.map(p => {
         const diffPct = p.pnlPercent !== undefined ? parseFloat(p.pnlPercent) : (((p.currentPrice - p.entryPrice) / p.entryPrice) * 100);
         
-        let fillLeft = 50;
-        let fillWidth = 0;
-        let barColor = 'var(--muted)';
-        
-        if (diffPct > 0) {
-          fillLeft = 50;
-          fillWidth = Math.min(diffPct * 2.5, 50);
-          barColor = 'var(--green)';
-        } else if (diffPct < 0) {
-          fillLeft = Math.max(0, 50 + (diffPct * 2.5));
-          fillWidth = Math.min(Math.abs(diffPct * 2.5), 50);
-          barColor = 'var(--red)';
-        }
-
         const coinSymbol = p.pair.replace('_idr', '').toUpperCase();
         const pnlText = `${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%`;
         const pnlColor = diffPct >= 0 ? 'var(--green)' : 'var(--red)';
 
         // Calculate vertical body dimensions inside a 60px height container (break-even at 30px)
-        let bodyHeight = Math.min(Math.abs(diffPct) * 1.5, 30); // max 30px height
+        let bodyHeight = 0;
         let bodyTop = 30; // center
         let barColor = 'var(--muted)';
         
