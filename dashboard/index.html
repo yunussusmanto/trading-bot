@@ -459,30 +459,6 @@
         </div>
       </div>
 
-      <!-- Open Positions (Dipindahkan ke Utama di Bawah PnL) -->
-      <div class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
-        <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-          <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
-          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time Live Monitoring</span>
-        </div>
-        <div class="table-responsive">
-          <table class="indodax-table">
-            <thead>
-              <tr>
-                <th>Pair</th>
-                <th>Avg Entry</th>
-                <th>Harga Live</th>
-                <th>Profit / Loss (Rp)</th>
-                <th>Profit / Loss (%)</th>
-              </tr>
-            </thead>
-            <tbody id="positions-tbody">
-              <tr><td colspan="5" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <!-- Historical & Daily Report Card with Filters, Sorting, and Pagination -->
       <div id="daily-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
         <!-- Top Bar: Mode Switcher & Expand Button -->
@@ -592,6 +568,29 @@
               </div>
             </div>
           </div>
+      </div>
+
+      <!-- Open Positions (Dipindahkan ke Bawah Laporan Trading & History) -->
+      <div class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
+        <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
+          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time Live Monitoring</span>
+        </div>
+        <div class="table-responsive">
+          <table class="indodax-table">
+            <thead>
+              <tr>
+                <th>Pair</th>
+                <th>Avg Entry</th>
+                <th>Harga Live</th>
+                <th>Profit / Loss (Rp)</th>
+                <th>Profit / Loss (%)</th>
+              </tr>
+            </thead>
+            <tbody id="positions-tbody">
+              <tr><td colspan="5" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
