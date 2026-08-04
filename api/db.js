@@ -126,6 +126,7 @@ async function getPnLSummary() {
     today: parseFloat(res.rows[0]?.today || 0),
     week: parseFloat(res.rows[0]?.week || 0),
     month: parseFloat(res.rows[0]?.month || 0),
+    total: parseFloat(res.rows[0]?.all_time || 0),
     allTime: parseFloat(res.rows[0]?.all_time || 0)
   };
 }
