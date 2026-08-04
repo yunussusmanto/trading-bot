@@ -451,8 +451,8 @@
       </div>
 
       <!-- Saldo Value Box (INSIDE PANEL) -->
-      <div class="card" style="padding:10px 14px; margin-bottom:16px;">
-        <div class="saldo-amount" id="display-saldo-idr" style="font-size:12px; font-weight:600; line-height:1.5;">••••••••</div>
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <div class="saldo-amount" id="display-saldo-idr" style="line-height:1.5;">••••••••</div>
       </div>
 
       <!-- Audio for alerts -->
@@ -1435,17 +1435,34 @@ function renderBalanceGrid() {
   if (!cachedBalance || !el) return;
 
   if (!showBalance) {
-    el.innerHTML = '<span style="font-size:12px;font-weight:600;color:var(--muted)">••••••••</span>';
+    el.innerHTML = '<div style="font-size:18px;font-weight:700;color:var(--muted); font-family:\'JetBrains Mono\',monospace;">••••••••</div>';
     return;
   }
 
   const idr = cachedBalance.idr || 0;
   const cryptos = Object.entries(cachedBalance)
     .filter(([c, val]) => c !== 'idr' && parseFloat(val) > 0)
-    .map(([c, val]) => `<span style="font-size:12px;color:var(--accent2);font-weight:600">${parseFloat(val).toFixed(6)} ${c.toUpperCase()}</span>`);
+    .map(([c, val]) => {
+      const coin = c.toUpperCase();
+      const amount = parseFloat(val).toFixed(6);
+      return `
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:4px 8px; border-radius:6px; font-size:11px; display:inline-flex; align-items:center; gap:6px;">
+          <span style="color:var(--muted); font-weight:700;">${coin}</span>
+          <span style="color:var(--accent2); font-weight:600; font-family:'JetBrains Mono',monospace;">${amount}</span>
+        </div>
+      `;
+    }).join('');
 
-  const cryptoHtml = cryptos.length ? cryptos.join(' <span style="color:var(--muted);font-size:11px">|</span> ') + ' <span style="color:var(--muted);font-size:11px">|</span> ' : '';
-  el.innerHTML = `${cryptoHtml}<span style="font-size:12px;font-weight:700;color:var(--green)">${fmtIDR(idr)}</span>`;
+  const cryptoHtml = cryptos.length 
+    ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; border-top:1px solid var(--border); padding-top:10px;">${cryptos}</div>` 
+    : '';
+
+  el.innerHTML = `
+    <div style="font-size:20px; font-weight:800; color:var(--green); font-family:'JetBrains Mono',monospace; letter-spacing:-0.02em;">
+      ${fmtIDR(idr)}
+    </div>
+    ${cryptoHtml}
+  `;
 }
 
 // Trades Pagination State
