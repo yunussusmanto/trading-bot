@@ -1730,6 +1730,13 @@ function updateChartSymbol() {
   const depthLabel = document.getElementById('depth-pair-label');
   if (depthLabel) depthLabel.textContent = `${cleanCoin}/IDR`;
 
+  // Update Custom Dropdown Label
+  const customLabel = document.getElementById('custom-pair-label');
+  if (customLabel) {
+    const pairName = select.options[select.selectedIndex]?.text || cleanCoin + '/IDR';
+    customLabel.textContent = pairName;
+  }
+
   // Update Coin Unit Labels in Depth Tables
   document.querySelectorAll('.coin-symbol-label').forEach(el => el.textContent = cleanCoin);
 
@@ -2498,22 +2505,40 @@ async function loadEquity() {
     const r = await fetch('/api/equity');
     const d = await r.json();
     const canvas = document.getElementById('equity-chart');
-    if(canvas && d.history) {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.strokeStyle = '#00c087';
-      const step = canvas.width / Math.max(d.history.length - 1, 1);
-      const min = Math.min(...d.history);
-      const max = Math.max(...d.history, min+1);
-      d.history.forEach((v, i) => {
-        const x = i * step;
-        const y = canvas.height - ((v - min) / (max - min)) * canvas.height;
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      ctx.stroke();
+    if (!canvas) return;
+
+    let history = [];
+    if (Array.isArray(d)) {
+      history = d.map(x => parseFloat(x.value || x.total_value || 0));
     }
-  } catch(e) {}
+    
+    // Seed default capital (Rp 10.000.000) if no snapshot history exists yet
+    if (history.length === 0) {
+      history = [10000000, 10000000];
+    } else if (history.length === 1) {
+      history = [history[0], history[0]];
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0, canvas.width, canvas.height);
+    
+    ctx.beginPath();
+    ctx.strokeStyle = '#00c087';
+    ctx.lineWidth = 2.5;
+    
+    const step = canvas.width / Math.max(history.length - 1, 1);
+    const min = Math.min(...history);
+    const max = Math.max(...history, min + 1);
+    
+    history.forEach((v, i) => {
+      const x = i * step;
+      const y = canvas.height - 10 - ((v - min) / (max - min)) * (canvas.height - 20);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  } catch (e) {
+    console.error('loadEquity error:', e);
+  }
 }
 
 // Intercept WS for mini chart logic
@@ -2706,6 +2731,16 @@ async function makeCardsCollapsible() {
       console.error('Error making card collapsible:', card, err);
     }
   });
+}
+
+// Force BTC/IDR as default select pair on page load
+const initialSelect = document.getElementById('bot-pair');
+if (initialSelect) {
+  initialSelect.value = 'btc_idr';
+}
+const customLabelLoad = document.getElementById('custom-pair-label');
+if (customLabelLoad) {
+  customLabelLoad.textContent = 'Bitcoin (BTC/IDR)';
 }
 
 initTheme();
