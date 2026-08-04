@@ -459,25 +459,64 @@
             <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
           </div>
         </div>
-      <!-- Historical Daily Report Card (Cek Laporan Per Tanggal) -->
+      <!-- Historical & Daily Report Card with Filters, Sorting, and Pagination -->
       <div id="daily-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <!-- Top Bar: Mode Switcher & Expand Button -->
         <div class="daily-report-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
-            <span>📅 Laporan Profit Harian Per Tanggal</span>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
+              <span>📊 Laporan Trading & History</span>
+            </div>
+            <!-- Mode Switcher Pills -->
+            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
+              <button id="btn-report-mode-date" class="pnl-pill active" onclick="switchReportMode('date')">📅 Per Tanggal</button>
+              <button id="btn-report-mode-all" class="pnl-pill" onclick="switchReportMode('all')">📜 Tampilkan Semua</button>
+            </div>
           </div>
           
-          <div class="daily-report-controls" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <input type="date" id="report-date-picker" onchange="fetchDailyReportByDate()" style="padding: 5px 10px; font-size: 11px; width: auto; background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
-            <button onclick="fetchDailyReportByDate()" class="btn-blue" style="padding: 5px 12px; font-size: 11px;">🔍 Cek Laporan</button>
-            <button id="toggle-expand-report-btn" onclick="toggleExpandDailyReport()" class="btn-gray" style="padding: 5px 10px; font-size: 11px;">↔️ Expand View</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button id="toggle-expand-report-btn" onclick="toggleExpandDailyReport()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">↔️ Expand View</button>
           </div>
         </div>
 
+        <!-- Filter Controls Bar -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background: var(--surface2); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div id="date-picker-box" style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tanggal:</span>
+            <input type="date" id="report-date-picker" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; width: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Koin:</span>
+            <select id="report-pair-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+              <option value="all">Semua Koin</option>
+              <option value="bico_idr">BICO/IDR</option>
+              <option value="koma_idr">KOMA/IDR</option>
+              <option value="xrp_idr">XRP/IDR</option>
+              <option value="sol_idr">SOL/IDR</option>
+              <option value="btc_idr">BTC/IDR</option>
+              <option value="eth_idr">ETH/IDR</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tipe:</span>
+            <select id="report-type-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+              <option value="all">Semua Tipe</option>
+              <option value="buy">BUY / DCA_BUY</option>
+              <option value="sell">SELL</option>
+            </select>
+          </div>
+
+          <button onclick="onReportFilterChange()" class="btn-blue" style="padding: 4px 12px; font-size: 11px; margin-left: auto;">🔍 Apply Filter</button>
+        </div>
+
         <div id="daily-report-content" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- 3-Metrics Summary -->
           <div class="daily-report-metrics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
             <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
-              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Profit Tanggal Ini</div>
-              <div id="daily-report-pnl" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">Rp 0</div>
+              <div id="daily-report-pnl-label" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Profit Realisasi</div>
+              <div id="daily-report-pnl" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">••••••••</div>
             </div>
             <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
               <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Eksekusi Trade</div>
@@ -489,22 +528,33 @@
             </div>
           </div>
 
-          <div id="daily-report-table-wrapper" class="table-responsive" style="max-height: 200px; overflow-y: auto; margin-top: 4px; transition: max-height 0.3s ease;">
+          <!-- Interactive Table with Column Sort -->
+          <div id="daily-report-table-wrapper" class="table-responsive" style="max-height: 250px; overflow-y: auto; margin-top: 4px; transition: max-height 0.3s ease;">
             <table class="indodax-table">
               <thead>
                 <tr>
-                  <th>Waktu</th>
-                  <th>Pair</th>
-                  <th>Tipe</th>
-                  <th>Harga (Rp)</th>
-                  <th>Total Modal (Rp)</th>
-                  <th>Profit (Rp)</th>
+                  <th onclick="handleReportSort('timestamp')" style="cursor:pointer; user-select:none;">Waktu <span id="sort-icon-timestamp">↕</span></th>
+                  <th onclick="handleReportSort('pair')" style="cursor:pointer; user-select:none;">Pair <span id="sort-icon-pair">↕</span></th>
+                  <th onclick="handleReportSort('action')" style="cursor:pointer; user-select:none;">Tipe <span id="sort-icon-action">↕</span></th>
+                  <th onclick="handleReportSort('price')" style="cursor:pointer; user-select:none;">Harga (Rp) <span id="sort-icon-price">↕</span></th>
+                  <th onclick="handleReportSort('amount')" style="cursor:pointer; user-select:none;">Total Modal (Rp) <span id="sort-icon-amount">↕</span></th>
+                  <th onclick="handleReportSort('pnl')" style="cursor:pointer; user-select:none;">Profit (Rp) <span id="sort-icon-pnl">↕</span></th>
                 </tr>
               </thead>
               <tbody id="daily-report-trades-tbody">
-                <tr><td colspan="6" style="color:var(--muted); text-align:center;">Pilih tanggal & klik Cek Laporan</td></tr>
+                <tr><td colspan="6" style="color:var(--muted); text-align:center;">Memuat data...</td></tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Pagination Bar (Only active when reportMode === 'all') -->
+          <div id="report-pagination-bar" style="display: none; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 10px; background: var(--surface2); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div id="report-pagination-info" style="font-size: 11px; color: var(--muted); font-weight: 600;">Menampilkan 0-0 dari 0 transaksi</div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <button id="report-prev-page-btn" onclick="changeReportPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
+              <span id="report-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
+              <button id="report-next-page-btn" onclick="changeReportPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2017,70 +2067,212 @@ function toggleExpandDailyReport() {
   }
 }
 
-async function fetchDailyReportByDate() {
-  const picker = document.getElementById('report-date-picker');
-  if (!picker) return;
+let reportMode = 'date'; // 'date' or 'all'
+let reportCurrentPage = 1;
+const reportItemsPerPage = 10;
+let reportSortCol = 'timestamp';
+let reportSortDir = 'desc';
+let rawReportTrades = [];
+
+function switchReportMode(mode) {
+  reportMode = mode;
+  reportCurrentPage = 1;
   
-  if (!picker.value) {
-    const todayStr = new Date().toISOString().split('T')[0];
-    picker.value = todayStr;
+  const btnDate = document.getElementById('btn-report-mode-date');
+  const btnAll = document.getElementById('btn-report-mode-all');
+  const datePickerBox = document.getElementById('date-picker-box');
+  const pagBar = document.getElementById('report-pagination-bar');
+
+  if (mode === 'date') {
+    if (btnDate) btnDate.classList.add('active');
+    if (btnAll) btnAll.classList.remove('active');
+    if (datePickerBox) datePickerBox.style.display = 'flex';
+    if (pagBar) pagBar.style.display = 'none';
+  } else {
+    if (btnAll) btnAll.classList.add('active');
+    if (btnDate) btnDate.classList.remove('active');
+    if (datePickerBox) datePickerBox.style.display = 'none';
+    if (pagBar) pagBar.style.display = 'flex';
   }
   
-  const dateStr = picker.value;
+  fetchDailyReportByDate();
+}
+
+function onReportFilterChange() {
+  reportCurrentPage = 1;
+  fetchDailyReportByDate();
+}
+
+function handleReportSort(col) {
+  if (reportSortCol === col) {
+    reportSortDir = reportSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    reportSortCol = col;
+    reportSortDir = 'desc';
+  }
+  updateSortIcons();
+  renderReportTableAndMetrics();
+}
+
+function updateSortIcons() {
+  const cols = ['timestamp', 'pair', 'action', 'price', 'amount', 'pnl'];
+  cols.forEach(c => {
+    const el = document.getElementById(`sort-icon-${c}`);
+    if (el) {
+      if (c === reportSortCol) {
+        el.textContent = reportSortDir === 'asc' ? '▲' : '▼';
+        el.style.color = 'var(--accent2)';
+      } else {
+        el.textContent = '↕';
+        el.style.color = 'var(--muted)';
+      }
+    }
+  });
+}
+
+async function fetchDailyReportByDate() {
   try {
-    const res = await fetch(`/api/reports/daily?date=${dateStr}`);
+    let url = '/api/trades?limit=1000';
+    if (reportMode === 'date') {
+      const picker = document.getElementById('report-date-picker');
+      if (picker && !picker.value) {
+        picker.value = new Date().toISOString().split('T')[0];
+      }
+      const dateStr = picker ? picker.value : new Date().toISOString().split('T')[0];
+      url = `/api/reports/daily?date=${dateStr}`;
+    }
+
+    const res = await fetch(url);
     const data = await res.json();
     
-    const pnlEl = document.getElementById('daily-report-pnl');
-    const countEl = document.getElementById('daily-report-trades-count');
-    const tbody = document.getElementById('daily-report-trades-tbody');
-    
-    if (pnlEl) {
-      const pnlVal = data.totalPnl || 0;
-      if (!showPnL) {
-        pnlEl.textContent = '••••••••';
-        pnlEl.style.color = 'var(--text)';
-      } else {
-        pnlEl.textContent = (pnlVal >= 0 ? '+' : '') + fmtIDR(pnlVal);
-        pnlEl.style.color = pnlVal >= 0 ? 'var(--green)' : 'var(--red)';
-      }
+    if (reportMode === 'date') {
+      rawReportTrades = data.trades || [];
+    } else {
+      rawReportTrades = Array.isArray(data) ? data : [];
     }
     
-    if (countEl) {
-      countEl.textContent = `${data.totalTrades || 0} Transaksi`;
-    }
-    
-    if (tbody) {
-      if (!data.trades || !data.trades.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted); text-align:center;">Tidak ada riwayat transaksi pada tanggal ini</td></tr>';
-      } else {
-        tbody.innerHTML = data.trades.map(t => {
-          const timeStr = new Date(t.timestamp).toLocaleTimeString('id-ID');
-          const isBuy = t.action === 'BUY' || t.action === 'DCA_BUY';
-          const pnlVal = t.pnl || 0;
-          const modalVal = t.amount || 0;
-          const pnlDisplay = isBuy 
-            ? '<span style="color:var(--muted)">-</span>' 
-            : (!showPnL 
-                ? '<span style="color:var(--muted)">••••••••</span>' 
-                : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`);
-
-          return `
-            <tr>
-              <td>${timeStr}</td>
-              <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
-              <td><span class="badge ${isBuy ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
-              <td>${fmtIDR(t.price)}</td>
-              <td style="font-weight:600">${fmtIDR(modalVal)}</td>
-              <td>${pnlDisplay}</td>
-            </tr>
-          `;
-        }).join('');
-      }
-    }
+    renderReportTableAndMetrics();
   } catch (err) {
-    console.error('Fetch daily report error:', err);
+    console.error('Fetch report error:', err);
   }
+}
+
+function renderReportTableAndMetrics() {
+  const pairFilter = document.getElementById('report-pair-filter')?.value || 'all';
+  const typeFilter = document.getElementById('report-type-filter')?.value || 'all';
+  
+  // 1. Filter
+  let filtered = rawReportTrades.filter(t => {
+    if (pairFilter !== 'all' && t.pair.toLowerCase() !== pairFilter.toLowerCase()) return false;
+    if (typeFilter === 'buy' && (t.action !== 'BUY' && t.action !== 'DCA_BUY')) return false;
+    if (typeFilter === 'sell' && t.action !== 'SELL') return false;
+    return true;
+  });
+
+  // 2. Calculate Total Profit & Metrics for filtered
+  const totalPnl = filtered.reduce((acc, t) => acc + (parseFloat(t.pnl) || 0), 0);
+  
+  const pnlEl = document.getElementById('daily-report-pnl');
+  const countEl = document.getElementById('daily-report-trades-count');
+  const labelEl = document.getElementById('daily-report-pnl-label');
+
+  if (labelEl) {
+    labelEl.textContent = reportMode === 'date' ? 'Total Profit Tanggal Ini' : 'Total Profit Realisasi (Filtered)';
+  }
+  
+  if (pnlEl) {
+    if (!showPnL) {
+      pnlEl.textContent = '••••••••';
+      pnlEl.style.color = 'var(--text)';
+    } else {
+      pnlEl.textContent = (totalPnl >= 0 ? '+' : '') + fmtIDR(totalPnl);
+      pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+    }
+  }
+  
+  if (countEl) {
+    countEl.textContent = `${filtered.length} Transaksi`;
+  }
+
+  // 3. Sort
+  filtered.sort((a, b) => {
+    let valA = a[reportSortCol];
+    let valB = b[reportSortCol];
+    if (reportSortCol === 'price' || reportSortCol === 'amount' || reportSortCol === 'pnl' || reportSortCol === 'timestamp') {
+      valA = parseFloat(valA || 0);
+      valB = parseFloat(valB || 0);
+    } else {
+      valA = String(valA || '').toLowerCase();
+      valB = String(valB || '').toLowerCase();
+    }
+    if (valA < valB) return reportSortDir === 'asc' ? -1 : 1;
+    if (valA > valB) return reportSortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // 4. Pagination (Only when reportMode === 'all')
+  const pagBar = document.getElementById('report-pagination-bar');
+  let displayList = filtered;
+  
+  if (reportMode === 'all') {
+    if (pagBar) pagBar.style.display = 'flex';
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / reportItemsPerPage) || 1;
+    if (reportCurrentPage > totalPages) reportCurrentPage = totalPages;
+    if (reportCurrentPage < 1) reportCurrentPage = 1;
+
+    const startIdx = (reportCurrentPage - 1) * reportItemsPerPage;
+    const endIdx = Math.min(startIdx + reportItemsPerPage, totalItems);
+    displayList = filtered.slice(startIdx, endIdx);
+
+    const infoEl = document.getElementById('report-pagination-info');
+    const pageNumEl = document.getElementById('report-page-num');
+    const prevBtn = document.getElementById('report-prev-page-btn');
+    const nextBtn = document.getElementById('report-next-page-btn');
+
+    if (infoEl) infoEl.textContent = totalItems > 0 ? `Menampilkan ${startIdx + 1}-${endIdx} dari ${totalItems} transaksi` : `Menampilkan 0-0 dari 0 transaksi`;
+    if (pageNumEl) pageNumEl.textContent = `Page ${reportCurrentPage} of ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = reportCurrentPage <= 1;
+    if (nextBtn) nextBtn.disabled = reportCurrentPage >= totalPages;
+  } else {
+    if (pagBar) pagBar.style.display = 'none';
+  }
+
+  // 5. Render Table Rows
+  const tbody = document.getElementById('daily-report-trades-tbody');
+  if (tbody) {
+    if (!displayList || !displayList.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted); text-align:center;">Tidak ada riwayat transaksi yang sesuai filter</td></tr>';
+    } else {
+      tbody.innerHTML = displayList.map(t => {
+        const timeStr = new Date(t.timestamp).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'medium' });
+        const isBuy = t.action === 'BUY' || t.action === 'DCA_BUY';
+        const pnlVal = t.pnl || 0;
+        const modalVal = t.amount || 0;
+        const pnlDisplay = isBuy 
+          ? '<span style="color:var(--muted)">-</span>' 
+          : (!showPnL 
+              ? '<span style="color:var(--muted)">••••••••</span>' 
+              : `<span style="${pnlVal >= 0 ? 'color:var(--green)' : 'color:var(--red)'};font-weight:700">${pnlVal > 0 ? '+' + fmtIDR(pnlVal) : fmtIDR(pnlVal)}</span>`);
+
+        return `
+          <tr>
+            <td style="font-size:11px;">${timeStr}</td>
+            <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${t.pair}</td>
+            <td><span class="badge ${isBuy ? 'badge-green' : 'badge-red'}">${t.action}</span></td>
+            <td>${fmtIDR(t.price)}</td>
+            <td style="font-weight:600">${fmtIDR(modalVal)}</td>
+            <td>${pnlDisplay}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function changeReportPage(delta) {
+  reportCurrentPage += delta;
+  renderReportTableAndMetrics();
 }
 
 // Auto-set today date on page load
