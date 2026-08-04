@@ -998,6 +998,13 @@
           </table>
         </div>
       </div>
+      <!-- Mini Candlestick Performance Panel -->
+      <div id="mini-candles-card" class="card">
+        <div class="card-title">🕯️ Visual Performa Koin (Candlestick)</div>
+        <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:12px; padding: 4px 0;">
+          <div style="color:var(--muted); font-size:11px;">Belum ada koin berjalan</div>
+        </div>
+      </div>
 
     </div>
 
@@ -2528,9 +2535,13 @@ async function loadPositions() {
 
     if (!tb) return;
     
+    const candleList = document.getElementById('mini-candles-list');
     if (!Array.isArray(d) || !d.length) { 
       if (badge) badge.textContent = '0 Koin';
       if (summaryBar) summaryBar.style.display = 'none';
+      if (candleList) {
+        candleList.innerHTML = '<div style="color:var(--muted); font-size:11px; padding: 4px 0;">Belum ada koin berjalan</div>';
+      }
       tb.innerHTML = `<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:14px">
         <span style="color:var(--green);font-weight:700">🟢 6 Bot Trading Aktif Standby 24/7 (BICO, KOMA, XRP, SOL, BTC, ETH)</span><br>
         <span style="font-size:10px">Semua modal aman di IDR — Siap otomatis beli saat harga terdiskon (Dip Buying)</span>
@@ -2557,42 +2568,12 @@ async function loadPositions() {
       const capitalStr = !showPnL ? '••••••••' : fmtIDR(p.amount);
       const liveValStr = !showPnL ? '••••••••' : fmtIDR(p.liveValue || (p.amount + p.pnl));
 
-      // Dynamic price progress bar calculation (Break-even at center 50%)
-      const diffPct = p.pnlPercent !== undefined ? parseFloat(p.pnlPercent) : (((p.currentPrice - p.entryPrice) / p.entryPrice) * 100);
-      let pointerLeft = 50 + (diffPct * 2.5); // Multiplier maps 20% diff to 50% offset
-      pointerLeft = Math.max(0, Math.min(100, pointerLeft));
-      
-      let fillLeft = 50;
-      let fillWidth = 0;
-      let barColor = 'var(--muted)';
-      let dotColor = 'var(--muted)';
-      
-      if (diffPct > 0) {
-        fillLeft = 50;
-        fillWidth = Math.min(diffPct * 2.5, 50);
-        barColor = 'var(--green)';
-        dotColor = 'var(--green)';
-      } else if (diffPct < 0) {
-        fillLeft = Math.max(0, 50 + (diffPct * 2.5));
-        fillWidth = Math.min(Math.abs(diffPct * 2.5), 50);
-        barColor = 'var(--red)';
-        dotColor = 'var(--red)';
-      }
-
       return `
         <tr>
           <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
           <td style="font-weight:600">${capitalStr}</td>
           <td>${fmtIDR(p.entryPrice)}</td>
-          <td>
-            <div style="font-weight:600">${fmtIDR(p.currentPrice)}</div>
-            <div style="width: 80px; height: 2px; background: rgba(255,255,255,0.15); border-radius: 1px; position: relative; margin-top: 5px; overflow: visible;">
-              <!-- Center break-even marker -->
-              <div style="position: absolute; left: 50%; top: -3px; width: 1px; height: 8px; background: rgba(255,255,255,0.45);"></div>
-              <!-- Candlestick Body (Open-to-Close thick block) -->
-              <div style="position: absolute; left: ${fillLeft}%; width: ${fillWidth}%; height: 6px; top: -2px; background: ${barColor}; border-radius: 1px; box-shadow: 0 0 5px ${barColor};"></div>
-            </div>
-          </td>
+          <td style="font-weight:600">${fmtIDR(p.currentPrice)}</td>
           <td style="font-weight:600">${liveValStr}</td>
           <td>
             <span style="background:${bgBadge}; ${cls}; padding:3px 8px; border-radius:4px; font-weight:800; display:inline-block; font-size:11px;">
@@ -2603,6 +2584,46 @@ async function loadPositions() {
         </tr>
       `;
     }).join('');
+
+    // Render Side-Column Dedicated Mini Candlestick Panel
+    if (candleList && Array.isArray(d) && d.length) {
+      candleList.innerHTML = d.map(p => {
+        const diffPct = p.pnlPercent !== undefined ? parseFloat(p.pnlPercent) : (((p.currentPrice - p.entryPrice) / p.entryPrice) * 100);
+        
+        let fillLeft = 50;
+        let fillWidth = 0;
+        let barColor = 'var(--muted)';
+        
+        if (diffPct > 0) {
+          fillLeft = 50;
+          fillWidth = Math.min(diffPct * 2.5, 50);
+          barColor = 'var(--green)';
+        } else if (diffPct < 0) {
+          fillLeft = Math.max(0, 50 + (diffPct * 2.5));
+          fillWidth = Math.min(Math.abs(diffPct * 2.5), 50);
+          barColor = 'var(--red)';
+        }
+
+        const coinSymbol = p.pair.replace('_idr', '').toUpperCase();
+        const pnlText = `${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%`;
+        const pnlColor = diffPct >= 0 ? 'var(--green)' : 'var(--red)';
+
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface2); padding:8px 12px; border-radius:6px; border:1px solid var(--border);">
+            <span style="font-weight:700; font-size:12px; color:var(--accent2);">${coinSymbol}/IDR</span>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:11px; font-weight:700; color:${pnlColor}; font-family:'JetBrains Mono',monospace;">${pnlText}</span>
+              <div style="width: 80px; height: 2px; background: rgba(255,255,255,0.15); border-radius: 1px; position: relative; overflow: visible;">
+                <!-- Center break-even marker -->
+                <div style="position: absolute; left: 50%; top: -3px; width: 1px; height: 8px; background: rgba(255,255,255,0.45);"></div>
+                <!-- Candlestick Body (Open-to-Close thick block) -->
+                <div style="position: absolute; left: ${fillLeft}%; width: ${fillWidth}%; height: 6px; top: -2px; background: ${barColor}; border-radius: 1px; box-shadow: 0 0 5px ${barColor};"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     if (summaryBar) {
       summaryBar.style.display = 'flex';
