@@ -68,6 +68,21 @@
     background: rgba(0, 0, 0, 0.3);
   }
 
+  /* Fullscreen Card Overlay */
+  .fullscreen-card {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    background: var(--surface) !important;
+    padding: 24px !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    border-radius: 0 !important;
+  }
+
   /* Top Navigation Bar */
   nav.topbar {
     background: var(--surface);
@@ -854,10 +869,33 @@
       <!-- Daily Profit Chart Card -->
       <div id="daily-profit-chart-card" class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <span>💰 Grafik Keuntungan Harian (Realized Profit)</span>
+          <span style="display:flex;align-items:center;gap:6px">
+            <span>💰 Grafik Keuntungan Harian & Jam (Realized Profit)</span>
+            <button id="btn-profit-fullscreen" onclick="toggleProfitFullscreen()" class="btn-gray" style="padding:2px 6px;font-size:10px">🖵 Fullscreen</button>
+          </span>
           
           <!-- Flexible Filter Row -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <!-- Curve style -->
+            <select id="profit-chart-curve" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <option value="straight" selected>Tajam (Grafana)</option>
+              <option value="smooth">Halus (Smooth)</option>
+              <option value="stepline">Tangga (Stepline)</option>
+            </select>
+
+            <!-- Model style -->
+            <select id="profit-chart-type" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <option value="area" selected>Area</option>
+              <option value="line">Line</option>
+              <option value="bar">Bar (Batang)</option>
+            </select>
+
+            <!-- Grouping (Harian vs Per Jam) -->
+            <select id="profit-grouping" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <option value="daily" selected>📅 Harian</option>
+              <option value="hourly">🕒 Per Jam</option>
+            </select>
+
             <!-- Custom Date Inputs -->
             <div style="display:flex;align-items:center;gap:4px">
               <input type="date" id="profit-start-date" onchange="onProfitDateFilterChange()" style="padding:2px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
@@ -874,7 +912,7 @@
           </div>
         </div>
 
-        <div style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px;margin-top:10px">
+        <div id="profit-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px;margin-top:10px">
           <div id="daily-profit-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
@@ -1508,6 +1546,15 @@ function renderApexProfitChart() {
   const container = document.getElementById('daily-profit-apex-chart');
   if (!container) return;
 
+  // Read config settings
+  const chartType = document.getElementById('profit-chart-type')?.value || 'area';
+  const curveStyle = document.getElementById('profit-chart-curve')?.value || 'straight';
+  const grouping = document.getElementById('profit-grouping')?.value || 'daily';
+  
+  // Calculate dynamic fullscreen height
+  const isFS = document.getElementById('daily-profit-chart-card')?.classList.contains('fullscreen-card');
+  const chartHeight = isFS ? (window.innerHeight - 120) : 220;
+
   // 1. Parse date filter range
   let startDate = null;
   let endDate = null;
@@ -1545,29 +1592,68 @@ function renderApexProfitChart() {
   if (startDate) startDate.setHours(0,0,0,0);
   if (endDate) endDate.setHours(23,59,59,999);
 
-  // 2. Generate date map between start & end
   const dailyPnL = {};
-  let cur = new Date(startDate.getTime());
-  while (cur <= endDate) {
-    const dStr = cur.toLocaleDateString('sv-SE');
-    dailyPnL[dStr] = 0;
-    cur.setDate(cur.getDate() + 1);
+
+  if (grouping === 'hourly') {
+    // Cap date range to 10 days max to prevent browser freezing
+    const diffDays = Math.ceil(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24));
+    if (diffDays > 10) {
+      startDate = new Date(endDate.getTime());
+      startDate.setDate(startDate.getDate() - 3);
+      startDate.setHours(0,0,0,0);
+      if (startInput) startInput.value = startDate.toLocaleDateString('sv-SE');
+    }
+
+    // Generate Hourly intervals
+    let temp = new Date(startDate.getTime());
+    while (temp <= endDate) {
+      const year = temp.getFullYear();
+      const month = String(temp.getMonth() + 1).padStart(2, '0');
+      const date = String(temp.getDate()).padStart(2, '0');
+      const hour = String(temp.getHours()).padStart(2, '0');
+      const key = `${year}-${month}-${date} ${hour}:00`;
+      dailyPnL[key] = 0;
+      temp.setHours(temp.getHours() + 1);
+    }
+
+    // Populate hourly PnL
+    profitRawTrades.forEach(t => {
+      if (t.action === 'SELL' && t.pnl) {
+        const d = new Date(t.timestamp);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const date = String(d.getDate()).padStart(2, '0');
+        const hour = String(d.getHours()).padStart(2, '0');
+        const key = `${year}-${month}-${date} ${hour}:00`;
+        if (dailyPnL[key] !== undefined) {
+          dailyPnL[key] += parseFloat(t.pnl) || 0;
+        }
+      }
+    });
+  } else {
+    // Generate Daily intervals
+    let cur = new Date(startDate.getTime());
+    while (cur <= endDate) {
+      const dStr = cur.toLocaleDateString('sv-SE');
+      dailyPnL[dStr] = 0;
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    // Populate daily PnL
+    profitRawTrades.forEach(t => {
+      if (t.action === 'SELL' && t.pnl) {
+        const dStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
+        if (dailyPnL[dStr] !== undefined) {
+          dailyPnL[dStr] += parseFloat(t.pnl) || 0;
+        }
+      }
+    });
   }
 
-  // 3. Populate PnL from raw trades
-  profitRawTrades.forEach(t => {
-    if (t.action === 'SELL' && t.pnl) {
-      const dStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
-      if (dailyPnL[dStr] !== undefined) {
-        dailyPnL[dStr] += parseFloat(t.pnl) || 0;
-      }
-    }
-  });
-
-  const chartData = Object.keys(dailyPnL).sort().map(dStr => {
+  const chartData = Object.keys(dailyPnL).sort().map(key => {
     return {
-      x: new Date(dStr).getTime(),
-      y: Math.round(dailyPnL[dStr])
+      x: new Date(key).getTime(),
+      y: Math.round(dailyPnL[key])
     };
   });
 
@@ -1578,8 +1664,8 @@ function renderApexProfitChart() {
       data: chartData
     }],
     chart: {
-      type: 'area',
-      height: 220,
+      type: chartType,
+      height: chartHeight,
       background: 'transparent',
       fontFamily: 'Inter, sans-serif',
       foreColor: '#9ca3af',
@@ -1604,17 +1690,23 @@ function renderApexProfitChart() {
     },
     colors: ['#10b981'],
     stroke: {
-      curve: 'smooth',
-      width: 2.5,
+      curve: curveStyle,
+      width: chartType === 'bar' ? 0 : 2.5,
       colors: ['#10b981']
     },
     fill: {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.4,
+        opacityFrom: chartType === 'bar' ? 0.85 : 0.4,
         opacityTo: 0.02,
         stops: [0, 90, 100]
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        columnWidth: '70%'
       }
     },
     dataLabels: {
@@ -1644,6 +1736,7 @@ function renderApexProfitChart() {
       type: 'datetime',
       labels: {
         datetimeUTC: false,
+        format: grouping === 'hourly' ? 'dd/MM HH:mm' : 'dd/MM',
         style: {
           fontSize: '9px',
           fontFamily: 'JetBrains Mono, monospace'
@@ -1672,7 +1765,7 @@ function renderApexProfitChart() {
     tooltip: {
       theme: 'dark',
       x: {
-        format: 'dd MMM yyyy'
+        format: grouping === 'hourly' ? 'dd MMM yyyy HH:mm' : 'dd MMM yyyy'
       },
       y: {
         formatter: function (val) {
@@ -1710,6 +1803,26 @@ function switchProfitPreset(preset) {
 function onProfitDateFilterChange() {
   // Clear preset active pills since custom is used
   document.querySelectorAll('#daily-profit-chart-card .pnl-pill').forEach(b => b.classList.remove('active'));
+  renderApexProfitChart();
+}
+
+let isProfitFullscreen = false;
+function toggleProfitFullscreen() {
+  const card = document.getElementById('daily-profit-chart-card');
+  const btn = document.getElementById('btn-profit-fullscreen');
+  if (!card) return;
+
+  isProfitFullscreen = !isProfitFullscreen;
+
+  if (isProfitFullscreen) {
+    card.classList.add('fullscreen-card');
+    if (btn) btn.textContent = '❌ Exit Fullscreen';
+  } else {
+    card.classList.remove('fullscreen-card');
+    if (btn) btn.textContent = '🖵 Fullscreen';
+  }
+
+  // Force re-render with updated heights
   renderApexProfitChart();
 }
 
