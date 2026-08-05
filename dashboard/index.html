@@ -886,12 +886,12 @@
         </div>
         
         <!-- TradingView Widget Container -->
-        <div id="tradingview-chart-container" style="height:450px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+        <div id="tradingview-chart-container" style="height:600px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
           <div id="tradingview-widget-div" style="width:100%;height:100%"></div>
         </div>
 
         <!-- Native Candlestick Container -->
-        <div id="native-chart-container" style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative;display:none">
+        <div id="native-chart-container" style="height:500px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative;display:none">
           <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
         </div>
       </div>
@@ -2117,7 +2117,7 @@ function drawNativeCandleChart(candles) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const width = canvas.parentElement.clientWidth || 700;
-  const height = 360;
+  const height = 500;
 
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
