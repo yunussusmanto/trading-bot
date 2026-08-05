@@ -2226,7 +2226,12 @@ function switchChartSource(source) {
 
 function loadTradingViewChart(pair) {
   const cleanCoin = pair.replace('_idr', '').replace('_', '').toUpperCase();
-  const tvSymbol = `INDODAX:${cleanCoin}IDR`;
+  
+  // Resolve correct exchange symbol: Binance has IDR pairs for main assets, fall back to USDT for others
+  const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
+  const tvSymbol = idrCoins.includes(cleanCoin)
+    ? `BINANCE:${cleanCoin}IDR`
+    : `BINANCE:${cleanCoin}USDT`;
   
   const container = document.getElementById('tradingview-widget-div');
   if (!container) return;
