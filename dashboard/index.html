@@ -850,6 +850,17 @@
         </div>
       </div>
 
+      <!-- Daily Profit Chart Card -->
+      <div id="daily-profit-chart-card" class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>💰 Grafik Keuntungan Harian (Realized Profit)</span>
+          <span style="color:var(--muted);font-size:11px;font-weight:400">10 Hari Terakhir</span>
+        </div>
+        <div style="height:180px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+          <canvas id="daily-profit-canvas" style="width:100%;height:100%;display:block"></canvas>
+        </div>
+      </div>
+
       <!-- Pending Approvals & Open Orders -->
       <div class="card" id="approval-section">
         <div class="card-title">🔔 Pending Approval (Semi-Auto)</div>
@@ -1453,6 +1464,141 @@ function renderBalanceGrid() {
 // Refresh daily report trades history when requested
 async function loadTrades() {
   await fetchDailyReportByDate();
+  await updateDailyProfitChart();
+}
+
+async function updateDailyProfitChart() {
+  const canvas = document.getElementById('daily-profit-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Handle High-DPI screens
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width || 300;
+  const height = rect.height || 180;
+  
+  if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+  }
+  ctx.resetTransform();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, width, height);
+
+  try {
+    const tradesRes = await fetch('/api/trades?limit=500');
+    const trades = await tradesRes.json();
+    if (!Array.isArray(trades)) return;
+
+    // Group realized profit by local YYYY-MM-DD
+    const dailyPnL = {};
+    for (let i = 9; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toLocaleDateString('sv-SE');
+      dailyPnL[dateStr] = 0;
+    }
+
+    trades.forEach(t => {
+      if (t.action === 'SELL' && t.pnl) {
+        const dateStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
+        if (dailyPnL[dateStr] !== undefined) {
+          dailyPnL[dateStr] += parseFloat(t.pnl) || 0;
+        }
+      }
+    });
+
+    const sortedDates = Object.keys(dailyPnL).sort();
+    const dataPoints = sortedDates.map(date => ({
+      date: date.substring(5), // MM-DD format
+      pnl: dailyPnL[date]
+    }));
+
+    const maxPnL = Math.max(...dataPoints.map(d => d.pnl), 10000);
+
+    const paddingLeft = 55;
+    const paddingRight = 20;
+    const paddingTop = 25;
+    const paddingBottom = 25;
+    const chartWidth = width - paddingLeft - paddingRight;
+    const chartHeight = height - paddingTop - paddingBottom;
+
+    // Grid lines & labels
+    ctx.strokeStyle = '#2a2a2c';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    const gridLines = 4;
+    for (let i = 0; i <= gridLines; i++) {
+      const yVal = (maxPnL / gridLines) * i;
+      const y = paddingTop + chartHeight - (yVal / maxPnL) * chartHeight;
+      
+      ctx.beginPath();
+      ctx.moveTo(paddingLeft, y);
+      ctx.lineTo(width - paddingRight, y);
+      ctx.stroke();
+
+      ctx.fillText(fmtIDRShort(yVal), paddingLeft - 8, y);
+    }
+
+    // Draw bars
+    const barSpacing = 8;
+    const totalBars = dataPoints.length;
+    const barWidth = (chartWidth - (barSpacing * (totalBars - 1))) / totalBars;
+
+    dataPoints.forEach((dp, index) => {
+      const x = paddingLeft + index * (barWidth + barSpacing);
+      const barHeight = (dp.pnl / maxPnL) * chartHeight;
+      const y = paddingTop + chartHeight - barHeight;
+
+      if (dp.pnl > 0) {
+        // Gradient fill
+        const grad = ctx.createLinearGradient(x, y, x, paddingTop + chartHeight);
+        grad.addColorStop(0, '#10b981');
+        grad.addColorStop(1, 'rgba(16, 185, 129, 0.15)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, barWidth, barHeight);
+        
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(x, y, barWidth, 2);
+      } else {
+        // Empty bar placeholder
+        ctx.fillStyle = '#1a1a1c';
+        ctx.fillRect(x, paddingTop + chartHeight - 2, barWidth, 2);
+      }
+
+      // X Label (Date)
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '9px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(dp.date, x + barWidth / 2, height - paddingBottom + 12);
+
+      // PnL Label on top of bar
+      if (dp.pnl > 0) {
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 8px "JetBrains Mono", monospace';
+        ctx.fillText(fmtIDRShort(dp.pnl), x + barWidth / 2, y - 6);
+      }
+    });
+
+  } catch (err) {
+    console.error('Error drawing daily profit chart:', err);
+  }
+}
+
+function fmtIDRShort(val) {
+  if (val >= 1000000) {
+    return 'Rp ' + (val / 1000000).toFixed(1) + 'M';
+  }
+  if (val >= 1000) {
+    return 'Rp ' + (val / 1000).toFixed(0) + 'K';
+  }
+  return 'Rp ' + val;
 }
 
 // Custom Downward Dropdown Logic
@@ -2836,6 +2982,7 @@ setInterval(loadPnL, 30000);
 setInterval(loadPositions, 10000);
 setInterval(loadOpenOrders, 5000);
 setInterval(loadBots, 5000);
+setInterval(updateDailyProfitChart, 60000);
 </script>
 </body>
 </html>
