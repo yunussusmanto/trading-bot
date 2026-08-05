@@ -808,7 +808,8 @@ app.get('/api/balance', async (req, res) => {
 // Get trade history from SQLite DB
 app.get('/api/trades', async (req, res) => {
   try {
-    const rows = await db.getTrades(100);
+    const limit = parseInt(req.query.limit || 100);
+    const rows = await db.getTrades(limit);
     res.json(rows);
   } catch (e) {
     res.status(500).json({ error: e.message });
