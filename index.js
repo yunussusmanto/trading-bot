@@ -527,9 +527,14 @@ async function executeOrder(pair, signal, price, config, customReason = '') {
           const info = await indodax.getInfo();
           const coinKey = pair.replace('_idr', '');
           const actualBalance = parseFloat(info.balance?.[coinKey] || 0);
-          if (actualBalance > 0 && actualBalance >= actualCoinAmount * 0.9) {
-            // Pakai saldo aktual jika masuk akal (tidak jauh berbeda)
-            actualCoinAmount = parseFloat(actualBalance.toFixed(8));
+          if (actualBalance > 0) {
+            if (actualBalance < actualCoinAmount) {
+              // Jika saldo di exchange lebih sedikit dari catatan bot (misal terjual manual), gunakan saldo exchange
+              actualCoinAmount = parseFloat(actualBalance.toFixed(8));
+            } else if (actualBalance >= actualCoinAmount * 0.9) {
+              // Pakai saldo aktual jika masuk akal (tidak jauh berbeda) untuk membersihkan sisa debu (dust)
+              actualCoinAmount = parseFloat(actualBalance.toFixed(8));
+            }
           }
         } catch (_) {}
 
