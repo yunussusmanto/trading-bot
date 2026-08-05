@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Indodax Pro – Trading Robot Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -852,12 +853,29 @@
 
       <!-- Daily Profit Chart Card -->
       <div id="daily-profit-chart-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
           <span>💰 Grafik Keuntungan Harian (Realized Profit)</span>
-          <span style="color:var(--muted);font-size:11px;font-weight:400">10 Hari Terakhir</span>
+          
+          <!-- Flexible Filter Row -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <!-- Custom Date Inputs -->
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="date" id="profit-start-date" onchange="onProfitDateFilterChange()" style="padding:2px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <span style="font-size:11px;color:var(--muted)">s/d</span>
+              <input type="date" id="profit-end-date" onchange="onProfitDateFilterChange()" style="padding:2px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+            </div>
+
+            <!-- Quick Preset Pills -->
+            <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
+              <button id="btn-profit-7d" class="pnl-pill" onclick="switchProfitPreset('7d')">7 Hari</button>
+              <button id="btn-profit-30d" class="pnl-pill active" onclick="switchProfitPreset('30d')">30 Hari</button>
+              <button id="btn-profit-all" class="pnl-pill" onclick="switchProfitPreset('all')">Semua</button>
+            </div>
+          </div>
         </div>
-        <div style="height:180px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
-          <canvas id="daily-profit-canvas" style="width:100%;height:100%;display:block"></canvas>
+
+        <div style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px;margin-top:10px">
+          <div id="daily-profit-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
 
@@ -1461,144 +1479,238 @@ function renderBalanceGrid() {
   `;
 }
 
+// Profit Chart State
+let profitRawTrades = [];
+let apexProfitChart = null;
+let profitChartPreset = '30d';
+
 // Refresh daily report trades history when requested
 async function loadTrades() {
   await fetchDailyReportByDate();
+  profitRawTrades = []; // Reset cache to force reload
   await updateDailyProfitChart();
 }
 
 async function updateDailyProfitChart() {
-  const canvas = document.getElementById('daily-profit-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Handle High-DPI screens
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
-  const width = rect.width || 300;
-  const height = rect.height || 180;
-  
-  if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-  }
-  ctx.resetTransform();
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, width, height);
-
   try {
-    const tradesRes = await fetch('/api/trades?limit=500');
-    const trades = await tradesRes.json();
-    if (!Array.isArray(trades)) return;
-
-    // Group realized profit by local YYYY-MM-DD
-    const dailyPnL = {};
-    for (let i = 9; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toLocaleDateString('sv-SE');
-      dailyPnL[dateStr] = 0;
+    if (!profitRawTrades || !profitRawTrades.length) {
+      const res = await fetch('/api/trades?limit=1000');
+      profitRawTrades = await res.json();
+      if (!Array.isArray(profitRawTrades)) profitRawTrades = [];
     }
-
-    trades.forEach(t => {
-      if (t.action === 'SELL' && t.pnl) {
-        const dateStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
-        if (dailyPnL[dateStr] !== undefined) {
-          dailyPnL[dateStr] += parseFloat(t.pnl) || 0;
-        }
-      }
-    });
-
-    const sortedDates = Object.keys(dailyPnL).sort();
-    const dataPoints = sortedDates.map(date => ({
-      date: date.substring(5), // MM-DD format
-      pnl: dailyPnL[date]
-    }));
-
-    const maxPnL = Math.max(...dataPoints.map(d => d.pnl), 10000);
-
-    const paddingLeft = 55;
-    const paddingRight = 20;
-    const paddingTop = 25;
-    const paddingBottom = 25;
-    const chartWidth = width - paddingLeft - paddingRight;
-    const chartHeight = height - paddingTop - paddingBottom;
-
-    // Grid lines & labels
-    ctx.strokeStyle = '#2a2a2c';
-    ctx.lineWidth = 1;
-    ctx.fillStyle = '#9ca3af';
-    ctx.font = '9px "JetBrains Mono", monospace';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-
-    const gridLines = 4;
-    for (let i = 0; i <= gridLines; i++) {
-      const yVal = (maxPnL / gridLines) * i;
-      const y = paddingTop + chartHeight - (yVal / maxPnL) * chartHeight;
-      
-      ctx.beginPath();
-      ctx.moveTo(paddingLeft, y);
-      ctx.lineTo(width - paddingRight, y);
-      ctx.stroke();
-
-      ctx.fillText(fmtIDRShort(yVal), paddingLeft - 8, y);
-    }
-
-    // Draw bars
-    const barSpacing = 8;
-    const totalBars = dataPoints.length;
-    const barWidth = (chartWidth - (barSpacing * (totalBars - 1))) / totalBars;
-
-    dataPoints.forEach((dp, index) => {
-      const x = paddingLeft + index * (barWidth + barSpacing);
-      const barHeight = (dp.pnl / maxPnL) * chartHeight;
-      const y = paddingTop + chartHeight - barHeight;
-
-      if (dp.pnl > 0) {
-        // Gradient fill
-        const grad = ctx.createLinearGradient(x, y, x, paddingTop + chartHeight);
-        grad.addColorStop(0, '#10b981');
-        grad.addColorStop(1, 'rgba(16, 185, 129, 0.15)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(x, y, barWidth, barHeight);
-        
-        ctx.fillStyle = '#10b981';
-        ctx.fillRect(x, y, barWidth, 2);
-      } else {
-        // Empty bar placeholder
-        ctx.fillStyle = '#1a1a1c';
-        ctx.fillRect(x, paddingTop + chartHeight - 2, barWidth, 2);
-      }
-
-      // X Label (Date)
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '9px "Inter", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(dp.date, x + barWidth / 2, height - paddingBottom + 12);
-
-      // PnL Label on top of bar
-      if (dp.pnl > 0) {
-        ctx.fillStyle = '#10b981';
-        ctx.font = 'bold 8px "JetBrains Mono", monospace';
-        ctx.fillText(fmtIDRShort(dp.pnl), x + barWidth / 2, y - 6);
-      }
-    });
-
+    renderApexProfitChart();
   } catch (err) {
-    console.error('Error drawing daily profit chart:', err);
+    console.error('updateDailyProfitChart error:', err);
   }
 }
 
-function fmtIDRShort(val) {
-  if (val >= 1000000) {
-    return 'Rp ' + (val / 1000000).toFixed(1) + 'M';
+function renderApexProfitChart() {
+  const container = document.getElementById('daily-profit-apex-chart');
+  if (!container) return;
+
+  // 1. Parse date filter range
+  let startDate = null;
+  let endDate = null;
+
+  const startInput = document.getElementById('profit-start-date');
+  const endInput = document.getElementById('profit-end-date');
+
+  if (startInput && startInput.value) {
+    startDate = new Date(startInput.value);
   }
-  if (val >= 1000) {
-    return 'Rp ' + (val / 1000).toFixed(0) + 'K';
+  if (endInput && endInput.value) {
+    endDate = new Date(endInput.value);
   }
-  return 'Rp ' + val;
+
+  // If no custom dates, check presets
+  if (!startDate && !endDate) {
+    endDate = new Date();
+    startDate = new Date();
+    if (profitChartPreset === '7d') {
+      startDate.setDate(startDate.getDate() - 7);
+    } else if (profitChartPreset === '30d') {
+      startDate.setDate(startDate.getDate() - 30);
+    } else {
+      // 'all' - find earliest trade date or default 60 days
+      if (profitRawTrades.length) {
+        const firstTrade = profitRawTrades[profitRawTrades.length - 1];
+        startDate = new Date(firstTrade.timestamp);
+      } else {
+        startDate.setDate(startDate.getDate() - 60);
+      }
+    }
+  }
+
+  // Ensure dates boundaries are correct (start to midnight end)
+  if (startDate) startDate.setHours(0,0,0,0);
+  if (endDate) endDate.setHours(23,59,59,999);
+
+  // 2. Generate date map between start & end
+  const dailyPnL = {};
+  let cur = new Date(startDate.getTime());
+  while (cur <= endDate) {
+    const dStr = cur.toLocaleDateString('sv-SE');
+    dailyPnL[dStr] = 0;
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  // 3. Populate PnL from raw trades
+  profitRawTrades.forEach(t => {
+    if (t.action === 'SELL' && t.pnl) {
+      const dStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
+      if (dailyPnL[dStr] !== undefined) {
+        dailyPnL[dStr] += parseFloat(t.pnl) || 0;
+      }
+    }
+  });
+
+  const chartData = Object.keys(dailyPnL).sort().map(dStr => {
+    return {
+      x: new Date(dStr).getTime(),
+      y: Math.round(dailyPnL[dStr])
+    };
+  });
+
+  // 4. ApexCharts Options
+  const options = {
+    series: [{
+      name: 'Realisasi Profit',
+      data: chartData
+    }],
+    chart: {
+      type: 'area',
+      height: 220,
+      background: 'transparent',
+      fontFamily: 'Inter, sans-serif',
+      foreColor: '#9ca3af',
+      toolbar: {
+        show: true,
+        autoSelected: 'zoom',
+        tools: {
+          download: false,
+          selection: true,
+          zoom: true,
+          zoomin: true,
+          zoomout: true,
+          pan: true,
+          reset: true
+        }
+      },
+      zoom: {
+        enabled: true,
+        type: 'x',
+        autoScaleYaxis: true
+      }
+    },
+    colors: ['#10b981'],
+    stroke: {
+      curve: 'smooth',
+      width: 2.5,
+      colors: ['#10b981']
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.4,
+        opacityTo: 0.02,
+        stops: [0, 90, 100]
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    markers: {
+      size: 0,
+      hover: {
+        size: 5
+      }
+    },
+    grid: {
+      borderColor: '#2a2a2c',
+      strokeDashArray: 3,
+      xaxis: {
+        lines: {
+          show: true
+        }
+      },
+      yaxis: {
+        lines: {
+          show: true
+        }
+      }
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        datetimeUTC: false,
+        style: {
+          fontSize: '9px',
+          fontFamily: 'JetBrains Mono, monospace'
+        }
+      },
+      axisBorder: {
+        show: false
+      },
+      axisTicks: {
+        show: false
+      }
+    },
+    yaxis: {
+      labels: {
+        formatter: function (value) {
+          if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
+          if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'K';
+          return 'Rp ' + value;
+        },
+        style: {
+          fontSize: '9px',
+          fontFamily: 'JetBrains Mono, monospace'
+        }
+      }
+    },
+    tooltip: {
+      theme: 'dark',
+      x: {
+        format: 'dd MMM yyyy'
+      },
+      y: {
+        formatter: function (val) {
+          return 'Rp ' + val.toLocaleString('id-ID');
+        }
+      }
+    }
+  };
+
+  if (apexProfitChart) {
+    apexProfitChart.updateOptions(options);
+  } else {
+    apexProfitChart = new ApexCharts(container, options);
+    apexProfitChart.render();
+  }
+}
+
+function switchProfitPreset(preset) {
+  profitChartPreset = preset;
+  
+  // Clear custom dates
+  const startInput = document.getElementById('profit-start-date');
+  const endInput = document.getElementById('profit-end-date');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+
+  // Update button active state
+  document.querySelectorAll('#daily-profit-chart-card .pnl-pill').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`btn-profit-${preset}`);
+  if (btn) btn.classList.add('active');
+
+  renderApexProfitChart();
+}
+
+function onProfitDateFilterChange() {
+  // Clear preset active pills since custom is used
+  document.querySelectorAll('#daily-profit-chart-card .pnl-pill').forEach(b => b.classList.remove('active'));
+  renderApexProfitChart();
 }
 
 // Custom Downward Dropdown Logic
