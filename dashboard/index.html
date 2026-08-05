@@ -97,6 +97,12 @@
     flex: 1 !important;
     height: 100% !important;
   }
+  .fullscreen-card #tradingview-chart-container,
+  .fullscreen-card #native-chart-container {
+    flex: 1 !important;
+    height: calc(100vh - 100px) !important;
+    margin-top: 10px !important;
+  }
 
   /* Top Navigation Bar */
   nav.topbar {
@@ -873,7 +879,10 @@
       <!-- Candlestick Chart (TradingView & Native HTML5 Real-Time Indodax Rupiah IDR) -->
       <div id="candlestick-card" class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <span>📈 Grafik Candlestick (Real-Time Indodax)</span>
+          <span style="display:flex;align-items:center;gap:8px">
+            <span>📈 Grafik Candlestick (Real-Time Indodax)</span>
+            <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
+          </span>
           <div style="display:flex;align-items:center;gap:8px">
             <span id="chart-pair-name" style="color:var(--accent2);font-weight:700;margin-right:10px">BTC/IDR</span>
             
@@ -1905,10 +1914,43 @@ function toggleProfitFullscreen() {
   renderApexProfitChart();
 }
 
-// Exit profit chart fullscreen on Escape key press
+let isChartFullscreen = false;
+function toggleChartFullscreen() {
+  const card = document.getElementById('candlestick-card');
+  const btn = document.getElementById('btn-chart-fullscreen');
+  if (!card) return;
+
+  isChartFullscreen = !isChartFullscreen;
+
+  if (isChartFullscreen) {
+    card.classList.add('fullscreen-card');
+    if (btn) btn.textContent = '❌ Exit Fullscreen';
+  } else {
+    card.classList.remove('fullscreen-card');
+    if (btn) btn.textContent = '🖵 Fullscreen';
+  }
+
+  // Force chart re-render/refresh to match the new size
+  const select = document.getElementById('bot-pair');
+  if (select) {
+    const rawPair = select.value || 'btc_idr';
+    if (chartSource === 'tv') {
+      loadTradingViewChart(rawPair);
+    } else {
+      loadCandlesForPair(rawPair);
+    }
+  }
+}
+
+// Exit profit chart fullscreen or candlestick chart fullscreen on Escape key press
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isProfitFullscreen) {
-    toggleProfitFullscreen();
+  if (e.key === 'Escape') {
+    if (isProfitFullscreen) {
+      toggleProfitFullscreen();
+    }
+    if (isChartFullscreen) {
+      toggleChartFullscreen();
+    }
   }
 });
 
@@ -2117,7 +2159,7 @@ function drawNativeCandleChart(candles) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const width = canvas.parentElement.clientWidth || 700;
-  const height = 500;
+  const height = canvas.parentElement.clientHeight || 500;
 
   if (canvas.width !== width || canvas.height !== height) {
     canvas.width = width;
