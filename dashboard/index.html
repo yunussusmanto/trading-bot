@@ -97,6 +97,18 @@
     flex: 1 !important;
     height: 100% !important;
   }
+  .fullscreen-card #floating-chart-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: calc(100vh - 120px) !important;
+    margin-top: 10px !important;
+    overflow: hidden !important;
+  }
+  .fullscreen-card #active-floating-apex-chart {
+    flex: 1 !important;
+    height: 100% !important;
+  }
   .fullscreen-card #tradingview-chart-container,
   .fullscreen-card #native-chart-container {
     flex: 1 !important;
@@ -704,6 +716,72 @@
               <tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Floating Profit Chart Card -->
+      <div id="floating-profit-chart-card" class="card">
+        <!-- Title Row (Spans 100%) -->
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700;color:var(--header-blue)">💰 GRAFIK ESTIMASI FLOATING PROFIT (POSISI AKTIF)</span>
+            <button id="btn-floating-fullscreen" onclick="toggleFloatingFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
+          </span>
+        </div>
+
+        <!-- Controls (Multi-row Grid/Flex) -->
+        <div class="floating-controls" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+          <!-- Row 1: Tajam (Curve) & Area (Type) & Target Position Select -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <!-- Target Position Select -->
+            <select id="floating-pos-select" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+              <option value="all">Semua Posisi</option>
+            </select>
+
+            <!-- Curve style -->
+            <select id="floating-chart-curve" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+              <option value="straight" selected>Tajam (Grafana)</option>
+              <option value="smooth">Halus (Smooth)</option>
+              <option value="stepline">Tangga (Stepline)</option>
+            </select>
+
+            <!-- Model style -->
+            <select id="floating-chart-type" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+              <option value="area" selected>Area</option>
+              <option value="line">Line (Garis)</option>
+              <option value="bar">Bar (Batang)</option>
+              <option value="scatter">Scatter (Bintik)</option>
+              <option value="candlestick">Candlestick (Lilin)</option>
+            </select>
+          </div>
+
+          <!-- Row 2: Per Jam & Date pickers & Presets aligned side-by-side -->
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <!-- Grouping (Harian vs Per Jam) -->
+            <select id="floating-grouping" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+              <option value="daily">📅 Harian</option>
+              <option value="hourly" selected>🕒 Per Jam</option>
+            </select>
+
+            <!-- Custom Date Inputs -->
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="date" id="floating-start-date" onchange="renderApexFloatingChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+              <span style="font-size:11px;color:var(--muted)">s/d</span>
+              <input type="date" id="floating-end-date" onchange="renderApexFloatingChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+            </div>
+
+            <!-- Quick Preset Pills -->
+            <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
+              <button id="btn-floating-1d" class="pnl-pill active" onclick="switchFloatingPreset('1d')">1 Hari</button>
+              <button id="btn-floating-7d" class="pnl-pill" onclick="switchFloatingPreset('7d')">7 Hari</button>
+              <button id="btn-floating-30d" class="pnl-pill" onclick="switchFloatingPreset('30d')">30 Hari</button>
+              <button id="btn-floating-all" class="pnl-pill" onclick="switchFloatingPreset('all')">Semua</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="floating-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px">
+          <div id="active-floating-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
 
@@ -1949,7 +2027,7 @@ function toggleChartFullscreen() {
   }
 }
 
-// Exit profit chart fullscreen, candlestick chart fullscreen, or active position chart fullscreen on Escape key press
+// Exit profit chart fullscreen, candlestick chart fullscreen, or floating profit chart fullscreen on Escape key press
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (isProfitFullscreen) {
@@ -1958,8 +2036,247 @@ document.addEventListener('keydown', (e) => {
     if (isChartFullscreen) {
       toggleChartFullscreen();
     }
+    if (isFloatingFullscreen) {
+      toggleFloatingFullscreen();
+    }
   }
 });
+
+let isFloatingFullscreen = false;
+function toggleFloatingFullscreen() {
+  const card = document.getElementById('floating-profit-chart-card');
+  const btn = document.getElementById('btn-floating-fullscreen');
+  if (!card) return;
+
+  isFloatingFullscreen = !isFloatingFullscreen;
+
+  if (isFloatingFullscreen) {
+    card.classList.add('fullscreen-card');
+    if (btn) btn.textContent = '❌ Exit Fullscreen';
+  } else {
+    card.classList.remove('fullscreen-card');
+    if (btn) btn.textContent = '🖵 Fullscreen';
+  }
+
+  renderApexFloatingChart();
+}
+
+function switchFloatingPreset(preset) {
+  floatingChartPreset = preset;
+  document.querySelectorAll('#floating-profit-chart-card .pnl-pill').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.getElementById(`btn-floating-${preset}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const startInput = document.getElementById('floating-start-date');
+  const endInput = document.getElementById('floating-end-date');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+
+  renderApexFloatingChart();
+}
+
+async function fetchBinanceKlines(symbol, interval, limit) {
+  try {
+    const cleanSym = symbol.replace('_idr', '').replace('_', '').toUpperCase();
+    const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
+    const tvSymbol = idrCoins.includes(cleanSym) ? `${cleanSym}IDR` : `${cleanSym}USDT`;
+    
+    const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${tvSymbol}&interval=${interval}&limit=${limit}`);
+    if (!r.ok) throw new Error('Binance error');
+    const d = await r.json();
+    return d.map(k => ({
+      time: k[0],
+      open: parseFloat(k[1]),
+      high: parseFloat(k[2]),
+      low: parseFloat(k[3]),
+      close: parseFloat(k[4])
+    }));
+  } catch (err) {
+    console.error('Binance fetch klines error:', err);
+    return null;
+  }
+}
+
+async function renderApexFloatingChart() {
+  const container = document.getElementById('active-floating-apex-chart');
+  if (!container) return;
+
+  const targetPair = document.getElementById('floating-pos-select')?.value || 'all';
+  const chartType = document.getElementById('floating-chart-type')?.value || 'area';
+  const curveStyle = document.getElementById('floating-chart-curve')?.value || 'straight';
+  const grouping = document.getElementById('floating-grouping')?.value || 'hourly';
+
+  const isFS = document.getElementById('floating-profit-chart-card')?.classList.contains('fullscreen-card');
+  const chartHeight = isFS ? (window.innerHeight - 200) : 220;
+
+  // Determine timeframe and interval
+  let interval = '1h';
+  let limit = 24;
+  
+  if (floatingChartPreset === '1d') {
+    interval = grouping === 'hourly' ? '15m' : '1h';
+    limit = grouping === 'hourly' ? 96 : 24;
+  } else if (floatingChartPreset === '7d') {
+    interval = grouping === 'hourly' ? '1h' : '4h';
+    limit = grouping === 'hourly' ? 168 : 42;
+  } else if (floatingChartPreset === '30d') {
+    interval = grouping === 'hourly' ? '4h' : '1d';
+    limit = grouping === 'hourly' ? 180 : 30;
+  } else if (floatingChartPreset === 'all') {
+    interval = '1d';
+    limit = 60;
+  }
+
+  // Handle custom dates
+  const startInput = document.getElementById('floating-start-date');
+  const endInput = document.getElementById('floating-end-date');
+  if (startInput?.value && endInput?.value) {
+    const startMs = new Date(startInput.value).getTime();
+    const endMs = new Date(endInput.value).getTime();
+    const diffDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 2) {
+      interval = '15m'; limit = 96;
+    } else if (diffDays <= 7) {
+      interval = '1h'; limit = 168;
+    } else {
+      interval = '1d'; limit = Math.min(diffDays, 100);
+    }
+  }
+
+  const usdtIdrRate = parseFloat(allPairsData.find(p => p.symbol === 'usdt_idr')?.last || 16000);
+  const positionsToMap = targetPair === 'all' 
+    ? activePositionsData 
+    : activePositionsData.filter(p => p.pair.toLowerCase() === targetPair.toLowerCase());
+
+  if (!positionsToMap.length) {
+    container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:11px">Belum ada posisi berjalan untuk pair ini</div>`;
+    return;
+  }
+
+  const seriesPromises = positionsToMap.map(async (pos) => {
+    const klines = await fetchBinanceKlines(pos.pair, interval, limit);
+    return { pos, klines };
+  });
+
+  const resolved = await seriesPromises;
+
+  const timePoints = {};
+  resolved.forEach(({ pos, klines }) => {
+    if (!klines) return;
+    const avgEntry = pos.entryPrice;
+    const coinAmount = pos.coinAmount;
+    const cleanSym = pos.pair.replace('_idr', '').replace('_', '').toUpperCase();
+    const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
+    const isUSD = !idrCoins.includes(cleanSym);
+
+    klines.forEach(k => {
+      const ts = k.time;
+      if (!timePoints[ts]) {
+        timePoints[ts] = { time: ts, open: 0, high: 0, low: 0, close: 0 };
+      }
+      
+      const multiplier = isUSD ? usdtIdrRate : 1;
+      
+      timePoints[ts].open += (k.open * multiplier - avgEntry) * coinAmount;
+      timePoints[ts].high += (k.high * multiplier - avgEntry) * coinAmount;
+      timePoints[ts].low += (k.low * multiplier - avgEntry) * coinAmount;
+      timePoints[ts].close += (k.close * multiplier - avgEntry) * coinAmount;
+    });
+  });
+
+  const sortedPoints = Object.values(timePoints).sort((a, b) => a.time - b.time);
+
+  if (!sortedPoints.length) {
+    container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:11px">Gagal memuat histori data harga koin dari server</div>`;
+    return;
+  }
+
+  let seriesData = [];
+  if (chartType === 'candlestick') {
+    seriesData = sortedPoints.map(p => ({
+      x: new Date(p.time),
+      y: [Math.round(p.open), Math.round(p.high), Math.round(p.low), Math.round(p.close)]
+    }));
+  } else {
+    seriesData = sortedPoints.map(p => ({
+      x: new Date(p.time),
+      y: Math.round(p.close)
+    }));
+  }
+
+  const options = {
+    series: [{
+      name: 'Estimasi Floating P&L',
+      data: seriesData
+    }],
+    chart: {
+      type: chartType === 'candlestick' ? 'candlestick' : (chartType === 'area' ? 'area' : (chartType === 'bar' ? 'bar' : (chartType === 'scatter' ? 'scatter' : 'line'))),
+      height: chartHeight,
+      toolbar: { show: true },
+      zoom: { enabled: true },
+      background: 'transparent',
+      foreColor: '#999999'
+    },
+    stroke: {
+      curve: curveStyle,
+      width: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0 : 2.5,
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0.85 : 0.4,
+        opacityTo: 0.1,
+        stops: [0, 90, 100]
+      }
+    },
+    colors: [function({ value }) {
+      if (chartType === 'candlestick') return '#00c087';
+      return value >= 0 ? '#00c087' : '#ff4d4d';
+    }],
+    grid: {
+      borderColor: '#222222',
+      strokeDashArray: 4,
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        style: { colors: '#777777', fontSize: '9px' },
+        datetimeUTC: false
+      }
+    },
+    yaxis: {
+      labels: {
+        formatter: function(val) {
+          return (val >= 0 ? '+' : '') + 'Rp ' + (val / 1000).toFixed(1) + 'K';
+        },
+        style: { colors: '#777777', fontSize: '9px' }
+      }
+    },
+    tooltip: {
+      theme: 'dark',
+      x: { format: 'dd MMM yyyy HH:mm' },
+      y: {
+        formatter: function(val) {
+          return (val >= 0 ? '🟢 Untung' : '🔴 Rugi') + ': ' + fmtIDR(val);
+        }
+      }
+    }
+  };
+
+  if (floatingChartInstance) {
+    floatingChartInstance.destroy();
+  }
+  
+  container.innerHTML = '';
+  const newDiv = document.createElement('div');
+  container.appendChild(newDiv);
+  
+  floatingChartInstance = new ApexCharts(newDiv, options);
+  floatingChartInstance.render();
+}
 
 // Custom Downward Dropdown Logic
 function toggleCustomDropdown(e) {
@@ -2745,6 +3062,10 @@ let showPnL = false;
 let cachedPnLData = null;
 let selectedPnLTimeframe = 'today';
 
+let activePositionsData = [];
+let floatingChartInstance = null;
+let floatingChartPreset = '1d';
+
 function togglePnLVisibility() {
   showPnL = !showPnL;
   const btn = document.getElementById('toggle-pnl-btn');
@@ -3147,6 +3468,24 @@ async function loadPositions() {
         pnlEl.style.color = totalFloatPnl >= 0 ? 'var(--green)' : 'var(--red)';
       }
     }
+
+    // Populate activePositionsData cache & update select inside floating chart
+    activePositionsData = Array.isArray(d) ? d : [];
+    const floatSelect = document.getElementById('floating-pos-select');
+    if (floatSelect) {
+      const prevSelectVal = floatSelect.value || 'all';
+      floatSelect.innerHTML = '<option value="all">Semua Posisi</option>' + activePositionsData.map(p => {
+        return `<option value="${p.pair.toLowerCase()}">${p.pair.toUpperCase()}</option>`;
+      }).join('');
+      
+      const pairsList = activePositionsData.map(p => p.pair.toLowerCase());
+      if (prevSelectVal === 'all' || pairsList.includes(prevSelectVal)) {
+        floatSelect.value = prevSelectVal;
+      } else {
+        floatSelect.value = 'all';
+      }
+    }
+    renderApexFloatingChart();
   } catch (e) {}
 }
 
@@ -3272,7 +3611,7 @@ async function makeCardsCollapsible() {
     console.error('Failed to load collapsed states from server:', e);
   }
 
-  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card'];
+  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card', 'floating-profit-chart-card'];
   excludedIds.forEach(id => {
     const cardEl = document.getElementById(id);
     if (cardEl) {
@@ -3411,6 +3750,12 @@ const defaultStartInput = document.getElementById('profit-start-date');
 const defaultEndInput = document.getElementById('profit-end-date');
 if (defaultStartInput) defaultStartInput.value = profitTodayStr;
 if (defaultEndInput) defaultEndInput.value = profitTodayStr;
+
+// Auto-set floating chart date pickers to today's date
+const defaultFloatStart = document.getElementById('floating-start-date');
+const defaultFloatEnd = document.getElementById('floating-end-date');
+if (defaultFloatStart) defaultFloatStart.value = profitTodayStr;
+if (defaultFloatEnd) defaultFloatEnd.value = profitTodayStr;
 
 initTheme();
 connectWS();
