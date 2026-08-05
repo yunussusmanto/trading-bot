@@ -1841,6 +1841,13 @@ function toggleProfitFullscreen() {
   renderApexProfitChart();
 }
 
+// Exit profit chart fullscreen on Escape key press
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isProfitFullscreen) {
+    toggleProfitFullscreen();
+  }
+});
+
 // Custom Downward Dropdown Logic
 function toggleCustomDropdown(e) {
   if (e) e.stopPropagation();
