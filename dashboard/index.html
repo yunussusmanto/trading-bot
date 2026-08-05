@@ -97,18 +97,7 @@
     flex: 1 !important;
     height: 100% !important;
   }
-  .fullscreen-card #floating-chart-wrapper {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: calc(100vh - 120px) !important;
-    margin-top: 10px !important;
-    overflow: hidden !important;
-  }
-  .fullscreen-card #active-floating-apex-chart {
-    flex: 1 !important;
-    height: 100% !important;
-  }
+
   .fullscreen-card #tradingview-chart-container,
   .fullscreen-card #native-chart-container {
     flex: 1 !important;
@@ -719,26 +708,6 @@
         </div>
       </div>
 
-      <!-- Floating Profit Chart Card -->
-      <div id="floating-profit-chart-card" class="card">
-        <!-- Title Row (Spans 100%) -->
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
-          <span style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:12px;font-weight:700;color:var(--header-blue)">💰 GRAFIK ESTIMASI FLOATING PROFIT (POSISI AKTIF)</span>
-            <button id="btn-floating-fullscreen" onclick="toggleFloatingFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
-          </span>
-          
-          <!-- Only target selector is kept -->
-          <select id="floating-pos-select" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-            <option value="all">Semua Posisi</option>
-          </select>
-        </div>
-
-        <div id="floating-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px">
-          <div id="active-floating-apex-chart" style="width:100%;height:220px;"></div>
-        </div>
-      </div>
-
       <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
 
       <!-- Robot Control Form -->
@@ -1131,9 +1100,9 @@
           </table>
         </div>
       </div>
-      <!-- Mini Candlestick Performance Panel -->
+      <!-- Mini Bar Chart Performance Panel -->
       <div id="mini-candles-card" class="card">
-        <div class="card-title">🕯️ Visual Performa Koin (Candlestick)</div>
+        <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
         <div id="mini-candles-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; padding: 4px 0;">
           <div style="color:var(--muted); font-size:11px; grid-column: 1 / -1;">Belum ada koin berjalan</div>
         </div>
@@ -1990,234 +1959,9 @@ document.addEventListener('keydown', (e) => {
     if (isChartFullscreen) {
       toggleChartFullscreen();
     }
-    if (isFloatingFullscreen) {
-      toggleFloatingFullscreen();
     }
   }
 });
-
-let isFloatingFullscreen = false;
-function toggleFloatingFullscreen() {
-  const card = document.getElementById('floating-profit-chart-card');
-  const btn = document.getElementById('btn-floating-fullscreen');
-  if (!card) return;
-
-  isFloatingFullscreen = !isFloatingFullscreen;
-
-  if (isFloatingFullscreen) {
-    card.classList.add('fullscreen-card');
-    if (btn) btn.textContent = '❌ Exit Fullscreen';
-  } else {
-    card.classList.remove('fullscreen-card');
-    if (btn) btn.textContent = '🖵 Fullscreen';
-  }
-
-  renderApexFloatingChart();
-}
-
-
-
-async function fetchBinanceKlines(symbol, interval, limit) {
-  try {
-    const cleanSym = symbol.toLowerCase().replace('_idr', '').replace('_', '').toUpperCase();
-    const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
-    const tvSymbol = idrCoins.includes(cleanSym) ? `${cleanSym}IDR` : `${cleanSym}USDT`;
-    
-    const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${tvSymbol}&interval=${interval}&limit=${limit}`);
-    if (r.ok) {
-      const d = await r.json();
-      return d.map(k => ({
-        time: k[0],
-        open: parseFloat(k[1]),
-        high: parseFloat(k[2]),
-        low: parseFloat(k[3]),
-        close: parseFloat(k[4])
-      }));
-    }
-  } catch (err) {
-    console.error('Binance fetch klines error:', err);
-  }
-
-  // FALLBACK: Generate simulated historical price path from avgEntry to currentPrice!
-  const now = Date.now();
-  const stepMs = interval === '15m' ? 15*60*1000 : (interval === '1h' ? 60*60*1000 : (interval === '4h' ? 4*60*60*1000 : 24*60*60*1000));
-  const pos = activePositionsData.find(p => p.pair.toLowerCase() === symbol.toLowerCase());
-  const avgEntry = pos ? pos.entryPrice : 1000;
-  const currentPrice = pos ? pos.currentPrice : avgEntry;
-  
-  const simulated = [];
-  let prevClose = avgEntry * 0.98;
-  for (let i = limit; i >= 0; i--) {
-    const time = now - (i * stepMs);
-    const ratio = (limit - i) / limit;
-    const targetBase = avgEntry * (1 - ratio) + currentPrice * ratio;
-    
-    const range = targetBase * 0.02;
-    const change = (Math.random() - 0.48) * range;
-    const open = prevClose;
-    const close = targetBase + change;
-    const high = Math.max(open, close) + Math.random() * (range * 0.2);
-    const low = Math.min(open, close) - Math.random() * (range * 0.2);
-    prevClose = close;
-    
-    simulated.push({
-      time: time,
-      open: open,
-      high: high,
-      low: low,
-      close: close
-    });
-  }
-  return simulated;
-}
-
-async function renderApexFloatingChart() {
-  const container = document.getElementById('active-floating-apex-chart');
-  if (!container) return;
-
-  const targetPair = document.getElementById('floating-pos-select')?.value || 'all';
-  const chartType = 'bar';
-  const curveStyle = 'straight';
-
-  const isFS = document.getElementById('floating-profit-chart-card')?.classList.contains('fullscreen-card');
-  const chartHeight = isFS ? (window.innerHeight - 200) : 220;
-
-  // Timeframe forced to last 24 hours with 1-hour interval bars
-  const interval = '1h';
-  const limit = 24;
-
-  const usdtIdrRate = parseFloat(allPairsData.find(p => p.symbol === 'usdt_idr')?.last || 16000);
-  const positionsToMap = targetPair === 'all' 
-    ? activePositionsData 
-    : activePositionsData.filter(p => p.pair.toLowerCase() === targetPair.toLowerCase());
-
-  if (!positionsToMap.length) {
-    container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:11px">Belum ada posisi berjalan untuk pair ini</div>`;
-    return;
-  }
-
-  const seriesPromises = positionsToMap.map(async (pos) => {
-    const klines = await fetchBinanceKlines(pos.pair, interval, limit);
-    return { pos, klines };
-  });
-
-  const resolved = await seriesPromises;
-
-  const timePoints = {};
-  resolved.forEach(({ pos, klines }) => {
-    if (!klines) return;
-    const avgEntry = pos.entryPrice;
-    const coinAmount = pos.coinAmount;
-    const cleanSym = pos.pair.replace('_idr', '').replace('_', '').toUpperCase();
-    const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
-    const isUSD = !idrCoins.includes(cleanSym);
-
-    klines.forEach(k => {
-      const ts = k.time;
-      if (!timePoints[ts]) {
-        timePoints[ts] = { time: ts, open: 0, high: 0, low: 0, close: 0 };
-      }
-      
-      const multiplier = isUSD ? usdtIdrRate : 1;
-      
-      timePoints[ts].open += (k.open * multiplier - avgEntry) * coinAmount;
-      timePoints[ts].high += (k.high * multiplier - avgEntry) * coinAmount;
-      timePoints[ts].low += (k.low * multiplier - avgEntry) * coinAmount;
-      timePoints[ts].close += (k.close * multiplier - avgEntry) * coinAmount;
-    });
-  });
-
-  const sortedPoints = Object.values(timePoints).sort((a, b) => a.time - b.time);
-
-  if (!sortedPoints.length) {
-    container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:11px">Gagal memuat histori data harga koin dari server</div>`;
-    return;
-  }
-
-  let seriesData = [];
-  if (chartType === 'candlestick') {
-    seriesData = sortedPoints.map(p => ({
-      x: new Date(p.time),
-      y: [Math.round(p.open), Math.round(p.high), Math.round(p.low), Math.round(p.close)]
-    }));
-  } else {
-    seriesData = sortedPoints.map(p => ({
-      x: new Date(p.time),
-      y: Math.round(p.close)
-    }));
-  }
-
-  const options = {
-    series: [{
-      name: 'Estimasi Floating P&L',
-      data: seriesData
-    }],
-    chart: {
-      type: chartType === 'candlestick' ? 'candlestick' : (chartType === 'area' ? 'area' : (chartType === 'bar' ? 'bar' : (chartType === 'scatter' ? 'scatter' : 'line'))),
-      height: chartHeight,
-      toolbar: { show: true },
-      zoom: { enabled: true },
-      background: 'transparent',
-      foreColor: '#999999'
-    },
-    stroke: {
-      curve: curveStyle,
-      width: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0 : 2.5,
-    },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0.85 : 0.4,
-        opacityTo: 0.1,
-        stops: [0, 90, 100]
-      }
-    },
-    colors: [function({ value }) {
-      if (chartType === 'candlestick') return '#00c087';
-      return value >= 0 ? '#00c087' : '#ff4d4d';
-    }],
-    grid: {
-      borderColor: '#222222',
-      strokeDashArray: 4,
-    },
-    xaxis: {
-      type: 'datetime',
-      labels: {
-        style: { colors: '#777777', fontSize: '9px' },
-        datetimeUTC: false
-      }
-    },
-    yaxis: {
-      labels: {
-        formatter: function(val) {
-          return (val >= 0 ? '+' : '') + 'Rp ' + (val / 1000).toFixed(1) + 'K';
-        },
-        style: { colors: '#777777', fontSize: '9px' }
-      }
-    },
-    tooltip: {
-      theme: 'dark',
-      x: { format: 'dd MMM yyyy HH:mm' },
-      y: {
-        formatter: function(val) {
-          return (val >= 0 ? '🟢 Untung' : '🔴 Rugi') + ': ' + fmtIDR(val);
-        }
-      }
-    }
-  };
-
-  if (floatingChartInstance) {
-    floatingChartInstance.destroy();
-  }
-  
-  container.innerHTML = '';
-  const newDiv = document.createElement('div');
-  container.appendChild(newDiv);
-  
-  floatingChartInstance = new ApexCharts(newDiv, options);
-  floatingChartInstance.render();
-}
 
 // Custom Downward Dropdown Logic
 function toggleCustomDropdown(e) {
@@ -3385,13 +3129,11 @@ async function loadPositions() {
         return `
           <div onclick="selectPairFromMarket('${p.pair}')" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; background:var(--surface2); padding:8px 4px; border-radius:6px; border:1px solid var(--border); text-align:center;" title="Klik untuk tampilkan grafik koin ini">
             <span style="font-weight:700; font-size:11px; color:var(--accent2); margin-bottom:4px;">${coinSymbol}</span>
-            <div style="height: 60px; width: 14px; position: relative; margin: 4px 0; overflow: visible;">
-              <!-- Vertical wick line -->
-              <div style="position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.15); transform: translateX(-50%);"></div>
+            <div style="height: 60px; width: 18px; position: relative; margin: 4px 0; overflow: visible;">
               <!-- Center break-even line -->
               <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.45); transform: translateY(-50%);"></div>
-              <!-- Vertical Candlestick Body -->
-              <div style="position: absolute; left: calc(50% - 3px); top: ${bodyTop}px; width: 6px; height: ${bodyHeight}px; background: ${barColor}; border-radius: 1px; box-shadow: 0 0 5px ${barColor}; z-index: 2;"></div>
+              <!-- Vertical Bar (Batang) -->
+              <div style="position: absolute; left: calc(50% - 6px); top: ${bodyTop}px; width: 12px; height: ${bodyHeight}px; background: ${barColor}; border-radius: 2px; box-shadow: 0 0 8px ${barColor}; z-index: 2;"></div>
             </div>
             <span style="font-size:10px; font-weight:700; color:${pnlColor}; font-family:'JetBrains Mono',monospace;">${pnlText}</span>
           </div>
@@ -3410,23 +3152,7 @@ async function loadPositions() {
       }
     }
 
-    // Populate activePositionsData cache & update select inside floating chart
     activePositionsData = Array.isArray(d) ? d : [];
-    const floatSelect = document.getElementById('floating-pos-select');
-    if (floatSelect) {
-      const prevSelectVal = floatSelect.value || 'all';
-      floatSelect.innerHTML = '<option value="all">Semua Posisi</option>' + activePositionsData.map(p => {
-        return `<option value="${p.pair.toLowerCase()}">${p.pair.toUpperCase()}</option>`;
-      }).join('');
-      
-      const pairsList = activePositionsData.map(p => p.pair.toLowerCase());
-      if (prevSelectVal === 'all' || pairsList.includes(prevSelectVal)) {
-        floatSelect.value = prevSelectVal;
-      } else {
-        floatSelect.value = 'all';
-      }
-    }
-    renderApexFloatingChart();
   } catch (e) {}
 }
 
