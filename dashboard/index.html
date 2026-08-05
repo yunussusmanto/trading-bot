@@ -98,8 +98,7 @@
     height: 100% !important;
   }
   .fullscreen-card #tradingview-chart-container,
-  .fullscreen-card #native-chart-container,
-  .fullscreen-card #active-pos-chart-container {
+  .fullscreen-card #native-chart-container {
     flex: 1 !important;
     height: calc(100vh - 100px) !important;
     margin-top: 10px !important;
@@ -705,28 +704,6 @@
               <tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <!-- Active Positions Candlestick Chart Card -->
-      <div id="active-positions-chart-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <span style="display:flex;align-items:center;gap:8px">
-            <span>📊 Grafik Candlestick Posisi Aktif (Real-Time)</span>
-            <button id="btn-active-pos-fullscreen" onclick="toggleActivePosFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
-          </span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <select id="active-pos-select" onchange="changeActivePosChart(this.value)" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="">Memuat posisi...</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="active-pos-chart-container" style="height:600px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
-          <div id="active-pos-tv-widget" style="width:100%;height:100%"></div>
-          <div id="active-pos-empty-msg" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--muted);font-size:12px;text-align:center">
-            Tidak ada posisi berjalan aktif saat ini
-          </div>
         </div>
       </div>
 
@@ -1981,76 +1958,8 @@ document.addEventListener('keydown', (e) => {
     if (isChartFullscreen) {
       toggleChartFullscreen();
     }
-    if (isActivePosFullscreen) {
-      toggleActivePosFullscreen();
-    }
   }
 });
-
-function changeActivePosChart(pair) {
-  loadActivePosTradingViewChart(pair);
-}
-
-function loadActivePosTradingViewChart(pair) {
-  const cleanCoin = pair.replace('_idr', '').replace('_', '').toUpperCase();
-  
-  const idrCoins = ['BTC', 'ETH', 'USDT', 'SOL', 'DOGE', 'ADA', 'DOT'];
-  const tvSymbol = idrCoins.includes(cleanCoin)
-    ? `BINANCE:${cleanCoin}IDR`
-    : `BINANCE:${cleanCoin}USDT`;
-  
-  const container = document.getElementById('active-pos-tv-widget');
-  if (!container) return;
-
-  const isFS = document.getElementById('active-positions-chart-card')?.classList.contains('fullscreen-card');
-  const tvHeight = isFS ? (window.innerHeight - 100) : 600;
-
-  if (typeof TradingView !== 'undefined') {
-    new TradingView.widget({
-      "width": "100%",
-      "height": tvHeight,
-      "symbol": tvSymbol,
-      "interval": "15",
-      "timezone": "Asia/Jakarta",
-      "theme": "dark",
-      "style": "1",
-      "locale": "id",
-      "toolbar_bg": "#121212",
-      "enable_publishing": false,
-      "hide_side_toolbar": false,
-      "allow_symbol_change": false,
-      "container_id": "active-pos-tv-widget",
-      "studies": [
-        "RSI@tv-basicstudies",
-        "MASimple@tv-basicstudies"
-      ]
-    });
-  } else {
-    setTimeout(() => loadActivePosTradingViewChart(pair), 300);
-  }
-}
-
-let isActivePosFullscreen = false;
-function toggleActivePosFullscreen() {
-  const card = document.getElementById('active-positions-chart-card');
-  const btn = document.getElementById('btn-active-pos-fullscreen');
-  if (!card) return;
-
-  isActivePosFullscreen = !isActivePosFullscreen;
-
-  if (isActivePosFullscreen) {
-    card.classList.add('fullscreen-card');
-    if (btn) btn.textContent = '❌ Exit Fullscreen';
-  } else {
-    card.classList.remove('fullscreen-card');
-    if (btn) btn.textContent = '🖵 Fullscreen';
-  }
-
-  const pair = document.getElementById('active-pos-select')?.value;
-  if (pair) {
-    loadActivePosTradingViewChart(pair);
-  }
-}
 
 // Custom Downward Dropdown Logic
 function toggleCustomDropdown(e) {
@@ -3228,37 +3137,7 @@ async function loadPositions() {
       }).join('');
     }
 
-    // Render active positions candlestick select and chart
-    const activeSelect = document.getElementById('active-pos-select');
-    const activeTvContainer = document.getElementById('active-pos-tv-widget');
-    const activeEmptyMsg = document.getElementById('active-pos-empty-msg');
-    
-    if (activeSelect) {
-      if (!Array.isArray(d) || !d.length) {
-        activeSelect.style.display = 'none';
-        if (activeTvContainer) activeTvContainer.innerHTML = '';
-        if (activeEmptyMsg) activeEmptyMsg.style.display = 'block';
-      } else {
-        activeSelect.style.display = 'block';
-        if (activeEmptyMsg) activeEmptyMsg.style.display = 'none';
-        
-        const previousVal = activeSelect.value;
-        const pairsList = d.map(p => p.pair);
-        
-        activeSelect.innerHTML = d.map(p => {
-          const coinSym = p.pair.replace('_idr', '').toUpperCase();
-          return `<option value="${p.pair}">${coinSym}/IDR</option>`;
-        }).join('');
-        
-        if (pairsList.includes(previousVal)) {
-          activeSelect.value = previousVal;
-        } else {
-          activeSelect.value = pairsList[0];
-        }
-        
-        loadActivePosTradingViewChart(activeSelect.value);
-      }
-    }
+
 
     if (summaryBar) {
       summaryBar.style.display = 'flex';
