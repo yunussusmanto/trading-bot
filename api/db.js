@@ -44,6 +44,13 @@ async function initDb() {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_settings (
+        key VARCHAR(255) PRIMARY KEY,
+        value TEXT
+      )
+    `);
     console.log('PostgreSQL trading_bot database initialized successfully.');
   } catch (err) {
     console.error('PostgreSQL init error:', err.message);
@@ -210,4 +217,20 @@ async function getDailyReportByDate(dateStr) {
   }
 }
 
-module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs };
+async function getSetting(key) {
+  try {
+    const res = await pool.query('SELECT value FROM user_settings WHERE key = $1', [key]);
+    return res.rows[0]?.value || null;
+  } catch (_) { return null; }
+}
+
+async function saveSetting(key, value) {
+  try {
+    await pool.query(`
+      INSERT INTO user_settings (key, value) VALUES ($1, $2)
+      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+    `, [key, value]);
+  } catch (_) {}
+}
+
+module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, getSetting, saveSetting };
