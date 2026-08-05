@@ -88,8 +88,9 @@
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
-    height: auto !important;
+    height: calc(100vh - 120px) !important;
     margin-top: 10px !important;
+    overflow: hidden !important;
   }
   .fullscreen-card #daily-profit-apex-chart {
     flex: 1 !important;
@@ -1567,7 +1568,7 @@ function renderApexProfitChart() {
   
   // Calculate dynamic fullscreen height with buffer to prevent axis cutoff
   const isFS = document.getElementById('daily-profit-chart-card')?.classList.contains('fullscreen-card');
-  const chartHeight = isFS ? (window.innerHeight - 130) : 220;
+  const chartHeight = isFS ? (window.innerHeight - 200) : 220;
 
   // 1. Parse date filter range
   let startDate = null;
