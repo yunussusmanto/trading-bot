@@ -2262,10 +2262,11 @@ async function fetchDailyReportByDate() {
     let url = '/api/trades?limit=1000';
     if (reportMode === 'date') {
       const picker = document.getElementById('report-date-picker');
+      const todayStr = new Date().toLocaleDateString('sv-SE');
       if (picker && !picker.value) {
-        picker.value = new Date().toISOString().split('T')[0];
+        picker.value = todayStr;
       }
-      const dateStr = picker ? picker.value : new Date().toISOString().split('T')[0];
+      const dateStr = picker ? picker.value : todayStr;
       url = `/api/reports/daily?date=${dateStr}`;
     }
 
@@ -2406,7 +2407,7 @@ function changeReportPage(delta) {
 window.addEventListener('DOMContentLoaded', () => {
   const picker = document.getElementById('report-date-picker');
   if (picker && !picker.value) {
-    picker.value = new Date().toISOString().split('T')[0];
+    picker.value = new Date().toLocaleDateString('sv-SE');
     setTimeout(fetchDailyReportByDate, 800);
   }
 });
