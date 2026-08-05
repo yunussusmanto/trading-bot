@@ -8,21 +8,21 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    min-height:100vh; background:#0B1426;
+    min-height:100vh; background:#121214;
     display:flex; align-items:center; justify-content:center;
     font-family:'Inter',sans-serif;
   }
   /* Animated bg */
   body::before {
     content:''; position:fixed; inset:0;
-    background: radial-gradient(ellipse at 20% 50%, rgba(0,102,255,.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,180,216,.1) 0%, transparent 60%);
+    background: radial-gradient(ellipse at 20% 50%, rgba(100,100,100,.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(150,150,150,.1) 0%, transparent 60%);
     pointer-events:none;
   }
 
   .card {
-    background: rgba(20,31,54,.95);
-    border: 1px solid #263759;
+    background: rgba(26,26,28,.95);
+    border: 1px solid #2a2a2c;
     border-radius: 20px;
     padding: 40px 36px;
     width: 100%; max-width: 400px;
@@ -37,7 +37,7 @@
   }
   .logo-icon {
     width:56px; height:56px; border-radius:14px; margin:0 auto 12px;
-    background: linear-gradient(135deg,#0066FF,#00B4D8);
+    background: linear-gradient(135deg,#4b5563,#9ca3af);
     display:flex; align-items:center; justify-content:center;
     font-size:24px;
   }
@@ -48,15 +48,15 @@
   label { display:block; font-size:12px; font-weight:500; color:#94A3B8; margin-bottom:6px; }
   input {
     width:100%; padding:11px 14px;
-    background:#1E2C4B; border:1px solid #263759; border-radius:10px;
+    background:#242426; border:1px solid #2a2a2c; border-radius:10px;
     color:#F8FAFC; font-size:14px; font-family:inherit;
     outline:none; transition:border-color .2s, box-shadow .2s;
   }
-  input:focus { border-color:#0066FF; box-shadow:0 0 0 3px rgba(0,102,255,.2); }
+  input:focus { border-color:#6b7280; box-shadow:0 0 0 3px rgba(107,114,128,.2); }
 
   .btn {
     width:100%; padding:12px;
-    background: linear-gradient(135deg,#0066FF,#00B4D8);
+    background: linear-gradient(135deg,#4b5563,#9ca3af);
     color:#fff; border:none; border-radius:10px;
     font-size:14px; font-weight:600; font-family:inherit;
     cursor:pointer; margin-top:8px;
