@@ -907,32 +907,39 @@
 
       <!-- Daily Profit Chart Card -->
       <div id="daily-profit-chart-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:10px">
+        <!-- Title Row (Spans 100%) -->
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
           <span style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:12px;font-weight:700">💰 Laporan & Grafik Profit Harian</span>
+            <span style="font-size:12px;font-weight:700;color:var(--header-blue)">💰 LAPORAN & GRAFIK PROFIT HARIAN</span>
             <button id="btn-profit-fullscreen" onclick="toggleProfitFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
           </span>
-          
-          <!-- Flexible Filter Row -->
+        </div>
+
+        <!-- Controls (Multi-row Grid/Flex) -->
+        <div class="profit-controls" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+          <!-- Row 1: Tajam (Grafana) & Area aligned side-by-side -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <!-- Curve style -->
-            <select id="profit-chart-curve" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+            <select id="profit-chart-curve" onchange="renderApexProfitChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="straight" selected>Tajam (Grafana)</option>
               <option value="smooth">Halus (Smooth)</option>
               <option value="stepline">Tangga (Stepline)</option>
             </select>
 
             <!-- Model style -->
-            <select id="profit-chart-type" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+            <select id="profit-chart-type" onchange="renderApexProfitChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="area" selected>Area</option>
               <option value="line">Line (Garis)</option>
               <option value="bar">Bar (Batang)</option>
               <option value="scatter">Scatter (Bintik)</option>
               <option value="candlestick">Candlestick (Lilin)</option>
             </select>
+          </div>
 
+          <!-- Row 2: Per Jam & Date pickers & Presets aligned side-by-side -->
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
             <!-- Grouping (Harian vs Per Jam) -->
-            <select id="profit-grouping" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+            <select id="profit-grouping" onchange="renderApexProfitChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="daily">📅 Harian</option>
               <option value="hourly" selected>🕒 Per Jam</option>
             </select>
@@ -954,7 +961,7 @@
           </div>
         </div>
 
-        <div id="profit-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px;margin-top:10px">
+        <div id="profit-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px">
           <div id="daily-profit-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
