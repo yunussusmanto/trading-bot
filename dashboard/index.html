@@ -77,10 +77,23 @@
     height: 100vh !important;
     z-index: 9999 !important;
     background: var(--surface) !important;
-    padding: 24px !important;
+    padding: 20px 24px !important;
     margin: 0 !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
     border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .fullscreen-card #profit-chart-wrapper {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    margin-top: 10px !important;
+  }
+  .fullscreen-card #daily-profit-apex-chart {
+    flex: 1 !important;
+    height: 100% !important;
   }
 
   /* Top Navigation Bar */
@@ -868,39 +881,40 @@
 
       <!-- Daily Profit Chart Card -->
       <div id="daily-profit-chart-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <span style="display:flex;align-items:center;gap:6px">
-            <span>💰 Grafik Keuntungan Harian & Jam (Realized Profit)</span>
-            <button id="btn-profit-fullscreen" onclick="toggleProfitFullscreen()" class="btn-gray" style="padding:2px 6px;font-size:10px">🖵 Fullscreen</button>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:10px">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-weight:700">💰 Laporan & Grafik Profit Harian</span>
+            <button id="btn-profit-fullscreen" onclick="toggleProfitFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
           </span>
           
           <!-- Flexible Filter Row -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <!-- Curve style -->
-            <select id="profit-chart-curve" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+            <select id="profit-chart-curve" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="straight" selected>Tajam (Grafana)</option>
               <option value="smooth">Halus (Smooth)</option>
               <option value="stepline">Tangga (Stepline)</option>
             </select>
 
             <!-- Model style -->
-            <select id="profit-chart-type" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+            <select id="profit-chart-type" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="area" selected>Area</option>
-              <option value="line">Line</option>
+              <option value="line">Line (Garis)</option>
               <option value="bar">Bar (Batang)</option>
+              <option value="scatter">Scatter (Bintik)</option>
             </select>
 
             <!-- Grouping (Harian vs Per Jam) -->
-            <select id="profit-grouping" onchange="renderApexProfitChart()" style="padding:4px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+            <select id="profit-grouping" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <option value="daily" selected>📅 Harian</option>
               <option value="hourly">🕒 Per Jam</option>
             </select>
 
             <!-- Custom Date Inputs -->
             <div style="display:flex;align-items:center;gap:4px">
-              <input type="date" id="profit-start-date" onchange="onProfitDateFilterChange()" style="padding:2px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <input type="date" id="profit-start-date" onchange="onProfitDateFilterChange()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
               <span style="font-size:11px;color:var(--muted)">s/d</span>
-              <input type="date" id="profit-end-date" onchange="onProfitDateFilterChange()" style="padding:2px 6px;font-size:11px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;outline:none;cursor:pointer">
+              <input type="date" id="profit-end-date" onchange="onProfitDateFilterChange()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
             </div>
 
             <!-- Quick Preset Pills -->
@@ -1551,9 +1565,9 @@ function renderApexProfitChart() {
   const curveStyle = document.getElementById('profit-chart-curve')?.value || 'straight';
   const grouping = document.getElementById('profit-grouping')?.value || 'daily';
   
-  // Calculate dynamic fullscreen height
+  // Calculate dynamic fullscreen height with buffer to prevent axis cutoff
   const isFS = document.getElementById('daily-profit-chart-card')?.classList.contains('fullscreen-card');
-  const chartHeight = isFS ? (window.innerHeight - 120) : 220;
+  const chartHeight = isFS ? (window.innerHeight - 130) : 220;
 
   // 1. Parse date filter range
   let startDate = null;
@@ -1595,11 +1609,11 @@ function renderApexProfitChart() {
   const dailyPnL = {};
 
   if (grouping === 'hourly') {
-    // Cap date range to 10 days max to prevent browser freezing
+    // Cap date range to 30 days max to prevent browser freezing
     const diffDays = Math.ceil(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24));
-    if (diffDays > 10) {
+    if (diffDays > 30) {
       startDate = new Date(endDate.getTime());
-      startDate.setDate(startDate.getDate() - 3);
+      startDate.setDate(startDate.getDate() - 7); // Default to 7 days for hourly if range exceeded
       startDate.setHours(0,0,0,0);
       if (startInput) startInput.value = startDate.toLocaleDateString('sv-SE');
     }
@@ -1664,7 +1678,7 @@ function renderApexProfitChart() {
       data: chartData
     }],
     chart: {
-      type: chartType,
+      type: chartType === 'scatter' ? 'scatter' : chartType,
       height: chartHeight,
       background: 'transparent',
       fontFamily: 'Inter, sans-serif',
@@ -1691,14 +1705,14 @@ function renderApexProfitChart() {
     colors: ['#10b981'],
     stroke: {
       curve: curveStyle,
-      width: chartType === 'bar' ? 0 : 2.5,
+      width: (chartType === 'bar' || chartType === 'scatter') ? 0 : 2.5,
       colors: ['#10b981']
     },
     fill: {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: chartType === 'bar' ? 0.85 : 0.4,
+        opacityFrom: (chartType === 'bar' || chartType === 'scatter') ? 0.85 : 0.4,
         opacityTo: 0.02,
         stops: [0, 90, 100]
       }
@@ -1713,9 +1727,9 @@ function renderApexProfitChart() {
       enabled: false
     },
     markers: {
-      size: 0,
+      size: chartType === 'scatter' ? 5 : 0,
       hover: {
-        size: 5
+        size: chartType === 'scatter' ? 7 : 5
       }
     },
     grid: {
