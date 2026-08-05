@@ -924,8 +924,8 @@
 
             <!-- Grouping (Harian vs Per Jam) -->
             <select id="profit-grouping" onchange="renderApexProfitChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="daily" selected>📅 Harian</option>
-              <option value="hourly">🕒 Per Jam</option>
+              <option value="daily">📅 Harian</option>
+              <option value="hourly" selected>🕒 Per Jam</option>
             </select>
 
             <!-- Custom Date Inputs -->
@@ -937,8 +937,9 @@
 
             <!-- Quick Preset Pills -->
             <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
+              <button id="btn-profit-1d" class="pnl-pill active" onclick="switchProfitPreset('1d')">1 Hari</button>
               <button id="btn-profit-7d" class="pnl-pill" onclick="switchProfitPreset('7d')">7 Hari</button>
-              <button id="btn-profit-30d" class="pnl-pill active" onclick="switchProfitPreset('30d')">30 Hari</button>
+              <button id="btn-profit-30d" class="pnl-pill" onclick="switchProfitPreset('30d')">30 Hari</button>
               <button id="btn-profit-all" class="pnl-pill" onclick="switchProfitPreset('all')">Semua</button>
             </div>
           </div>
@@ -1552,7 +1553,7 @@ function renderBalanceGrid() {
 // Profit Chart State
 let profitRawTrades = [];
 let apexProfitChart = null;
-let profitChartPreset = '30d';
+let profitChartPreset = '1d';
 
 // Refresh daily report trades history when requested
 async function loadTrades() {
@@ -1605,7 +1606,9 @@ function renderApexProfitChart() {
   if (!startDate && !endDate) {
     endDate = new Date();
     startDate = new Date();
-    if (profitChartPreset === '7d') {
+    if (profitChartPreset === '1d') {
+      startDate.setDate(startDate.getDate() - 1);
+    } else if (profitChartPreset === '7d') {
       startDate.setDate(startDate.getDate() - 7);
     } else if (profitChartPreset === '30d') {
       startDate.setDate(startDate.getDate() - 30);
