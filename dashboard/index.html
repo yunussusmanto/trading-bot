@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Indodax Pro – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
@@ -869,13 +870,28 @@
         </div>
       </div>
 
-      <!-- Candlestick Chart (Native HTML5 Real-Time Indodax Rupiah IDR) -->
+      <!-- Candlestick Chart (TradingView & Native HTML5 Real-Time Indodax Rupiah IDR) -->
       <div id="candlestick-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>📈 Grafik Candlestick Real-Time (Indodax IDR)</span>
-          <span id="chart-pair-name" style="color:var(--accent2);font-weight:700">BTC/IDR</span>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span>📈 Grafik Candlestick (Real-Time Indodax)</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="chart-pair-name" style="color:var(--accent2);font-weight:700;margin-right:10px">BTC/IDR</span>
+            
+            <!-- Toggle Switch Pills -->
+            <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
+              <button id="btn-chart-tv" class="pnl-pill active" onclick="switchChartSource('tv')">TradingView</button>
+              <button id="btn-chart-native" class="pnl-pill" onclick="switchChartSource('native')">Internal Chart</button>
+            </div>
+          </div>
         </div>
-        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+        
+        <!-- TradingView Widget Container -->
+        <div id="tradingview-chart-container" style="height:450px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+          <div id="tradingview-widget-div" style="width:100%;height:100%"></div>
+        </div>
+
+        <!-- Native Candlestick Container -->
+        <div id="native-chart-container" style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative;display:none">
           <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
         </div>
       </div>
@@ -2127,6 +2143,71 @@ function drawNativeCandleChart(candles) {
   });
 }
 
+// Chart source state (TradingView by default)
+let chartSource = 'tv';
+
+function switchChartSource(source) {
+  chartSource = source;
+  
+  const tvContainer = document.getElementById('tradingview-chart-container');
+  const nativeContainer = document.getElementById('native-chart-container');
+  
+  if (source === 'tv') {
+    if (tvContainer) tvContainer.style.display = 'block';
+    if (nativeContainer) nativeContainer.style.display = 'none';
+    document.getElementById('btn-chart-tv')?.classList.add('active');
+    document.getElementById('btn-chart-native')?.classList.remove('active');
+  } else {
+    if (tvContainer) tvContainer.style.display = 'none';
+    if (nativeContainer) nativeContainer.style.display = 'block';
+    document.getElementById('btn-chart-tv')?.classList.remove('active');
+    document.getElementById('btn-chart-native')?.classList.add('active');
+  }
+  
+  // Re-sync symbols
+  const select = document.getElementById('bot-pair');
+  if (select) {
+    const rawPair = select.value || 'btc_idr';
+    if (source === 'tv') {
+      loadTradingViewChart(rawPair);
+    } else {
+      loadCandlesForPair(rawPair);
+    }
+  }
+}
+
+function loadTradingViewChart(pair) {
+  const cleanCoin = pair.replace('_idr', '').replace('_', '').toUpperCase();
+  const tvSymbol = `INDODAX:${cleanCoin}IDR`;
+  
+  const container = document.getElementById('tradingview-widget-div');
+  if (!container) return;
+
+  if (typeof TradingView !== 'undefined') {
+    new TradingView.widget({
+      "width": "100%",
+      "height": "100%",
+      "symbol": tvSymbol,
+      "interval": "15",
+      "timezone": "Asia/Jakarta",
+      "theme": "dark",
+      "style": "1",
+      "locale": "id",
+      "toolbar_bg": "#121212",
+      "enable_publishing": false,
+      "hide_side_toolbar": false,
+      "allow_symbol_change": false,
+      "container_id": "tradingview-widget-div",
+      "studies": [
+        "RSI@tv-basicstudies",
+        "MASimple@tv-basicstudies"
+      ]
+    });
+  } else {
+    setTimeout(() => loadTradingViewChart(pair), 300);
+  }
+}
+
 // Chart Symbol Switcher
 function updateChartSymbol() {
   const select = document.getElementById('bot-pair');
@@ -2137,7 +2218,7 @@ function updateChartSymbol() {
   // Update Ticker Banner
   document.getElementById('banner-symbol').textContent = `${cleanCoin} to IDR`;
   document.getElementById('banner-market-name').textContent = `${cleanCoin} MARKET`;
-  document.getElementById('chart-pair-name').textContent = `${cleanCoin}/IDR (Indodax Real-Time Chart)`;
+  document.getElementById('chart-pair-name').textContent = `${cleanCoin}/IDR`;
   
   const depthLabel = document.getElementById('depth-pair-label');
   if (depthLabel) depthLabel.textContent = `${cleanCoin}/IDR`;
@@ -2160,8 +2241,12 @@ function updateChartSymbol() {
     if (pData.low) document.getElementById('banner-low').textContent = fmtIDR(pData.low);
   }
 
-  // Load Native Candlestick Chart for Pair (In Rupiah IDR)
-  loadCandlesForPair(rawPair);
+  // Load Chart for Pair depending on selected source
+  if (chartSource === 'tv') {
+    loadTradingViewChart(rawPair);
+  } else {
+    loadCandlesForPair(rawPair);
+  }
 }
 
 // OrderBook & Market Depth Loader
