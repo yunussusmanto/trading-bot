@@ -919,6 +919,7 @@
               <option value="line">Line (Garis)</option>
               <option value="bar">Bar (Batang)</option>
               <option value="scatter">Scatter (Bintik)</option>
+              <option value="candlestick">Candlestick (Lilin)</option>
             </select>
 
             <!-- Grouping (Harian vs Per Jam) -->
@@ -1624,6 +1625,7 @@ function renderApexProfitChart() {
   if (endDate) endDate.setHours(23,59,59,999);
 
   const dailyPnL = {};
+  const tradesByInterval = {};
 
   if (grouping === 'hourly') {
     // Cap date range to 30 days max to prevent browser freezing
@@ -1644,6 +1646,7 @@ function renderApexProfitChart() {
       const hour = String(temp.getHours()).padStart(2, '0');
       const key = `${year}-${month}-${date} ${hour}:00`;
       dailyPnL[key] = 0;
+      tradesByInterval[key] = [];
       temp.setHours(temp.getHours() + 1);
     }
 
@@ -1658,6 +1661,7 @@ function renderApexProfitChart() {
         const key = `${year}-${month}-${date} ${hour}:00`;
         if (dailyPnL[key] !== undefined) {
           dailyPnL[key] += parseFloat(t.pnl) || 0;
+          tradesByInterval[key].push(t);
         }
       }
     });
@@ -1667,6 +1671,7 @@ function renderApexProfitChart() {
     while (cur <= endDate) {
       const dStr = cur.toLocaleDateString('sv-SE');
       dailyPnL[dStr] = 0;
+      tradesByInterval[dStr] = [];
       cur.setDate(cur.getDate() + 1);
     }
 
@@ -1676,16 +1681,45 @@ function renderApexProfitChart() {
         const dStr = new Date(t.timestamp).toLocaleDateString('sv-SE');
         if (dailyPnL[dStr] !== undefined) {
           dailyPnL[dStr] += parseFloat(t.pnl) || 0;
+          tradesByInterval[dStr].push(t);
         }
       }
     });
   }
 
   const chartData = Object.keys(dailyPnL).sort().map(key => {
-    return {
-      x: new Date(key).getTime(),
-      y: Math.round(dailyPnL[key])
-    };
+    const timestamp = new Date(key).getTime();
+    if (chartType === 'candlestick') {
+      const intervalTrades = tradesByInterval[key] || [];
+      if (intervalTrades.length === 0) {
+        return { x: timestamp, y: [0, 0, 0, 0] };
+      }
+
+      // Sort trades chronologically within this interval
+      intervalTrades.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      let runningSum = 0;
+      const path = [];
+      intervalTrades.forEach(t => {
+        runningSum += parseFloat(t.pnl) || 0;
+        path.push(runningSum);
+      });
+
+      const open = 0;
+      const close = runningSum;
+      const high = Math.max(0, close, ...path);
+      const low = Math.min(0, close, ...path);
+
+      return {
+        x: timestamp,
+        y: [Math.round(open), Math.round(high), Math.round(low), Math.round(close)]
+      };
+    } else {
+      return {
+        x: timestamp,
+        y: Math.round(dailyPnL[key])
+      };
+    }
   });
 
   // 4. ApexCharts Options
@@ -1695,7 +1729,7 @@ function renderApexProfitChart() {
       data: chartData
     }],
     chart: {
-      type: chartType === 'scatter' ? 'scatter' : chartType,
+      type: chartType,
       height: chartHeight,
       background: 'transparent',
       fontFamily: 'Inter, sans-serif',
@@ -1722,14 +1756,14 @@ function renderApexProfitChart() {
     colors: ['#10b981'],
     stroke: {
       curve: curveStyle,
-      width: (chartType === 'bar' || chartType === 'scatter') ? 0 : 2.5,
+      width: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0 : 2.5,
       colors: ['#10b981']
     },
     fill: {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: (chartType === 'bar' || chartType === 'scatter') ? 0.85 : 0.4,
+        opacityFrom: (chartType === 'bar' || chartType === 'scatter' || chartType === 'candlestick') ? 0.85 : 0.4,
         opacityTo: 0.02,
         stops: [0, 90, 100]
       }
@@ -1738,6 +1772,15 @@ function renderApexProfitChart() {
       bar: {
         borderRadius: 4,
         columnWidth: '70%'
+      },
+      candlestick: {
+        colors: {
+          upward: '#10b981',
+          downward: '#dc2626'
+        },
+        wick: {
+          useFillColor: true
+        }
       }
     },
     dataLabels: {
@@ -1783,6 +1826,7 @@ function renderApexProfitChart() {
     yaxis: {
       labels: {
         formatter: function (value) {
+          if (value === undefined || value === null) return '';
           if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1) + 'M';
           if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'K';
           return 'Rp ' + value;
@@ -1800,6 +1844,7 @@ function renderApexProfitChart() {
       },
       y: {
         formatter: function (val) {
+          if (val === undefined || val === null) return '';
           return 'Rp ' + val.toLocaleString('id-ID');
         }
       }
