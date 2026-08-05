@@ -3403,6 +3403,13 @@ if (customLabelLoad) {
   customLabelLoad.textContent = 'Bitcoin (BTC/IDR)';
 }
 
+// Auto-set profit date pickers to today's date
+const profitTodayStr = new Date().toLocaleDateString('sv-SE');
+const defaultStartInput = document.getElementById('profit-start-date');
+const defaultEndInput = document.getElementById('profit-end-date');
+if (defaultStartInput) defaultStartInput.value = profitTodayStr;
+if (defaultEndInput) defaultEndInput.value = profitTodayStr;
+
 initTheme();
 connectWS();
 loadTrades();
