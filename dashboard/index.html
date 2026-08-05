@@ -727,57 +727,11 @@
             <span style="font-size:12px;font-weight:700;color:var(--header-blue)">💰 GRAFIK ESTIMASI FLOATING PROFIT (POSISI AKTIF)</span>
             <button id="btn-floating-fullscreen" onclick="toggleFloatingFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
           </span>
-        </div>
-
-        <!-- Controls (Multi-row Grid/Flex) -->
-        <div class="floating-controls" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
-          <!-- Row 1: Tajam (Curve) & Area (Type) & Target Position Select -->
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <!-- Target Position Select -->
-            <select id="floating-pos-select" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="all">Semua Posisi</option>
-            </select>
-
-            <!-- Curve style -->
-            <select id="floating-chart-curve" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="straight" selected>Tajam (Grafana)</option>
-              <option value="smooth">Halus (Smooth)</option>
-              <option value="stepline">Tangga (Stepline)</option>
-            </select>
-
-            <!-- Model style -->
-            <select id="floating-chart-type" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="area" selected>Area</option>
-              <option value="line">Line (Garis)</option>
-              <option value="bar">Bar (Batang)</option>
-              <option value="scatter">Scatter (Bintik)</option>
-              <option value="candlestick">Candlestick (Lilin)</option>
-            </select>
-          </div>
-
-          <!-- Row 2: Per Jam & Date pickers & Presets aligned side-by-side -->
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <!-- Grouping (Harian vs Per Jam) -->
-            <select id="floating-grouping" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <option value="daily">📅 Harian</option>
-              <option value="hourly" selected>🕒 Per Jam</option>
-            </select>
-
-            <!-- Custom Date Inputs -->
-            <div style="display:flex;align-items:center;gap:4px">
-              <input type="date" id="floating-start-date" onchange="renderApexFloatingChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-              <span style="font-size:11px;color:var(--muted)">s/d</span>
-              <input type="date" id="floating-end-date" onchange="renderApexFloatingChart()" style="padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
-            </div>
-
-            <!-- Quick Preset Pills -->
-            <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
-              <button id="btn-floating-1d" class="pnl-pill active" onclick="switchFloatingPreset('1d')">1 Hari</button>
-              <button id="btn-floating-7d" class="pnl-pill" onclick="switchFloatingPreset('7d')">7 Hari</button>
-              <button id="btn-floating-30d" class="pnl-pill" onclick="switchFloatingPreset('30d')">30 Hari</button>
-              <button id="btn-floating-all" class="pnl-pill" onclick="switchFloatingPreset('all')">Semua</button>
-            </div>
-          </div>
+          
+          <!-- Only target selector is kept -->
+          <select id="floating-pos-select" onchange="renderApexFloatingChart()" style="width:160px;padding:4px 8px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;cursor:pointer">
+            <option value="all">Semua Posisi</option>
+          </select>
         </div>
 
         <div id="floating-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px">
@@ -2061,21 +2015,7 @@ function toggleFloatingFullscreen() {
   renderApexFloatingChart();
 }
 
-function switchFloatingPreset(preset) {
-  floatingChartPreset = preset;
-  document.querySelectorAll('#floating-profit-chart-card .pnl-pill').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  const activeBtn = document.getElementById(`btn-floating-${preset}`);
-  if (activeBtn) activeBtn.classList.add('active');
 
-  const startInput = document.getElementById('floating-start-date');
-  const endInput = document.getElementById('floating-end-date');
-  if (startInput) startInput.value = '';
-  if (endInput) endInput.value = '';
-
-  renderApexFloatingChart();
-}
 
 async function fetchBinanceKlines(symbol, interval, limit) {
   try {
@@ -2136,46 +2076,15 @@ async function renderApexFloatingChart() {
   if (!container) return;
 
   const targetPair = document.getElementById('floating-pos-select')?.value || 'all';
-  const chartType = document.getElementById('floating-chart-type')?.value || 'area';
-  const curveStyle = document.getElementById('floating-chart-curve')?.value || 'straight';
-  const grouping = document.getElementById('floating-grouping')?.value || 'hourly';
+  const chartType = 'bar';
+  const curveStyle = 'straight';
 
   const isFS = document.getElementById('floating-profit-chart-card')?.classList.contains('fullscreen-card');
   const chartHeight = isFS ? (window.innerHeight - 200) : 220;
 
-  // Determine timeframe and interval
-  let interval = '1h';
-  let limit = 24;
-  
-  if (floatingChartPreset === '1d') {
-    interval = grouping === 'hourly' ? '15m' : '1h';
-    limit = grouping === 'hourly' ? 96 : 24;
-  } else if (floatingChartPreset === '7d') {
-    interval = grouping === 'hourly' ? '1h' : '4h';
-    limit = grouping === 'hourly' ? 168 : 42;
-  } else if (floatingChartPreset === '30d') {
-    interval = grouping === 'hourly' ? '4h' : '1d';
-    limit = grouping === 'hourly' ? 180 : 30;
-  } else if (floatingChartPreset === 'all') {
-    interval = '1d';
-    limit = 60;
-  }
-
-  // Handle custom dates
-  const startInput = document.getElementById('floating-start-date');
-  const endInput = document.getElementById('floating-end-date');
-  if (startInput?.value && endInput?.value) {
-    const startMs = new Date(startInput.value).getTime();
-    const endMs = new Date(endInput.value).getTime();
-    const diffDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 2) {
-      interval = '15m'; limit = 96;
-    } else if (diffDays <= 7) {
-      interval = '1h'; limit = 168;
-    } else {
-      interval = '1d'; limit = Math.min(diffDays, 100);
-    }
-  }
+  // Timeframe forced to last 24 hours with 1-hour interval bars
+  const interval = '1h';
+  const limit = 24;
 
   const usdtIdrRate = parseFloat(allPairsData.find(p => p.symbol === 'usdt_idr')?.last || 16000);
   const positionsToMap = targetPair === 'all' 
@@ -3783,11 +3692,7 @@ const defaultEndInput = document.getElementById('profit-end-date');
 if (defaultStartInput) defaultStartInput.value = profitTodayStr;
 if (defaultEndInput) defaultEndInput.value = profitTodayStr;
 
-// Auto-set floating chart date pickers to today's date
-const defaultFloatStart = document.getElementById('floating-start-date');
-const defaultFloatEnd = document.getElementById('floating-end-date');
-if (defaultFloatStart) defaultFloatStart.value = profitTodayStr;
-if (defaultFloatEnd) defaultFloatEnd.value = profitTodayStr;
+
 
 initTheme();
 connectWS();
