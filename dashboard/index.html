@@ -17,29 +17,29 @@
     --surface: #1a1a1c;     /* Matte Greyish Black Card Surface */
     --surface2: #242426;    /* Slate/Charcoal Input & Row Surface */
     --border: #2a2a2c;      /* Sleek Matte Border */
-    --header-blue: #3b82f6; /* Modern Vibrant Blue */
-    --accent: #2563eb;      /* Primary Royal Blue */
-    --accent2: #60a5fa;     /* Light Sky Blue Accent */
+    --header-blue: #9ca3af; /* Modern Premium Grey */
+    --accent: #4b5563;      /* Primary Slate Grey */
+    --accent2: #d1d5db;     /* Light Metallic Grey Accent */
     --green: #10b981;       /* Vibrant Emerald Trading Green */
     --red: #ef4444;         /* Vibrant Coral Trading Red */
     --yellow: #f59e0b;      /* Warning Amber Yellow */
     --text: #e5e7eb;        /* Soft White Text */
-    --muted: #9ca3af;       /* Neutral Muted Text */
+    --muted: #6b7280;       /* Neutral Muted Text */
   }
 
   [data-theme="light"] {
-    --bg: #f8fafc;          /* Crisp Clean Light Background */
+    --bg: #f3f4f6;          /* Crisp Clean Light Gray Background */
     --surface: #ffffff;     /* Pure White Card Surface */
-    --surface2: #f1f5f9;    /* Light Gray Input Surface */
+    --surface2: #e5e7eb;    /* Light Gray Input Surface */
     --border: #cbd5e1;      /* Slate Border */
-    --header-blue: #0088cc; /* Indodax Blue */
-    --accent: #0066ff;      /* Accent Blue */
-    --accent2: #0284c7;     /* Dark Cyan Accent */
+    --header-blue: #4b5563; /* Dark Grey Header */
+    --accent: #374151;      /* Deep Slate Grey */
+    --accent2: #6b7280;     /* Medium Grey Accent */
     --green: #059669;       /* Light Mode Trading Green */
     --red: #dc2626;         /* Light Mode Trading Red */
     --yellow: #d97706;      /* Light Mode Warning Yellow */
-    --text: #0f172a;        /* Deep Slate Dark Text */
-    --muted: #64748b;       /* Slate Subtitle Text */
+    --text: #111827;        /* Deep Slate Dark Text */
+    --muted: #6b7280;       /* Slate Subtitle Text */
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -144,7 +144,7 @@
     font-size: 12px; font-weight: 500; color: var(--muted);
     text-decoration: none; transition: all .15s; cursor: pointer;
   }
-  .menu-item:hover, .menu-item.active { background: rgba(0, 136, 204, 0.12); color: var(--header-blue); font-weight: 600; }
+  .menu-item:hover, .menu-item.active { background: rgba(156, 163, 175, 0.12); color: var(--header-blue); font-weight: 600; }
 
   /* Main Workspace Layout */
   main.workspace { flex: 1; padding: 16px 20px; display: flex; gap: 16px; width: 100%; max-width: 100%; overflow-x: hidden; }
@@ -195,7 +195,7 @@
     background: var(--header-blue);
     color: #ffffff;
     font-weight: 700;
-    box-shadow: 0 2px 6px rgba(0, 136, 204, 0.35);
+    box-shadow: 0 2px 6px rgba(156, 163, 175, 0.35);
   }
 
   /* Mobile Responsive Enhancements for Daily Report Panel */
@@ -286,7 +286,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: rgba(0, 136, 204, 0.2);
+    background: rgba(156, 163, 175, 0.2);
     color: var(--header-blue);
     font-size: 10px;
     font-weight: 700;
