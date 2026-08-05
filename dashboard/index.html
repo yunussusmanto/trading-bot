@@ -1950,7 +1950,7 @@ function toggleChartFullscreen() {
   }
 }
 
-// Exit profit chart fullscreen, candlestick chart fullscreen, or floating profit chart fullscreen on Escape key press
+// Exit profit chart fullscreen or candlestick chart fullscreen on Escape key press
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (isProfitFullscreen) {
@@ -1958,7 +1958,6 @@ document.addEventListener('keydown', (e) => {
     }
     if (isChartFullscreen) {
       toggleChartFullscreen();
-    }
     }
   }
 });
