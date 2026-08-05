@@ -11,17 +11,17 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #0c0d0e;          /* Sleek Jet Black (No blue tint) */
-    --surface: #17181a;     /* Pure Charcoal Dark Surface */
-    --surface2: #222427;    /* Slate/Charcoal Input & Row Surface */
-    --border: #2d3035;      /* Sleek Neutral Dark Border */
+    --bg: #121212;          /* Matte Dark Background (Hitam Dop) */
+    --surface: #1a1a1c;     /* Matte Greyish Black Card Surface */
+    --surface2: #242426;    /* Slate/Charcoal Input & Row Surface */
+    --border: #2a2a2c;      /* Sleek Matte Border */
     --header-blue: #3b82f6; /* Modern Vibrant Blue */
     --accent: #2563eb;      /* Primary Royal Blue */
     --accent2: #60a5fa;     /* Light Sky Blue Accent */
     --green: #10b981;       /* Vibrant Emerald Trading Green */
     --red: #ef4444;         /* Vibrant Coral Trading Red */
     --yellow: #f59e0b;      /* Warning Amber Yellow */
-    --text: #f3f4f6;        /* High-Contrast Soft White */
+    --text: #e5e7eb;        /* Soft White Text */
     --muted: #9ca3af;       /* Neutral Muted Text */
   }
 
@@ -843,7 +843,7 @@
           <span>📈 Grafik Candlestick Real-Time (Indodax IDR)</span>
           <span id="chart-pair-name" style="color:var(--accent2);font-weight:700">BTC/IDR</span>
         </div>
-        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#0c0d0e;border:1px solid var(--border);position:relative">
+        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
           <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
         </div>
       </div>
@@ -1781,7 +1781,7 @@ function drawNativeCandleChart(candles) {
     canvas.height = height;
   }
 
-  ctx.fillStyle = '#0c0d0e';
+  ctx.fillStyle = '#121212';
   ctx.fillRect(0, 0, width, height);
 
   if (!candles || !candles.length) return;
