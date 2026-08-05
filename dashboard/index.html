@@ -2278,10 +2278,13 @@ function loadTradingViewChart(pair) {
   const container = document.getElementById('tradingview-widget-div');
   if (!container) return;
 
+  const isFS = document.getElementById('candlestick-card')?.classList.contains('fullscreen-card');
+  const tvHeight = isFS ? (window.innerHeight - 100) : 750;
+
   if (typeof TradingView !== 'undefined') {
     new TradingView.widget({
       "width": "100%",
-      "height": "100%",
+      "height": tvHeight,
       "symbol": tvSymbol,
       "interval": "15",
       "timezone": "Asia/Jakarta",
