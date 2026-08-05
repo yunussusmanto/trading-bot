@@ -663,31 +663,6 @@
           </div>
         </div>
       </div>
-      <!-- Realized Profit Per Coin Summary Card -->
-      <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px;">
-            <span>📈 Laporan Profit Realisasi Per Koin</span>
-          </div>
-          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
-        </div>
-
-        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-          <table class="indodax-table">
-            <thead>
-              <tr>
-                <th>Coin Pair</th>
-                <th>Total Transaksi (Sells)</th>
-                <th>Total Profit Realisasi (Rp)</th>
-                <th>Rata-rata Profit / Transaksi</th>
-              </tr>
-            </thead>
-            <tbody id="coin-performance-tbody">
-              <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:12px;">Memuat performa profit per koin...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       <!-- Open Positions (Pro Trading Dashboard Card) -->
       <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
@@ -730,6 +705,34 @@
               <tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Realized Profit Per Coin Summary Card -->
+      <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
+            <span>📈 Laporan Profit Realisasi Per Koin</span>
+          </div>
+          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
+        </div>
+
+        <div class="card-body-collapsible">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="indodax-table">
+              <thead>
+                <tr>
+                  <th>Coin Pair</th>
+                  <th>Total Transaksi (Sells)</th>
+                  <th>Total Profit Realisasi (Rp)</th>
+                  <th>Rata-rata Profit / Transaksi</th>
+                </tr>
+              </thead>
+              <tbody id="coin-performance-tbody">
+                <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:12px;">Memuat performa profit per koin...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -3336,7 +3339,7 @@ async function makeCardsCollapsible() {
     console.error('Failed to load collapsed states from server:', e);
   }
 
-  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card', 'coin-performance-report-card'];
+  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card'];
   excludedIds.forEach(id => {
     const cardEl = document.getElementById(id);
     if (cardEl) {
