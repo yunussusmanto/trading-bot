@@ -11,18 +11,18 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #090d16;          /* Deep Black */
-    --surface: #111622;     /* Dark Card Surface */
-    --surface2: #1a202c;    /* Row / Input Surface */
-    --border: #232d3f;      /* Sleek Dark Border */
-    --header-blue: #0088cc; /* Indodax Header Blue */
-    --accent: #0066ff;      /* Primary Accent Blue */
-    --accent2: #00b4d8;     /* Cyan Accent */
-    --green: #00c087;       /* Trading Green */
-    --red: #ff4d4d;         /* Trading Red */
-    --yellow: #f59e0b;      /* Warning Yellow */
-    --text: #f8fafc;        /* Main Text */
-    --muted: #94a3b8;       /* Subtitle / Muted Text */
+    --bg: #0c0d0e;          /* Sleek Jet Black (No blue tint) */
+    --surface: #17181a;     /* Pure Charcoal Dark Surface */
+    --surface2: #222427;    /* Slate/Charcoal Input & Row Surface */
+    --border: #2d3035;      /* Sleek Neutral Dark Border */
+    --header-blue: #3b82f6; /* Modern Vibrant Blue */
+    --accent: #2563eb;      /* Primary Royal Blue */
+    --accent2: #60a5fa;     /* Light Sky Blue Accent */
+    --green: #10b981;       /* Vibrant Emerald Trading Green */
+    --red: #ef4444;         /* Vibrant Coral Trading Red */
+    --yellow: #f59e0b;      /* Warning Amber Yellow */
+    --text: #f3f4f6;        /* High-Contrast Soft White */
+    --muted: #9ca3af;       /* Neutral Muted Text */
   }
 
   [data-theme="light"] {
@@ -819,7 +819,7 @@
           <span>📈 Grafik Candlestick Real-Time (Indodax IDR)</span>
           <span id="chart-pair-name" style="color:var(--accent2);font-weight:700">BTC/IDR</span>
         </div>
-        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#090D16;border:1px solid var(--border);position:relative">
+        <div style="height:360px;width:100%;border-radius:8px;overflow:hidden;background:#0c0d0e;border:1px solid var(--border);position:relative">
           <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
         </div>
       </div>
@@ -1757,7 +1757,7 @@ function drawNativeCandleChart(candles) {
     canvas.height = height;
   }
 
-  ctx.fillStyle = '#090D16';
+  ctx.fillStyle = '#0c0d0e';
   ctx.fillRect(0, 0, width, height);
 
   if (!candles || !candles.length) return;
