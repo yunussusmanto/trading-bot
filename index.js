@@ -815,6 +815,21 @@ app.get('/api/trades', async (req, res) => {
   }
 });
 
+// Get profit report grouped by coin pair
+app.get('/api/reports/coins', async (req, res) => {
+  try {
+    const data = await db.getProfitPerCoin();
+    const formatted = data.map(r => ({
+      pair: (r.pair || '').toUpperCase(),
+      tradeCount: parseInt(r.trade_count || 0),
+      totalProfit: parseFloat(r.total_profit || 0)
+    }));
+    res.json(formatted);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // CSV Export
 app.get('/api/trades/export', async (req, res) => {
   try {

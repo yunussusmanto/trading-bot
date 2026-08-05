@@ -233,4 +233,20 @@ async function saveSetting(key, value) {
   } catch (_) {}
 }
 
-module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, getSetting, saveSetting };
+async function getProfitPerCoin() {
+  try {
+    const res = await pool.query(`
+      SELECT 
+        pair, 
+        COUNT(*) as trade_count, 
+        SUM(pnl) as total_profit
+      FROM trades 
+      WHERE action = 'SELL' 
+      GROUP BY pair 
+      ORDER BY total_profit DESC
+    `);
+    return res.rows;
+  } catch (_) { return []; }
+}
+
+module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, getSetting, saveSetting, getProfitPerCoin };

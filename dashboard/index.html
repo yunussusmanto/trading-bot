@@ -663,6 +663,31 @@
           </div>
         </div>
       </div>
+      <!-- Realized Profit Per Coin Summary Card -->
+      <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px;">
+            <span>📈 Laporan Profit Realisasi Per Koin</span>
+          </div>
+          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
+        </div>
+
+        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+          <table class="indodax-table">
+            <thead>
+              <tr>
+                <th>Coin Pair</th>
+                <th>Total Transaksi (Sells)</th>
+                <th>Total Profit Realisasi (Rp)</th>
+                <th>Rata-rata Profit / Transaksi</th>
+              </tr>
+            </thead>
+            <tbody id="coin-performance-tbody">
+              <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:12px;">Memuat performa profit per koin...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <!-- Open Positions (Pro Trading Dashboard Card) -->
       <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
@@ -3265,6 +3290,40 @@ async function loadOpenOrders() {
   }
 }
 
+async function loadCoinPerformanceReport() {
+  try {
+    const r = await fetch('/api/reports/coins');
+    const data = await r.json();
+    const tbody = document.getElementById('coin-performance-tbody');
+    if (!tbody) return;
+
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:14px">
+        Belum ada realized profit terdaftar dari penjualan koin.
+      </td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = data.map(r => {
+      const isProfit = r.totalProfit >= 0;
+      const profitCls = isProfit ? 'color:var(--green)' : 'color:var(--red)';
+      const avgProfit = r.tradeCount > 0 ? (r.totalProfit / r.tradeCount) : 0;
+      const avgProfitCls = avgProfit >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+
+      return `
+        <tr>
+          <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${r.pair}</td>
+          <td style="font-weight:600">${r.tradeCount}x Penjualan</td>
+          <td style="font-weight:700;${profitCls}">${isProfit ? '+' : ''}${fmtIDR(r.totalProfit)}</td>
+          <td style="font-weight:600;${avgProfitCls}">${avgProfit >= 0 ? '+' : ''}${fmtIDR(avgProfit)}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('loadCoinPerformanceReport error:', e);
+  }
+}
+
 async function makeCardsCollapsible() {
   let serverStates = {};
   try {
@@ -3277,7 +3336,7 @@ async function makeCardsCollapsible() {
     console.error('Failed to load collapsed states from server:', e);
   }
 
-  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card', 'floating-profit-chart-card'];
+  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card', 'coin-performance-report-card'];
   excludedIds.forEach(id => {
     const cardEl = document.getElementById(id);
     if (cardEl) {
@@ -3428,12 +3487,14 @@ loadPnL();
 loadEquity();
 loadPositions();
 loadOpenOrders();
+loadCoinPerformanceReport();
 loadBots();
 makeCardsCollapsible();
 setInterval(loadOrderBook, 8000);
 setInterval(loadPnL, 30000);
 setInterval(loadPositions, 10000);
 setInterval(loadOpenOrders, 5000);
+setInterval(loadCoinPerformanceReport, 30000);
 setInterval(loadBots, 5000);
 setInterval(updateDailyProfitChart, 60000);
 </script>
