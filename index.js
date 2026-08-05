@@ -768,7 +768,7 @@ app.get('/api/open-orders', async (req, res) => {
     const targetPair = req.query.pair;
     const pairsToCheck = (targetPair && targetPair !== 'all') 
       ? [targetPair.toLowerCase()] 
-      : (Object.keys(activeBots).length ? Object.keys(activeBots) : ['bico_idr', 'koma_idr', 'xrp_idr', 'sol_idr', 'btc_idr', 'eth_idr']);
+      : (Object.keys(bots).length ? Object.keys(bots) : ['bico_idr', 'koma_idr', 'xrp_idr', 'sol_idr', 'btc_idr', 'eth_idr']);
 
     let allOrders = [];
     for (const pair of pairsToCheck) {
