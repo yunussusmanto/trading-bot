@@ -766,20 +766,32 @@ app.get('/api/bot/status', (req, res) => {
 app.get('/api/open-orders', async (req, res) => {
   try {
     const targetPair = req.query.pair;
-    const pairsToCheck = (targetPair && targetPair !== 'all') 
-      ? [targetPair.toLowerCase()] 
-      : (Object.keys(bots).length ? Object.keys(bots) : ['bico_idr', 'koma_idr', 'xrp_idr', 'sol_idr', 'btc_idr', 'eth_idr']);
-
     let allOrders = [];
-    for (const pair of pairsToCheck) {
-      try {
-        await waitRateLimit();
-        const data = await indodax.openOrders(pair);
-        if (data && data.orders && data.orders.length) {
-          const formatted = data.orders.map(o => ({ ...o, pair: pair.toUpperCase() }));
-          allOrders = allOrders.concat(formatted);
+    
+    if (targetPair && targetPair !== 'all') {
+      await waitRateLimit();
+      const data = await indodax.openOrders(targetPair.toLowerCase());
+      if (data && data.orders && data.orders.length) {
+        allOrders = data.orders.map(o => ({ ...o, pair: targetPair.toUpperCase() }));
+      }
+    } else {
+      await waitRateLimit();
+      const data = await indodax.openOrders();
+      if (data && data.orders) {
+        if (Array.isArray(data.orders)) {
+          allOrders = data.orders.map(o => ({ ...o, pair: (o.pair || 'CRYPTO').toUpperCase() }));
+        } else {
+          for (const [pairName, ordersList] of Object.entries(data.orders)) {
+            if (Array.isArray(ordersList)) {
+              const formatted = ordersList.map(o => ({ 
+                ...o, 
+                pair: pairName.toUpperCase() 
+              }));
+              allOrders = allOrders.concat(formatted);
+            }
+          }
         }
-      } catch (e) {}
+      }
     }
     res.json(allOrders);
   } catch (e) { res.json([]); }
