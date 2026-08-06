@@ -693,9 +693,9 @@
             <thead>
               <tr>
                 <th>Pair</th>
-                <th>Jumlah Koin</th>
                 <th>Modal Beli (Rp)</th>
                 <th>Avg Entry</th>
+                <th>Jumlah Koin</th>
                 <th>Harga Live</th>
                 <th>Nilai Live (Rp)</th>
                 <th>Untung / Rugi (P&L)</th>
@@ -3125,9 +3125,9 @@ async function loadPositions() {
       return `
         <tr style="cursor:pointer" onclick="selectPairFromMarket('${p.pair}')" title="Klik untuk tampilkan grafik koin ini">
           <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
-          <td style="font-weight:600">${amountText}</td>
           <td style="font-weight:600">${capitalStr}</td>
           <td>${fmtIDR(p.entryPrice)}</td>
+          <td style="font-weight:600">${amountText}</td>
           <td style="font-weight:600">${fmtIDR(p.currentPrice)}</td>
           <td style="font-weight:600">${liveValStr}</td>
           <td>
