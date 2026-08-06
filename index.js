@@ -797,6 +797,25 @@ app.get('/api/open-orders', async (req, res) => {
   } catch (e) { res.json([]); }
 });
 
+// Cancel an open order on Indodax
+app.post('/api/order/cancel', async (req, res) => {
+  try {
+    const { pair, orderId, type } = req.body;
+    if (!pair || !orderId || !type) {
+      return res.status(400).json({ error: 'Missing parameters' });
+    }
+    await waitRateLimit();
+    const result = await indodax.cancelOrder({ 
+      pair: pair.toLowerCase(), 
+      orderId: orderId, 
+      type: type.toLowerCase() 
+    });
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Get balance
 app.get('/api/balance', async (req, res) => {
   try {
