@@ -58,6 +58,13 @@ async function pollTelegramCommands() {
       const msg = update.message;
       if (!msg || !msg.text) continue;
 
+      // Security check: only allow commands from the authorized chat ID
+      const senderChatId = String(msg.chat.id);
+      if (senderChatId !== String(TELEGRAM_CHAT_ID)) {
+        console.warn(`[TELEGRAM] Unauthorized command from chat ID ${senderChatId} ignored.`);
+        continue;
+      }
+
       const text = msg.text.trim();
       if (text === '/status') {
         const activeList = Object.entries(bots).filter(([, b]) => b.running);
