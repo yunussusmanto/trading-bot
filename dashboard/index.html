@@ -3120,8 +3120,7 @@ async function loadPositions() {
       const capitalStr = !showPnL ? '••••••••' : fmtIDR(p.amount);
       const liveValStr = !showPnL ? '••••••••' : fmtIDR(p.liveValue || (p.amount + p.pnl));
       
-      const coinSymbol = p.pair.replace('_idr', '').toUpperCase();
-      const amountText = `${(p.coinAmount || 0).toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol}`;
+      const amountText = (p.coinAmount || 0).toLocaleString('id-ID', { maximumFractionDigits: 8 });
 
       return `
         <tr style="cursor:pointer" onclick="selectPairFromMarket('${p.pair}')" title="Klik untuk tampilkan grafik koin ini">
