@@ -3294,7 +3294,7 @@ async function loadOpenOrders() {
       let estTotalVal = 0;
 
       if (typeUpper === 'BUY') {
-        const idrAmount = parseFloat(o.remain_rp || o.order_rp || 0);
+        const idrAmount = parseFloat(o.remain_idr || o.order_idr || o.remain_rp || o.order_rp || 0);
         estTotalVal = idrAmount;
         if (priceVal > 0) {
           coinAmount = idrAmount / priceVal;
