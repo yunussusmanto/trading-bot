@@ -107,7 +107,7 @@ async function pollTelegramCommands() {
 
 setInterval(pollTelegramCommands, 4000);
 
-// ── Daily Audit Summary Report (Sent at 23:00 WIB / 16:00 UTC) ───
+// ── Daily Audit Summary Report (Sent at 23:59 WIB / 16:59 UTC) ───
 let lastReportDate = '';
 setInterval(async () => {
   const now = new Date();
@@ -115,8 +115,8 @@ setInterval(async () => {
   const utcMinutes = now.getUTCMinutes();
   const dateStr = now.toDateString();
 
-  // 23:00 WIB = 16:00 UTC
-  if (utcHours === 16 && utcMinutes === 0 && lastReportDate !== dateStr) {
+  // 23:59 WIB = 16:59 UTC
+  if (utcHours === 16 && utcMinutes === 59 && lastReportDate !== dateStr) {
     lastReportDate = dateStr;
     const allTrades = await db.getTrades(200);
     const todayTrades = allTrades.filter(t => new Date(t.timestamp).toDateString() === dateStr);
@@ -130,7 +130,7 @@ setInterval(async () => {
       balSummary = `\n💰 Saldo IDR: Rp ${parseFloat(info.balance?.idr || 0).toLocaleString('id-ID')}`;
     } catch (_) {}
 
-    sendTelegram(`📊 <b>LAPORAN HARIAN TRADING (23:00 WIB)</b>\n\n• Tanggal: ${dateStr}\n• Total Eksekusi: ${todayTrades.length} trade\n• Win Rate: ${winRate}%\n• Total PnL Hari Ini: <b>Rp ${Math.round(totalPnl).toLocaleString('id-ID')}</b>${balSummary}\n\n<i>Robot terus berjaga 24 jam di VPS.</i>`);
+    sendTelegram(`📊 <b>LAPORAN HARIAN TRADING (23:59 WIB)</b>\n\n• Tanggal: ${dateStr}\n• Total Eksekusi: ${todayTrades.length} trade\n• Win Rate: ${winRate}%\n• Total PnL Hari Ini: <b>Rp ${Math.round(totalPnl).toLocaleString('id-ID')}</b>${balSummary}\n\n<i>Robot terus berjaga 24 jam di VPS.</i>`);
   }
 }, 30000);
 
