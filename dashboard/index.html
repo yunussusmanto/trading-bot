@@ -3280,11 +3280,26 @@ async function loadOpenOrders() {
       const priceVal = parseFloat(o.price || 0);
       const price = fmtIDR(priceVal);
       
-      const coinSymbol = (o.pair || 'CRYPTO').split('_')[0].toUpperCase();
-      const coinAmount = parseFloat(o.order_btc || o.remain_btc || o.amount || 0);
-      const amountText = `${coinAmount.toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol}`;
+      const rawCoinSymbol = (o.pair || 'CRYPTO').split('_')[0].toLowerCase();
+      const coinSymbolUpper = rawCoinSymbol.toUpperCase();
       
-      const estTotalVal = priceVal * coinAmount;
+      let coinAmount = 0;
+      let estTotalVal = 0;
+
+      if (typeUpper === 'BUY') {
+        const idrAmount = parseFloat(o.remain_rp || o.order_rp || 0);
+        estTotalVal = idrAmount;
+        if (priceVal > 0) {
+          coinAmount = idrAmount / priceVal;
+        }
+      } else {
+        const coinAmountKey = `remain_${rawCoinSymbol}`;
+        const coinAmountKeyAlt = `order_${rawCoinSymbol}`;
+        coinAmount = parseFloat(o[coinAmountKey] || o[coinAmountKeyAlt] || o.amount || 0);
+        estTotalVal = coinAmount * priceVal;
+      }
+      
+      const amountText = `${coinAmount.toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbolUpper}`;
       const estTotal = fmtIDR(estTotalVal);
 
       return `
