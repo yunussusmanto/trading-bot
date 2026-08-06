@@ -693,6 +693,7 @@
             <thead>
               <tr>
                 <th>Pair</th>
+                <th>Jumlah Koin</th>
                 <th>Modal Beli (Rp)</th>
                 <th>Avg Entry</th>
                 <th>Harga Live</th>
@@ -702,7 +703,7 @@
               </tr>
             </thead>
             <tbody id="positions-tbody">
-              <tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
+              <tr><td colspan="8" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
             </tbody>
           </table>
         </div>
@@ -3093,7 +3094,7 @@ async function loadPositions() {
       if (candleList) {
         candleList.innerHTML = '<div style="color:var(--muted); font-size:11px; padding: 4px 0;">Belum ada koin berjalan</div>';
       }
-      tb.innerHTML = `<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:14px">
+      tb.innerHTML = `<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:14px">
         <span style="color:var(--green);font-weight:700">🟢 6 Bot Trading Aktif Standby 24/7 (BICO, KOMA, XRP, SOL, BTC, ETH)</span><br>
         <span style="font-size:10px">Semua modal aman di IDR — Siap otomatis beli saat harga terdiskon (Dip Buying)</span>
       </td></tr>`; 
@@ -3118,10 +3119,14 @@ async function loadPositions() {
 
       const capitalStr = !showPnL ? '••••••••' : fmtIDR(p.amount);
       const liveValStr = !showPnL ? '••••••••' : fmtIDR(p.liveValue || (p.amount + p.pnl));
+      
+      const coinSymbol = p.pair.replace('_idr', '').toUpperCase();
+      const amountText = `${(p.coinAmount || 0).toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol}`;
 
       return `
         <tr style="cursor:pointer" onclick="selectPairFromMarket('${p.pair}')" title="Klik untuk tampilkan grafik koin ini">
           <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
+          <td style="font-weight:600">${amountText}</td>
           <td style="font-weight:600">${capitalStr}</td>
           <td>${fmtIDR(p.entryPrice)}</td>
           <td style="font-weight:600">${fmtIDR(p.currentPrice)}</td>
