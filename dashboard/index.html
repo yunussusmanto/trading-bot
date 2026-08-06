@@ -1139,8 +1139,8 @@
       <!-- Mini Bar Chart Performance Panel -->
       <div id="mini-candles-card" class="card">
         <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
-        <div id="mini-candles-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(75px, 1fr)); gap: 8px; padding: 4px 0;">
-          <div style="color:var(--muted); font-size:11px; grid-column: 1 / -1;">Belum ada koin berjalan</div>
+        <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:8px; padding: 4px 0;">
+          <div style="color:var(--muted); font-size:11px; text-align:center;">Belum ada koin berjalan</div>
         </div>
       </div>
 
@@ -3092,7 +3092,7 @@ async function loadPositions() {
       if (badge) badge.textContent = '0 Koin';
       if (summaryBar) summaryBar.style.display = 'none';
       if (candleList) {
-        candleList.innerHTML = '<div style="color:var(--muted); font-size:11px; padding: 4px 0;">Belum ada koin berjalan</div>';
+        candleList.innerHTML = '<div style="color:var(--muted); font-size:11px; padding: 4px 0; text-align:center;">Belum ada koin berjalan</div>';
       }
       tb.innerHTML = `<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:14px">
         <span style="color:var(--green);font-weight:700">🟢 6 Bot Trading Aktif Standby 24/7 (BICO, KOMA, XRP, SOL, BTC, ETH)</span><br>
@@ -3140,7 +3140,7 @@ async function loadPositions() {
       `;
     }).join('');
 
-    // Render Side-Column Dedicated Mini Candlestick Panel
+    // Render Side-Column Dedicated Mini Bar Chart Panel
     if (candleList && Array.isArray(d) && d.length) {
       candleList.innerHTML = d.map(p => {
         const diffPct = p.pnlPercent !== undefined ? parseFloat(p.pnlPercent) : (((p.currentPrice - p.entryPrice) / p.entryPrice) * 100);
@@ -3149,31 +3149,20 @@ async function loadPositions() {
         const pnlText = `${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(2)}%`;
         const pnlColor = diffPct >= 0 ? 'var(--green)' : 'var(--red)';
 
-        // Calculate vertical body dimensions inside a 60px height container (break-even at 30px)
-        let bodyHeight = 0;
-        let bodyTop = 30; // center
-        let barColor = 'var(--muted)';
-        
-        if (diffPct > 0) {
-          bodyHeight = Math.min(diffPct * 1.5, 30);
-          bodyTop = 30 - bodyHeight;
-          barColor = 'var(--green)';
-        } else if (diffPct < 0) {
-          bodyHeight = Math.min(Math.abs(diffPct) * 1.5, 30);
-          bodyTop = 30;
-          barColor = 'var(--red)';
-        }
+        const barWidth = Math.min(Math.max(Math.abs(diffPct) * 15, 4), 100);
+        const fillStyle = diffPct >= 0 
+          ? 'background: #254131; border-right: 2px solid var(--green);' 
+          : 'background: #412525; border-right: 2px solid var(--red);';
 
         return `
-          <div onclick="selectPairFromMarket('${p.pair}')" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; background:var(--surface2); padding:8px 4px; border-radius:6px; border:1px solid var(--border); text-align:center;" title="Klik untuk tampilkan grafik koin ini">
-            <span style="font-weight:700; font-size:11px; color:var(--accent2); margin-bottom:4px;">${coinSymbol}</span>
-            <div style="height: 60px; width: 18px; position: relative; margin: 4px 0; overflow: visible;">
-              <!-- Center break-even line -->
-              <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.45); transform: translateY(-50%);"></div>
-              <!-- Vertical Bar (Batang) -->
-              <div style="position: absolute; left: calc(50% - 6px); top: ${bodyTop}px; width: 12px; height: ${bodyHeight}px; background: ${barColor}; border-radius: 2px; box-shadow: 0 0 8px ${barColor}; z-index: 2;"></div>
+          <div onclick="selectPairFromMarket('${p.pair}')" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 8px; background:var(--surface2); border-radius:6px; border:1px solid var(--border); transition: background 0.15s;" title="Klik untuk tampilkan grafik koin ini" class="progress-bar-row">
+            <div style="width:70px; font-weight:700; font-size:12px; color:var(--text); text-align:left; text-transform:uppercase;">${coinSymbol}</div>
+            
+            <div style="flex:1; height:12px; background:#18181a; border-radius:4px; overflow:hidden; border:1px solid var(--border); position:relative;">
+              <div style="width:${barWidth}%; height:100%; ${fillStyle} border-radius:3px; transition:width 0.3s ease;"></div>
             </div>
-            <span style="font-size:10px; font-weight:700; color:${pnlColor}; font-family:'JetBrains Mono',monospace;">${pnlText}</span>
+            
+            <div style="width:70px; text-align:right; font-size:12px; font-weight:700; color:${pnlColor}; font-family:'JetBrains Mono',monospace;">${pnlText}</div>
           </div>
         `;
       }).join('');
