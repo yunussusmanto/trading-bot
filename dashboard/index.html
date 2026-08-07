@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.6</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.7</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -846,39 +846,8 @@
         </div>
 
         <!-- Canvas Visual Depth Area Chart -->
-        <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
+        <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--border)">
           <canvas id="depth-chart-canvas" style="width:100%;height:100%;display:block"></canvas>
-        </div>
-
-        <!-- Market Beli and Market Jual Tables (responsive grid: side-by-side on desktop, stacked on mobile) -->
-        <div class="depth-tables-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">🟢 Market Beli (Bids)</div>
-            <div style="overflow-x:auto;width:100%">
-              <table class="indodax-table" style="width:100%;white-space:nowrap">
-                <thead>
-                  <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
-                </thead>
-                <tbody id="bids-tbody">
-                  <tr><td colspan="3" style="color:var(--muted)">Loading market beli...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">🔴 Market Jual (Asks)</div>
-            <div style="overflow-x:auto;width:100%">
-              <table class="indodax-table" style="width:100%;white-space:nowrap">
-                <thead>
-                  <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
-                </thead>
-                <tbody id="asks-tbody">
-                  <tr><td colspan="3" style="color:var(--muted)">Loading market jual...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
       </div>
         <div id="manual-trade-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
