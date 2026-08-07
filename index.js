@@ -204,6 +204,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(session({
+  name: process.env.SESSION_NAME || 'trading_bot_sid',
   secret: process.env.SESSION_SECRET || 'trading-bot-secret-2026',
   resave: false,
   saveUninitialized: false,
