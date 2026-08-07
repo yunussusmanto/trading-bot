@@ -395,13 +395,30 @@
       gap: 16px;
     }
     .app-shell { flex-direction: column; }
-    aside.sidebar { display: none; }
-    main.workspace { flex-direction: column; padding: 10px; gap: 12px; }
+    aside.sidebar {
+      display: none;
+      position: fixed;
+      top: 50px;
+      left: 0;
+      width: 260px;
+      height: calc(100vh - 50px);
+      z-index: 99999;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      box-shadow: 4px 0 20px rgba(0,0,0,0.6);
+      overflow-y: auto;
+      padding: 16px;
+    }
+    body.sidebar-open aside.sidebar {
+      display: flex !important;
+      flex-direction: column;
+    }
+    main.workspace { flex-direction: column; padding: 10px; gap: 12px; width: 100%; min-width: 100%; }
     .side-column { width: 100% !important; min-width: 100% !important; }
     .form-grid { grid-template-columns: 1fr; }
     .pnl-grid { grid-template-columns: repeat(2, 1fr); }
     nav.topbar { padding: 8px 12px; }
-    .brand-logo { font-size: 16px; }
+    .brand-logo { font-size: 14px; }
     .top-right { gap: 6px; }
     .pair-banner { flex-direction: column; align-items: flex-start; }
     .ticker-metrics { grid-template-columns: repeat(2, 1fr); display: grid; width: 100%; gap: 10px; }
@@ -552,7 +569,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.2</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.3</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -3224,15 +3241,35 @@ function initSidebarState() {
 }
 
 function toggleSidebar() {
-  const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
-  localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
-  updateSidebarToggleBtn(isCollapsed);
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    const isOpen = document.body.classList.toggle('sidebar-open');
+    document.body.classList.remove('sidebar-collapsed');
+    updateSidebarToggleBtn(!isOpen);
+  } else {
+    document.body.classList.remove('sidebar-open');
+    const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed ? 'true' : 'false');
+    updateSidebarToggleBtn(isCollapsed);
+  }
 }
 
 function updateSidebarToggleBtn(collapsed) {
   const icon = document.getElementById('sidebar-toggle-icon');
   if (icon) icon.textContent = collapsed ? '▶' : '◀';
 }
+
+// Close mobile drawer when clicking outside
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768 && document.body.classList.contains('sidebar-open')) {
+    const sidebar = document.querySelector('aside.sidebar');
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    if (sidebar && !sidebar.contains(e.target) && toggleBtn && !toggleBtn.contains(e.target)) {
+      document.body.classList.remove('sidebar-open');
+      updateSidebarToggleBtn(true);
+    }
+  }
+});
 
 window.addEventListener('DOMContentLoaded', () => {
   initTheme();
