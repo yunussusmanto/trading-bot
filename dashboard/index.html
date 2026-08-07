@@ -814,11 +814,11 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); padding: 6px 4px; border-radius: 6px;">
                   <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); padding: 6px 4px; border-radius: 6px;">
                   <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
@@ -892,11 +892,11 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); padding: 6px 4px; border-radius: 6px;">
                   <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); padding: 6px 4px; border-radius: 6px;">
                   <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
