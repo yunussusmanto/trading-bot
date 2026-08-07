@@ -3920,6 +3920,7 @@ async function makeCardsCollapsible() {
     try {
       if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
       if (excludedIds.includes(card.id)) return;
+      if (card.querySelector('.card-body-collapsible')) return;
       
       // Assign a persistent id if not present
       if (!card.id) {
@@ -4048,25 +4049,32 @@ if (defaultEndInput) defaultEndInput.value = profitTodayStr;
 
 
 
-initTheme();
-connectWS();
-loadTrades();
-loadPairs();
-loadBalance();
-loadPnL();
-loadEquity();
-loadPositions();
-loadOpenOrders();
-loadCoinPerformanceReport();
-loadBots();
-makeCardsCollapsible();
-setInterval(loadOrderBook, 8000);
-setInterval(loadPnL, 30000);
-setInterval(loadPositions, 10000);
-setInterval(loadOpenOrders, 5000);
-setInterval(loadCoinPerformanceReport, 30000);
-setInterval(loadBots, 5000);
-setInterval(updateDailyProfitChart, 60000);
+async function initApp() {
+  initTheme();
+  await loadUserProfile();
+
+  connectWS();
+  loadTrades();
+  loadPairs();
+  loadBalance();
+  loadPnL();
+  loadEquity();
+  loadPositions();
+  loadOpenOrders();
+  loadCoinPerformanceReport();
+  loadBots();
+  makeCardsCollapsible();
+
+  setInterval(loadOrderBook, 8000);
+  setInterval(loadPnL, 30000);
+  setInterval(loadPositions, 10000);
+  setInterval(loadOpenOrders, 5000);
+  setInterval(loadCoinPerformanceReport, 30000);
+  setInterval(loadBots, 5000);
+  setInterval(updateDailyProfitChart, 60000);
+}
+
+initApp();
 
 // --- Manual Trade Helper Functions ---
 let showManualNominals = false;
@@ -4551,8 +4559,6 @@ async function deleteUserAccount(userId, username) {
     alert(`Error: ${err.message}`);
   }
 }
-
-loadUserProfile();
 </script>
 </body>
 </html>
