@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.6 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.7 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -467,7 +467,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.6</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.7</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -759,33 +759,6 @@
         </div>
       </div>
 
-      <!-- Realized Profit Per Coin Summary Card -->
-      <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
-            <span>📈 Laporan Profit Realisasi Per Koin</span>
-          </div>
-          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
-        </div>
-
-        <div class="card-body-collapsible">
-          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-            <table class="indodax-table">
-              <thead>
-                <tr>
-                  <th>Coin Pair</th>
-                  <th>Total Transaksi (Sells)</th>
-                  <th>Total Profit Realisasi (Rp)</th>
-                  <th>Rata-rata Profit / Transaksi</th>
-                </tr>
-              </thead>
-              <tbody id="coin-performance-tbody">
-                <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:12px;">Memuat performa profit per koin...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
 
       <!-- Antrian Order Indodax (Open Orders / Limit Order) -->
       <div id="open-orders-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
@@ -1395,6 +1368,34 @@
         <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
         <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:8px; padding: 4px 0;">
           <div style="color:var(--muted); font-size:11px; text-align:center;">Belum ada koin berjalan</div>
+        </div>
+      </div>
+
+      <!-- Realized Profit Per Coin Summary Card -->
+      <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
+            <span>📈 Laporan Profit Realisasi Per Koin</span>
+          </div>
+          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
+        </div>
+
+        <div class="card-body-collapsible">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="indodax-table">
+              <thead>
+                <tr>
+                  <th>Coin Pair</th>
+                  <th>Total Transaksi (Sells)</th>
+                  <th>Total Profit Realisasi (Rp)</th>
+                  <th>Rata-rata Profit / Transaksi</th>
+                </tr>
+              </thead>
+              <tbody id="coin-performance-tbody">
+                <tr><td colspan="4" style="color:var(--muted); text-align:center; padding:12px;">Memuat performa profit per koin...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
