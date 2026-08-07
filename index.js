@@ -1113,25 +1113,29 @@ app.get('/api/candles/:pair', async (req, res) => {
     const pair = req.params.pair.toLowerCase().replace('_', '');
     const { resolution = '15', from, to } = req.query;
     
+    let tf = resolution;
+    if (resolution.toUpperCase() === '1D') tf = '1440';
+    
     const nowSec = Math.floor(Date.now() / 1000);
-    const defaultFrom = nowSec - 2 * 24 * 60 * 60; // default past 48 hours for detail
+    const defaultFrom = nowSec - 2 * 24 * 60 * 60; // default 48h ago
     
     const queryFrom = from || defaultFrom;
     const queryTo = to || nowSec;
     
-    const url = `https://indodax.com/api/chart_nest/v2/history?symbol=${pair.toUpperCase()}&resolution=${resolution}&from=${queryFrom}&to=${queryTo}`;
+    const url = `https://indodax.com/tradingview/history_v2?symbol=${pair.toUpperCase()}&tf=${tf}&from=${queryFrom}&to=${queryTo}`;
     const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     });
     const data = await response.json();
     
-    if (data.s === 'ok') {
-      const candles = data.t.map((time, idx) => ({
-        time: time,
-        open: parseFloat(data.o[idx]),
-        high: parseFloat(data.h[idx]),
-        low: parseFloat(data.l[idx]),
-        close: parseFloat(data.c[idx])
+    if (Array.isArray(data)) {
+      const candles = data.map(item => ({
+        time: item.Time,
+        open: parseFloat(item.Open),
+        high: parseFloat(item.High),
+        low: parseFloat(item.Low),
+        close: parseFloat(item.Close),
+        volume: parseFloat(item.Volume || 0)
       }));
       res.json(candles);
     } else {
