@@ -455,13 +455,74 @@
     color: #fff;
     background: rgba(255,255,255,0.05);
   }
-  .chart-controls-panel select option {
-    background: var(--surface2) !important;
-    color: var(--text) !important;
+  /* ── Responsive 3-Tab Architecture Styling (Laptop & Mobile Scaling) ── */
+  .main-tab-nav {
+    display: flex;
+    gap: 10px;
+    background: var(--surface2);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    width: 100%;
+    margin-bottom: 16px;
   }
-  @media (max-width: 768px) {
-    #native-chart-container {
-      height: 350px;
+  .tab-nav-btn {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .tab-nav-btn.active {
+    background: var(--surface) !important;
+    color: var(--accent2) !important;
+    border-color: var(--accent2) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  }
+  .tab-view-container {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    width: 100%;
+  }
+
+  @media (max-width: 992px) {
+    .tab-view-container {
+      grid-template-columns: 1fr !important;
+    }
+    .main-tab-nav {
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 4px;
+      gap: 6px;
+    }
+    .tab-nav-btn {
+      padding: 9px 12px !important;
+      font-size: 11px !important;
+      min-width: max-content;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .main-tab-nav {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+    .tab-nav-btn {
+      padding: 10px !important;
+      font-size: 11px !important;
+      justify-content: center;
     }
   }
 </style>
