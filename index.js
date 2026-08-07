@@ -303,16 +303,31 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-// Profile / Current User Info Endpoint
-app.get('/api/me', (req, res) => {
+// Profile / Current User Info Endpoint (Fresh DB lookup for real-time permission sync)
+app.get('/api/me', async (req, res) => {
   if (!req.session || !req.session.loggedIn) {
     return res.json({ loggedIn: false });
+  }
+  try {
+    if (req.session.user?.id) {
+      const freshUser = await db.getUserById(req.session.user.id);
+      if (freshUser && freshUser.is_active) {
+        req.session.user = {
+          id: freshUser.id,
+          username: freshUser.username,
+          role: freshUser.role,
+          permissions: freshUser.permissions || {}
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Fresh user lookup info:', e.message);
   }
   const user = req.session.user || {
     id: 1,
     username: 'admin',
     role: 'admin',
-    permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+    permissions: {}
   };
   res.json({ loggedIn: true, user });
 });
