@@ -51,6 +51,40 @@ async function initDb() {
         value TEXT
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'trader',
+        permissions JSONB DEFAULT '{}'::jsonb,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // Seed default admin account if table is empty
+    const userCheck = await pool.query('SELECT COUNT(*) FROM users');
+    if (parseInt(userCheck.rows[0].count) === 0) {
+      const crypto = require('crypto');
+      const salt = crypto.randomBytes(16).toString('hex');
+      const pass = process.env.ADMIN_PASS || 'R@sendriya#2024';
+      const hash = `${salt}:${crypto.pbkdf2Sync(pass, salt, 10000, 64, 'sha512').toString('hex')}`;
+      const defaultPerms = JSON.stringify({
+        panel_robot: true,
+        panel_manual: true,
+        panel_orders: true,
+        panel_reports: true,
+        panel_admin: true
+      });
+      await pool.query(
+        `INSERT INTO users (username, password_hash, role, permissions) VALUES ($1, $2, $3, $4)`,
+        ['admin', hash, 'admin', defaultPerms]
+      );
+      console.log('Default superadmin user (admin) created.');
+    }
+
     console.log('PostgreSQL trading_bot database initialized successfully.');
   } catch (err) {
     console.error('PostgreSQL init error:', err.message);
@@ -249,4 +283,113 @@ async function getProfitPerCoin() {
   } catch (_) { return []; }
 }
 
-module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, getSetting, saveSetting, getProfitPerCoin };
+const crypto = require('crypto');
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash) return false;
+  if (!storedHash.includes(':')) {
+    return password === (process.env.ADMIN_PASS || 'R@sendriya#2024');
+  }
+  const [salt, originalHash] = storedHash.split(':');
+  const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+  return hash === originalHash;
+}
+
+async function getAllUsers() {
+  try {
+    const res = await pool.query('SELECT id, username, role, permissions, is_active, created_at FROM users ORDER BY id ASC');
+    return res.rows;
+  } catch (err) {
+    return [];
+  }
+}
+
+async function getUserById(id) {
+  try {
+    const res = await pool.query('SELECT id, username, role, permissions, is_active, created_at FROM users WHERE id = $1', [id]);
+    return res.rows[0] || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function getUserByUsername(username) {
+  try {
+    const res = await pool.query('SELECT * FROM users WHERE LOWER(username) = LOWER($1)', [username]);
+    return res.rows[0] || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function createUser({ username, password, role = 'trader', permissions = {} }) {
+  const hash = hashPassword(password);
+  const res = await pool.query(
+    `INSERT INTO users (username, password_hash, role, permissions) VALUES ($1, $2, $3, $4) RETURNING id, username, role, permissions, is_active`,
+    [username, hash, role, JSON.stringify(permissions)]
+  );
+  return res.rows[0];
+}
+
+async function updateUser(id, { password, role, permissions, is_active }) {
+  let query = 'UPDATE users SET ';
+  const params = [];
+  let paramIdx = 1;
+
+  if (password) {
+    query += `password_hash = $${paramIdx++}, `;
+    params.push(hashPassword(password));
+  }
+  if (role !== undefined) {
+    query += `role = $${paramIdx++}, `;
+    params.push(role);
+  }
+  if (permissions !== undefined) {
+    query += `permissions = $${paramIdx++}, `;
+    params.push(JSON.stringify(permissions));
+  }
+  if (is_active !== undefined) {
+    query += `is_active = $${paramIdx++}, `;
+    params.push(is_active);
+  }
+
+  query = query.slice(0, -2) + ` WHERE id = $${paramIdx} RETURNING id, username, role, permissions, is_active`;
+  params.push(id);
+
+  const res = await pool.query(query, params);
+  return res.rows[0];
+}
+
+async function deleteUser(id) {
+  await pool.query('DELETE FROM users WHERE id = $1 AND LOWER(username) != \'admin\'', [id]);
+  return true;
+}
+
+module.exports = {
+  addTrade,
+  getTrades,
+  getTodayLoss,
+  getPnLSummary,
+  getDailyReportByDate,
+  addEquitySnapshot,
+  getEquityCurve,
+  saveBotConfig,
+  getActiveBotConfigs,
+  getSetting,
+  saveSetting,
+  getProfitPerCoin,
+  hashPassword,
+  verifyPassword,
+  getAllUsers,
+  getUserById,
+  getUserByUsername,
+  createUser,
+  updateUser,
+  deleteUser
+};

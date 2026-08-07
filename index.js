@@ -204,18 +204,49 @@ app.use((req, res, next) => {
   next();
 });
 app.use(session({
+  name: process.env.SESSION_NAME || 'trading_bot_sid',
   secret: process.env.SESSION_SECRET || 'trading-bot-secret-2026',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
 }));
 
-// Auth middleware (Nginx Basic Auth handles perimeter authentication)
+const db = require('./api/db');
+
+// Auth middlewares
 function requireAuth(req, res, next) {
   if (req.session && req.session.loggedIn) {
     return next();
   }
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Unauthorized. Harap login terlebih dahulu.' });
+  }
   res.redirect('/login');
+}
+
+function requirePermission(permName) {
+  return (req, res, next) => {
+    if (!req.session || !req.session.loggedIn) {
+      return res.status(401).json({ error: 'Unauthorized. Harap login terlebih dahulu.' });
+    }
+    const user = req.session.user || { role: 'admin', permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true } };
+    if (user.role === 'admin' || user.username === 'admin') return next();
+    const perms = user.permissions || {};
+    if (perms[permName] !== false) return next();
+    return res.status(403).json({ error: `Akses ditolak. Anda tidak memiliki izin untuk fitur (${permName}).` });
+  };
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session || !req.session.loggedIn) {
+    return res.status(401).json({ error: 'Unauthorized. Harap login terlebih dahulu.' });
+  }
+  const user = req.session.user || { role: 'admin' };
+  const perms = user.permissions || {};
+  if (user.role === 'admin' || user.username === 'admin' || perms.panel_admin === true) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Akses khusus Administrator.' });
 }
 
 // Login page
@@ -224,20 +255,116 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard', 'login.html'));
 });
 
-// Login POST
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    req.session.loggedIn = true;
-    return res.json({ ok: true });
+// Login POST (Multi-user DB + Env Fallback)
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username dan password wajib diisi' });
+    }
+
+    // 1. Check PostgreSQL users table
+    const dbUser = await db.getUserByUsername(username);
+    if (dbUser) {
+      if (!dbUser.is_active) {
+        return res.status(403).json({ error: 'Akun Anda dinonaktifkan. Hubungi Administrator.' });
+      }
+      if (db.verifyPassword(password, dbUser.password_hash)) {
+        req.session.loggedIn = true;
+        req.session.user = {
+          id: dbUser.id,
+          username: dbUser.username,
+          role: dbUser.role,
+          permissions: dbUser.permissions || {}
+        };
+        return res.json({ ok: true, user: req.session.user });
+      }
+    }
+
+    // 2. Fallback check for root ADMIN_USER / ADMIN_PASS
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      req.session.loggedIn = true;
+      req.session.user = {
+        id: 1,
+        username: 'admin',
+        role: 'admin',
+        permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+      };
+      return res.json({ ok: true, user: req.session.user });
+    }
+
+    res.status(401).json({ error: 'Username atau password salah' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  res.status(401).json({ error: 'Username atau password salah' });
 });
 
 // Logout
 app.post('/api/logout', (req, res) => {
   req.session.destroy();
   res.json({ ok: true });
+});
+
+// Profile / Current User Info Endpoint
+app.get('/api/me', (req, res) => {
+  if (!req.session || !req.session.loggedIn) {
+    return res.json({ loggedIn: false });
+  }
+  const user = req.session.user || {
+    id: 1,
+    username: 'admin',
+    role: 'admin',
+    permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+  };
+  res.json({ loggedIn: true, user });
+});
+
+// Admin User Management Routes
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const users = await db.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const { username, password, role, permissions } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username dan password wajib diisi' });
+    }
+    const existing = await db.getUserByUsername(username);
+    if (existing) {
+      return res.status(400).json({ error: 'Username sudah digunakan' });
+    }
+    const user = await db.createUser({ username, password, role, permissions });
+    res.json({ ok: true, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { password, role, permissions, is_active } = req.body;
+    const updated = await db.updateUser(userId, { password, role, permissions, is_active });
+    res.json({ ok: true, user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    await db.deleteUser(userId);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Protect all routes below
@@ -755,7 +882,7 @@ restoreBotsState();
 
 // ── REST API ─────────────────────────────────────────────────────
 // Start bot for a pair
-app.post('/api/bot/start', (req, res) => {
+app.post('/api/bot/start', requirePermission('panel_robot'), (req, res) => {
   const { pair, mode = 'auto', strategy = 'threshold', config = {} } = req.body;
   if (!pair) return res.status(400).json({ error: 'pair required' });
 
@@ -773,7 +900,7 @@ app.post('/api/bot/start', (req, res) => {
 });
 
 // Stop bot
-app.post('/api/bot/stop', (req, res) => {
+app.post('/api/bot/stop', requirePermission('panel_robot'), (req, res) => {
   const { pair } = req.body;
   if (bots[pair]) {
     clearInterval(bots[pair].interval);
@@ -837,7 +964,7 @@ app.get('/api/open-orders', async (req, res) => {
 });
 
 // Cancel an open order on Indodax
-app.post('/api/order/cancel', async (req, res) => {
+app.post('/api/order/cancel', requirePermission('panel_orders'), async (req, res) => {
   try {
     const { pair, orderId, type } = req.body;
     if (!pair || !orderId || !type) {
@@ -856,7 +983,7 @@ app.post('/api/order/cancel', async (req, res) => {
 });
 
 // Execute a manual order on Indodax
-app.post('/api/order/manual', async (req, res) => {
+app.post('/api/order/manual', requirePermission('panel_manual'), async (req, res) => {
   try {
     const { pair, type, orderType, price, amount } = req.body;
     if (!pair || !type || !orderType || !amount) {
