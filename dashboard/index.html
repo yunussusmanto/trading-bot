@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.8</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.9</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -805,23 +805,23 @@
             </button>
           </div>
 
-          <!-- Row 2: Date Pickers + Range Pills (side by side) -->
+          <!-- Row 2: Date Pickers (top) & Range Pills (bottom) -->
           <div id="chart-advanced-filters" class="collapsed"
-            style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <!-- Compact date row -->
-            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;flex-shrink:0">
+            style="display:flex;flex-direction:column;gap:6px">
+            <!-- Top: Date Pickers -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 10px;width:100%">
               <input type="date" id="chart-start-date" onchange="changeChartDateRange()"
-                style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;width:115px">
-              <span style="color:var(--muted);font-size:10px;padding:0 2px">–</span>
+                style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;flex:1;min-width:0;text-align:center">
+              <span style="color:var(--muted);font-size:10px;padding:0 2px">s/d</span>
               <input type="date" id="chart-end-date" onchange="changeChartDateRange()"
-                style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;width:115px">
+                style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;flex:1;min-width:0;text-align:center">
             </div>
-            <!-- Range pills beside date -->
-            <div style="display:flex;gap:4px;flex:1;min-width:160px">
-              <button id="btn-range-1d" class="chart-range-pill" onclick="setChartRangeDays(1)" style="flex:1">1H</button>
-              <button id="btn-range-7d" class="chart-range-pill active" onclick="setChartRangeDays(7)" style="flex:1">7H</button>
-              <button id="btn-range-30d" class="chart-range-pill" onclick="setChartRangeDays(30)" style="flex:1">30H</button>
-              <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')" style="flex:1">All</button>
+            <!-- Bottom: 4 Equal Grid Pills -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%">
+              <button id="btn-range-1d" class="chart-range-pill" onclick="setChartRangeDays(1)">1 Hari</button>
+              <button id="btn-range-7d" class="chart-range-pill active" onclick="setChartRangeDays(7)">7 Hari</button>
+              <button id="btn-range-30d" class="chart-range-pill" onclick="setChartRangeDays(30)">30 Hari</button>
+              <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')">Semua</button>
             </div>
           </div>
         </div>
