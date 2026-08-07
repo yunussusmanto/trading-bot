@@ -608,7 +608,7 @@
             </div>
             <div id="custom-dropdown-menu" class="custom-dropdown-menu" style="display:none;position:absolute;top:42px;left:0;z-index:999;width:240px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.5)">
               <div style="padding:6px;border-bottom:1px solid var(--border)">
-                <input id="custom-dropdown-search" placeholder="🔍 Cari koin..." onkeyup="filterCustomDropdown()" style="padding:4px 8px;font-size:11px;width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;outline:none">
+                <input id="custom-dropdown-search" type="search" name="custom_pair_search_off" autocomplete="off" autocomplete="new-password" placeholder="🔍 Cari koin..." onkeyup="filterCustomDropdown()" style="padding:4px 8px;font-size:11px;width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;outline:none">
               </div>
               <div id="custom-dropdown-items" style="max-height:220px;overflow-y:auto"></div>
             </div>
@@ -1003,7 +1003,7 @@
           Markets (Pasar Indodax)
         </div>
         <div style="padding:8px">
-          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
+          <input id="market-search" type="search" name="market_search_query_off" autocomplete="off" autocomplete="new-password" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
         </div>
         <div style="max-height:540px;overflow-y:auto">
           <table class="indodax-table">
@@ -2549,7 +2549,12 @@ function renderMarketsList(list) {
 }
 
 function filterMarkets() {
-  const q = document.getElementById('market-search').value.toLowerCase();
+  const el = document.getElementById('market-search');
+  if (!el) return;
+  if (el.value.toLowerCase().trim() === 'admin') {
+    el.value = '';
+  }
+  const q = el.value.toLowerCase().trim();
   const filtered = allPairsData.filter(p => p.symbol.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
   renderMarketsList(filtered);
 }
