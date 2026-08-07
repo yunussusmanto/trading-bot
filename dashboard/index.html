@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.4</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.5</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -801,13 +801,7 @@
             <!-- Date toggle icon -->
             <button onclick="toggleAdvancedChartFilters()" class="btn-gray"
               style="padding:6px 8px;font-size:14px;line-height:1;border-radius:6px;flex-shrink:0" title="Filter Tanggal">
-              📅
-            </button>
-
-            <!-- Fullscreen icon-only -->
-            <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray"
-              style="padding:6px 8px;font-size:14px;line-height:1;border-radius:6px;flex-shrink:0" title="Fullscreen">
-              ⤢
+              📅 Filter Tanggal
             </button>
           </div>
 
@@ -2498,44 +2492,11 @@ function toggleProfitFullscreen() {
 }
 
 let equityApexChart = null;
-let isChartFullscreen = false;
-function toggleChartFullscreen() {
-  const card = document.getElementById('candlestick-card');
-  const btn = document.getElementById('btn-chart-fullscreen');
-  if (!card) return;
-
-  isChartFullscreen = !isChartFullscreen;
-  const isMobile = window.innerWidth <= 768;
-
-  if (isChartFullscreen) {
-    card.classList.add('fullscreen-card');
-    if (btn) { btn.innerHTML = '✕'; btn.title = 'Tutup Fullscreen'; }
-    document.body.style.overflow = 'hidden';
-    if (isMobile && card.requestFullscreen) {
-      card.requestFullscreen().catch(() => {});
-    } else if (isMobile && card.webkitRequestFullscreen) {
-      card.webkitRequestFullscreen();
-    }
-  } else {
-    card.classList.remove('fullscreen-card');
-    if (btn) { btn.innerHTML = '⤢'; btn.title = 'Fullscreen'; }
-    document.body.style.overflow = '';
-    if (document.fullscreenElement || document.webkitFullscreenElement) {
-      (document.exitFullscreen || document.webkitExitFullscreen || (() => {})).call(document);
-    }
-  }
-
-  setTimeout(() => loadSelectedChart(), 120);
-}
-
-// Exit profit chart fullscreen or candlestick chart fullscreen on Escape key press
+// Exit profit chart fullscreen on Escape key press
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (isProfitFullscreen) {
       toggleProfitFullscreen();
-    }
-    if (isChartFullscreen) {
-      toggleChartFullscreen();
     }
   }
 });
