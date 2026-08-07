@@ -823,6 +823,52 @@ app.post('/api/order/cancel', async (req, res) => {
   }
 });
 
+// Execute a manual order on Indodax
+app.post('/api/order/manual', async (req, res) => {
+  try {
+    const { pair, type, orderType, price, amount } = req.body;
+    if (!pair || !type || !orderType || !amount) {
+      return res.status(400).json({ error: 'Missing trade parameters' });
+    }
+    
+    const cleanPair = pair.toLowerCase().replace('/', '');
+    let targetPrice = parseFloat(price);
+    
+    // If market/instant order, we get the current ticker price and apply slippage
+    if (orderType === 'market') {
+      const ticker = await indodax.getTicker(cleanPair);
+      const lastPrice = parseFloat(ticker.last);
+      if (type === 'buy') {
+        targetPrice = Math.round(lastPrice * 1.05); // 5% slippage to buy instantly
+      } else {
+        targetPrice = Math.round(lastPrice * 0.95); // 5% slippage to sell instantly
+      }
+    }
+    
+    if (!targetPrice || targetPrice <= 0) {
+      return res.status(400).json({ error: 'Invalid or missing price' });
+    }
+    
+    await waitRateLimit();
+    const result = await indodax.trade({
+      pair: cleanPair,
+      type: type.toLowerCase(),
+      price: targetPrice,
+      amount: parseFloat(amount)
+    });
+    
+    const coinSymbol = cleanPair.replace('_idr', '').toUpperCase();
+    const formattedPrice = targetPrice.toLocaleString('id-ID');
+    const formattedAmount = parseFloat(amount).toLocaleString('id-ID', { maximumFractionDigits: 8 });
+    
+    sendTelegram(`⚡ <b>MANUAL ORDER PLACED</b>\n\nPair: <b>${cleanPair.toUpperCase()}</b>\nTipe: <b>${type.toUpperCase()} (${orderType.toUpperCase()})</b>\nHarga: <b>Rp ${formattedPrice}</b>\nJumlah: <b>${formattedAmount} ${type === 'buy' ? 'IDR' : coinSymbol}</b>`);
+    
+    res.json({ ok: true, result });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Get balance
 app.get('/api/balance', async (req, res) => {
   try {

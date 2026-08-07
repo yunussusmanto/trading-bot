@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.6.1 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.7.0 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <style>
@@ -432,7 +432,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.6.1</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.7.0</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -757,6 +757,132 @@
       </div>
 
       <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
+
+      <!-- Manual Trading Panel -->
+      <div id="manual-trade-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin:0">
+            <span>⚡ Transaksi Jual Beli Manual</span>
+          </div>
+          <span style="font-size:10px; font-weight:700; color:var(--accent2)">Indodax Market Order</span>
+        </div>
+
+        <div class="card-body-collapsible" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          
+          <!-- Beli Form (Buy) -->
+          <div style="background: rgba(16,192,135,0.02); border: 1px solid rgba(16,192,135,0.12); padding: 16px; border-radius: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--green); margin-bottom: 16px; font-size: 14px;">
+              <span>🟢 Beli</span> <span id="manual-buy-coin-title">BTC</span>
+            </div>
+            
+            <!-- Order Type Selector -->
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
+              <div style="display: flex; gap: 12px; font-size: 12px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')"> Limit Order
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')"> Instan / Market
+                </label>
+              </div>
+            </div>
+
+            <!-- Saldo -->
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 6px;">
+              <span style="color: var(--muted);">Saldo tersedia:</span>
+              <span id="manual-buy-saldo" style="font-weight: 700; color: var(--accent2); font-family: 'JetBrains Mono', monospace;">0 IDR</span>
+            </div>
+
+            <!-- Limit Price Input -->
+            <div id="manual-buy-price-box" class="form-group" style="margin-bottom: 12px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Harga Limit (Rp)</label>
+              <input type="number" id="manual-buy-price" placeholder="Harga beli..." oninput="calcManualTrade('buy', 'price')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Total Coin Input -->
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label id="manual-buy-amount-label" class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Total BTC</label>
+              <input type="number" id="manual-buy-amount" step="any" placeholder="0.00" oninput="calcManualTrade('buy', 'amount')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Percentage Pills -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 12px;">
+              <button onclick="setManualPercent('buy', 0.1)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">10%</button>
+              <button onclick="setManualPercent('buy', 0.25)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">25%</button>
+              <button onclick="setManualPercent('buy', 0.5)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">50%</button>
+              <button onclick="setManualPercent('buy', 0.75)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">75%</button>
+              <button onclick="setManualPercent('buy', 1.0)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">100%</button>
+            </div>
+
+            <!-- Estimasi Total IDR Input/Display -->
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Estimasi Rupiah (Rp)</label>
+              <input type="number" id="manual-buy-total" placeholder="Total IDR..." oninput="calcManualTrade('buy', 'total')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Submit Buy -->
+            <button onclick="executeManualTrade('buy')" id="manual-buy-btn" class="btn-green" style="width: 100%; padding: 10px; font-weight: 700; border-radius: 6px; border: none; font-size: 13px;">Beli BTC</button>
+          </div>
+
+          <!-- Jual Form (Sell) -->
+          <div style="background: rgba(255,77,77,0.02); border: 1px solid rgba(255,77,77,0.12); padding: 16px; border-radius: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: var(--red); margin-bottom: 16px; font-size: 14px;">
+              <span>🔴 Jual</span> <span id="manual-sell-coin-title">BTC</span>
+            </div>
+            
+            <!-- Order Type Selector -->
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
+              <div style="display: flex; gap: 12px; font-size: 12px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')"> Limit Order
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')"> Instan / Market
+                </label>
+              </div>
+            </div>
+
+            <!-- Saldo -->
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 12px; border-bottom: 1px dashed var(--border); padding-bottom: 6px;">
+              <span style="color: var(--muted);">Saldo tersedia:</span>
+              <span id="manual-sell-saldo" style="font-weight: 700; color: var(--accent2); font-family: 'JetBrains Mono', monospace;">0 BTC</span>
+            </div>
+
+            <!-- Limit Price Input -->
+            <div id="manual-sell-price-box" class="form-group" style="margin-bottom: 12px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Harga Limit (Rp)</label>
+              <input type="number" id="manual-sell-price" placeholder="Harga jual..." oninput="calcManualTrade('sell', 'price')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Total Coin Input -->
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label id="manual-sell-amount-label" class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Total BTC</label>
+              <input type="number" id="manual-sell-amount" step="any" placeholder="0.00" oninput="calcManualTrade('sell', 'amount')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Percentage Pills -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 12px;">
+              <button onclick="setManualPercent('sell', 0.1)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">10%</button>
+              <button onclick="setManualPercent('sell', 0.25)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">25%</button>
+              <button onclick="setManualPercent('sell', 0.5)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">50%</button>
+              <button onclick="setManualPercent('sell', 0.75)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">75%</button>
+              <button onclick="setManualPercent('sell', 1.0)" class="btn-gray" style="padding: 4px 0; font-size: 10px;">100%</button>
+            </div>
+
+            <!-- Estimasi Total IDR Input/Display -->
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Estimasi Rupiah (Rp)</label>
+              <input type="number" id="manual-sell-total" placeholder="Total IDR..." oninput="calcManualTrade('sell', 'total')" style="width: 100%; padding: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; font-weight: 600;">
+            </div>
+
+            <!-- Submit Sell -->
+            <button onclick="executeManualTrade('sell')" id="manual-sell-btn" class="btn-red" style="width: 100%; padding: 10px; font-weight: 700; border-radius: 6px; border: none; font-size: 13px;">Jual BTC</button>
+          </div>
+
+        </div>
+      </div>
 
       <!-- Robot Control Form -->
       <div id="robot-control-card" class="card">
@@ -1565,6 +1691,7 @@ async function loadBalance() {
     const res = await fetch('/api/balance');
     cachedBalance = await res.json();
     renderBalanceGrid();
+    updateManualTradePanel();
   } catch (_) {}
 }
 
@@ -2389,6 +2516,7 @@ function updateChartSymbol() {
   } else {
     loadCandlesForPair(rawPair);
   }
+  updateManualTradePanel();
 }
 
 // OrderBook & Market Depth Loader
@@ -3553,6 +3681,210 @@ setInterval(loadOpenOrders, 5000);
 setInterval(loadCoinPerformanceReport, 30000);
 setInterval(loadBots, 5000);
 setInterval(updateDailyProfitChart, 60000);
+
+// --- Manual Trade Helper Functions ---
+function updateManualTradePanel() {
+  const select = document.getElementById('bot-pair');
+  if (!select) return;
+  const rawPair = select.value || 'btc_idr';
+  const cleanCoin = rawPair.replace('_idr', '').toUpperCase();
+
+  // Update headers/titles
+  const buyCoinTitle = document.getElementById('manual-buy-coin-title');
+  const sellCoinTitle = document.getElementById('manual-sell-coin-title');
+  const buyAmountLabel = document.getElementById('manual-buy-amount-label');
+  const sellAmountLabel = document.getElementById('manual-sell-amount-label');
+  const buyBtn = document.getElementById('manual-buy-btn');
+  const sellBtn = document.getElementById('manual-sell-btn');
+
+  if (buyCoinTitle) buyCoinTitle.textContent = cleanCoin;
+  if (sellCoinTitle) sellCoinTitle.textContent = cleanCoin;
+  if (buyAmountLabel) buyAmountLabel.textContent = `Total ${cleanCoin}`;
+  if (sellAmountLabel) sellAmountLabel.textContent = `Total ${cleanCoin}`;
+  if (buyBtn) buyBtn.textContent = `Beli ${cleanCoin}`;
+  if (sellBtn) sellBtn.textContent = `Jual ${cleanCoin}`;
+
+  // Update default price inputs from current banner price
+  const lastPriceEl = document.getElementById('banner-last');
+  let currentPrice = 0;
+  if (lastPriceEl) {
+    currentPrice = parseFloat(lastPriceEl.textContent.replace(/[^0-9]/g, ''));
+  }
+  
+  if (currentPrice > 0) {
+    const buyPriceInput = document.getElementById('manual-buy-price');
+    const sellPriceInput = document.getElementById('manual-sell-price');
+    if (buyPriceInput && !buyPriceInput.value) buyPriceInput.value = currentPrice;
+    if (sellPriceInput && !sellPriceInput.value) sellPriceInput.value = currentPrice;
+  }
+
+  // Update Saldo display
+  const idrSaldoEl = document.getElementById('manual-buy-saldo');
+  const coinSaldoEl = document.getElementById('manual-sell-saldo');
+  
+  if (cachedBalance) {
+    if (idrSaldoEl) {
+      idrSaldoEl.textContent = `${fmtIDR(cachedBalance.idr)} IDR`;
+    }
+    if (coinSaldoEl) {
+      const coinKey = rawPair.replace('_idr', '').toLowerCase();
+      const bal = parseFloat(cachedBalance[coinKey] || 0);
+      coinSaldoEl.textContent = `${bal.toFixed(8)} ${cleanCoin}`;
+    }
+  }
+}
+
+function toggleManualOrderType(side) {
+  const type = document.querySelector(`input[name="manual-${side}-type"]:checked`).value;
+  const priceBox = document.getElementById(`manual-${side}-price-box`);
+  if (priceBox) {
+    priceBox.style.display = type === 'market' ? 'none' : '';
+  }
+  calcManualTrade(side, 'type');
+}
+
+function calcManualTrade(side, field) {
+  const type = document.querySelector(`input[name="manual-${side}-type"]:checked`).value;
+  
+  const priceInput = document.getElementById(`manual-${side}-price`);
+  const amountInput = document.getElementById(`manual-${side}-amount`);
+  const totalInput = document.getElementById(`manual-${side}-total`);
+  
+  if (!priceInput || !amountInput || !totalInput) return;
+
+  let price = parseFloat(priceInput.value) || 0;
+  if (type === 'market') {
+    const lastPriceEl = document.getElementById('banner-last');
+    if (lastPriceEl) {
+      price = parseFloat(lastPriceEl.textContent.replace(/[^0-9]/g, ''));
+    }
+  }
+
+  if (price <= 0) return;
+
+  let amount = parseFloat(amountInput.value) || 0;
+  let total = parseFloat(totalInput.value) || 0;
+
+  if (field === 'price' || field === 'amount' || field === 'type') {
+    total = Math.round(price * amount);
+    totalInput.value = total || '';
+  } else if (field === 'total') {
+    amount = parseFloat((total / price).toFixed(8));
+    amountInput.value = amount || '';
+  }
+}
+
+function setManualPercent(side, pct) {
+  const select = document.getElementById('bot-pair');
+  if (!select || !cachedBalance) return;
+  const rawPair = select.value || 'btc_idr';
+  const coinKey = rawPair.replace('_idr', '').toLowerCase();
+
+  const type = document.querySelector(`input[name="manual-${side}-type"]:checked`).value;
+  const priceInput = document.getElementById(`manual-${side}-price`);
+  
+  let price = 0;
+  if (priceInput) price = parseFloat(priceInput.value) || 0;
+  
+  if (type === 'market' || price <= 0) {
+    const lastPriceEl = document.getElementById('banner-last');
+    if (lastPriceEl) {
+      price = parseFloat(lastPriceEl.textContent.replace(/[^0-9]/g, ''));
+    }
+  }
+
+  if (price <= 0) {
+    alert('Harga belum tersedia atau tidak valid!');
+    return;
+  }
+
+  const amountInput = document.getElementById(`manual-${side}-amount`);
+  const totalInput = document.getElementById(`manual-${side}-total`);
+
+  if (side === 'buy') {
+    const idrBal = parseFloat(cachedBalance.idr || 0);
+    const targetTotal = Math.floor(idrBal * pct);
+    if (totalInput) totalInput.value = targetTotal;
+    if (amountInput) amountInput.value = parseFloat((targetTotal / price).toFixed(8));
+  } else {
+    const coinBal = parseFloat(cachedBalance[coinKey] || 0);
+    const targetAmount = parseFloat((coinBal * pct).toFixed(8));
+    if (amountInput) amountInput.value = targetAmount;
+    if (totalInput) totalInput.value = Math.round(targetAmount * price);
+  }
+}
+
+async function executeManualTrade(side) {
+  const select = document.getElementById('bot-pair');
+  if (!select) return;
+  const rawPair = select.value || 'btc_idr';
+  const cleanCoin = rawPair.replace('_idr', '').toUpperCase();
+
+  const type = document.querySelector(`input[name="manual-${side}-type"]:checked`).value;
+  const priceInput = document.getElementById(`manual-${side}-price`);
+  const amountInput = document.getElementById(`manual-${side}-amount`);
+  const totalInput = document.getElementById(`manual-${side}-total`);
+
+  let price = parseFloat(priceInput.value) || 0;
+  if (type === 'market') {
+    const lastPriceEl = document.getElementById('banner-last');
+    if (lastPriceEl) {
+      price = parseFloat(lastPriceEl.textContent.replace(/[^0-9]/g, ''));
+    }
+  }
+
+  const amount = parseFloat(amountInput.value) || 0;
+  const total = parseFloat(totalInput.value) || 0;
+
+  if (price <= 0 || amount <= 0 || total <= 0) {
+    alert('Harap isi jumlah dan harga transaksi dengan benar!');
+    return;
+  }
+
+  const orderAmount = side === 'buy' ? total : amount;
+  const confirmationMsg = `Apakah Anda yakin ingin memasang order manual?\n\nTipe: ${side.toUpperCase()} (${type.toUpperCase()})\nKoin: ${cleanCoin}\nHarga: Rp ${price.toLocaleString('id-ID')}\nJumlah: ${side === 'buy' ? 'Rp ' + total.toLocaleString('id-ID') : amount + ' ' + cleanCoin}`;
+  
+  if (!confirm(confirmationMsg)) return;
+
+  try {
+    const btn = document.getElementById(`manual-${side}-btn`);
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+    }
+
+    const res = await fetch('/api/order/manual', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pair: rawPair,
+        type: side,
+        orderType: type,
+        price: price,
+        amount: orderAmount
+      })
+    });
+    
+    const data = await res.json();
+    if (data.ok) {
+      alert(`Order ${side.toUpperCase()} berhasil dipasang!`);
+      if (amountInput) amountInput.value = '';
+      if (totalInput) totalInput.value = '';
+      loadBalance();
+      loadOpenOrders();
+    } else {
+      alert(`Gagal: ${data.error || 'Terjadi kesalahan sistem'}`);
+    }
+  } catch (err) {
+    alert(`Terjadi error: ${err.message}`);
+  } finally {
+    const btn = document.getElementById(`manual-${side}-btn`);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = side === 'buy' ? `Beli ${cleanCoin}` : `Jual ${cleanCoin}`;
+    }
+  }
+}
 </script>
 </body>
 </html>
