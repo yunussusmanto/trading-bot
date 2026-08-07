@@ -455,20 +455,26 @@
     color: #fff;
     background: rgba(255,255,255,0.05);
   }
-  /* ── Responsive 3-Tab Architecture Styling (Laptop & Mobile Scaling) ── */
+  /* ── Responsive 3-Tab Architecture Styling (Dynamic Scaling) ── */
+  .workspace {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   .main-tab-nav {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     background: var(--surface2);
     padding: 6px;
     border-radius: 12px;
     border: 1px solid var(--border);
     width: 100%;
     margin-bottom: 16px;
+    box-sizing: border-box;
   }
   .tab-nav-btn {
     flex: 1;
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-size: 13px;
     font-weight: 700;
     border-radius: 8px;
@@ -489,39 +495,35 @@
     border-color: var(--accent2) !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
   }
+  
   .tab-view-container {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
     gap: 16px;
     width: 100%;
+    box-sizing: border-box;
+  }
+  .tab-main-col, .tab-side-col {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  @media (max-width: 992px) {
+  @media (max-width: 1100px) {
     .tab-view-container {
       grid-template-columns: 1fr !important;
     }
-    .main-tab-nav {
-      flex-direction: row;
-      overflow-x: auto;
-      padding: 4px;
-      gap: 6px;
-    }
-    .tab-nav-btn {
-      padding: 9px 12px !important;
-      font-size: 11px !important;
-      min-width: max-content;
-    }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     .main-tab-nav {
-      display: grid;
-      grid-template-columns: 1fr;
+      flex-direction: column;
       gap: 6px;
+      padding: 6px;
     }
     .tab-nav-btn {
       padding: 10px !important;
-      font-size: 11px !important;
+      font-size: 12px !important;
       justify-content: center;
     }
   }
@@ -581,21 +583,21 @@
   <main class="workspace" style="display:flex;flex-direction:column;gap:16px">
 
     <!-- Best Practice 3-Tab Main Navigation Bar -->
-    <div class="main-tab-nav" style="display:flex;gap:10px;background:var(--surface2);padding:6px;border-radius:12px;border:1px solid var(--border);width:100%">
-      <button id="tab-btn-trade" class="tab-nav-btn active" onclick="switchMainTab('trade')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:var(--surface);color:var(--accent2);border-color:var(--accent2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+    <div class="main-tab-nav">
+      <button id="tab-btn-trade" class="tab-nav-btn active" onclick="switchMainTab('trade')">
         ⚡ Marketplace & Manual Trade
       </button>
-      <button id="tab-btn-robot" class="tab-nav-btn" onclick="switchMainTab('robot')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      <button id="tab-btn-robot" class="tab-nav-btn" onclick="switchMainTab('robot')">
         🤖 Robot Trading Hub
       </button>
-      <button id="tab-btn-reports" class="tab-nav-btn" onclick="switchMainTab('reports')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      <button id="tab-btn-reports" class="tab-nav-btn" onclick="switchMainTab('reports')">
         📈 Laporan Profit & Analytics
       </button>
     </div>
 
     <!-- TAB 1: MARKETPLACE & MANUAL TRADE -->
-    <div id="tab-view-trade" class="tab-view-container" style="display:grid;grid-template-columns:1fr 340px;gap:16px;width:100%">
-      <div class="tab-main-col" style="display:flex;flex-direction:column;gap:16px">
+    <div id="tab-view-trade" class="tab-view-container">
+      <div class="tab-main-col">
         <div class="pair-banner">
         <div class="pair-title" style="align-items:center;gap:10px">
           <div class="coin-icon" id="banner-coin-icon">฿</div>
@@ -1018,8 +1020,8 @@
     </div>
 
     <!-- TAB 2: ROBOT TRADING HUB -->
-    <div id="tab-view-robot" class="tab-view-container" style="display:grid;grid-template-columns:1fr 340px;gap:16px;width:100%;display:none">
-      <div class="tab-main-col" style="display:flex;flex-direction:column;gap:16px">
+    <div id="tab-view-robot" class="tab-view-container" style="display:none">
+      <div class="tab-main-col">
         <div id="robot-control-card" class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">
           <div class="card-title" style="margin:0">🤖 Robot Trading Control Panel</div>
@@ -1198,7 +1200,7 @@
     </div>
 
     <!-- TAB 3: LAPORAN PROFIT & ANALYTICS -->
-    <div id="tab-view-reports" class="tab-view-container" style="display:flex;flex-direction:column;gap:16px;width:100%;display:none">
+    <div id="tab-view-reports" class="tab-view-container" style="display:none">
       <div id="pnl-summary-card" class="card" style="padding: 16px; margin-bottom: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
           <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
@@ -4408,20 +4410,16 @@ function switchMainTab(tabName) {
     if (btn) {
       if (t === tabName) {
         btn.classList.add('active');
-        btn.style.background = 'var(--surface)';
-        btn.style.color = 'var(--accent2)';
-        btn.style.borderColor = 'var(--accent2)';
-        btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
       } else {
         btn.classList.remove('active');
-        btn.style.background = 'transparent';
-        btn.style.color = 'var(--muted)';
-        btn.style.borderColor = 'transparent';
-        btn.style.boxShadow = 'none';
       }
     }
     if (view) {
       view.style.display = (t === tabName) ? (t === 'reports' ? 'flex' : 'grid') : 'none';
+      if (t === tabName && t === 'reports') {
+        view.style.flexDirection = 'column';
+        view.style.gap = '16px';
+      }
     }
   });
 
