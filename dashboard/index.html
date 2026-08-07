@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.7.3 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.8.1 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <style>
@@ -432,7 +432,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.7.3</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.8.1</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1106,8 +1106,20 @@
             <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
           </span>
           <div style="display:flex;align-items:center;gap:8px">
-            <span id="chart-pair-name" style="color:var(--accent2);font-weight:700;margin-right:10px">BTC/IDR</span>
+            <select id="chart-card-pair" onchange="changeChartCardPair()" class="btn-gray" style="padding:4px 8px; font-size:11px; outline:none; cursor:pointer; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--accent2); font-weight:700; text-transform:uppercase;">
+              <option value="btc_idr">BTC/IDR</option>
+            </select>
+            <span id="chart-pair-name" style="display:none">BTC/IDR</span>
             
+            <select id="internal-chart-resolution" onchange="changeInternalResolution()" class="btn-gray" style="padding:4px 8px; font-size:11px; display:none; outline:none; cursor:pointer; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+              <option value="1">1 Menit</option>
+              <option value="5">5 Menit</option>
+              <option value="15" selected>15 Menit</option>
+              <option value="60">1 Jam</option>
+              <option value="240">4 Jam</option>
+              <option value="1D">1 Hari</option>
+            </select>
+
             <!-- Toggle Switch Pills -->
             <div class="pnl-timeframe-pills" style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px">
               <button id="btn-chart-tv" class="pnl-pill active" onclick="switchChartSource('tv')">TradingView</button>
@@ -1123,7 +1135,7 @@
 
         <!-- Native Candlestick Container -->
         <div id="native-chart-container" style="height:600px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative;display:none">
-          <canvas id="candlestick-canvas" style="width:100%;height:100%;display:block"></canvas>
+          <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
         </div>
       </div>
 
@@ -2278,11 +2290,11 @@ async function loadPairs() {
     const data = await res.json();
     if (data && data.length && Array.isArray(data)) {
       allPairsData = data;
-      // Always put BTC/IDR at top position 0
       allPairsData.sort((a, b) => (a.symbol === 'btc_idr' ? -1 : (b.symbol === 'btc_idr' ? 1 : (b.vol || 0) - (a.vol || 0))));
       
       const mainSelect = document.getElementById('bot-pair');
       const depthSelect = document.getElementById('depth-chart-pair-select');
+      const chartSelect = document.getElementById('chart-card-pair');
       const curVal = mainSelect?.value || 'btc_idr';
 
       const optionsHtml = allPairsData.map(p => {
@@ -2293,6 +2305,7 @@ async function loadPairs() {
 
       if (mainSelect) mainSelect.innerHTML = optionsHtml;
       if (depthSelect) depthSelect.innerHTML = optionsHtml;
+      if (chartSelect) chartSelect.innerHTML = optionsHtml;
 
       renderMarketsList(allPairsData);
       updateChartSymbol();
@@ -2320,135 +2333,103 @@ function filterMarkets() {
   renderMarketsList(filtered);
 }
 
+let activeLightweightChart = null;
+let activeCandlestickSeries = null;
 let nativeCandleData = [];
+let currentResolution = '15';
 
-function loadCandlesForPair(pair) {
+async function loadCandlesForPair(pair) {
   const rawPair = pair || 'btc_idr';
-  const pData = allPairsData.find(p => p.symbol === rawPair);
-  const basePrice = pData && pData.last ? parseFloat(pData.last) : 1000000000;
-  const highPrice = pData && pData.high ? parseFloat(pData.high) : basePrice * 1.02;
-  const lowPrice = pData && pData.low ? parseFloat(pData.low) : basePrice * 0.98;
+  try {
+    const res = await fetch(`/api/candles/${rawPair}?resolution=${currentResolution}`);
+    const candles = await res.json();
+    
+    nativeCandleData = candles;
 
-  const nowSec = Math.floor(Date.now() / 1000);
-  const intervalSec = 15 * 60;
-  nativeCandleData = [];
-  let prevClose = basePrice * 0.97;
+    const container = document.getElementById('lightweight-chart-div');
+    if (!container) return;
 
-  for (let i = 50; i >= 1; i--) {
-    const time = nowSec - (i * intervalSec);
-    const range = Math.max((highPrice - lowPrice) * 0.05, basePrice * 0.005);
-    const change = (Math.random() - 0.48) * range;
-    const open = prevClose;
-    const close = Math.min(highPrice, Math.max(lowPrice, open + change));
-    const high = Math.max(open, close) + Math.random() * (range * 0.3);
-    const low = Math.min(open, close) - Math.random() * (range * 0.3);
-    prevClose = close;
+    container.innerHTML = '';
+    if (activeLightweightChart) {
+      try {
+        activeLightweightChart.remove();
+      } catch (_) {}
+      activeLightweightChart = null;
+      activeCandlestickSeries = null;
+    }
 
-    nativeCandleData.push({
-      time: Math.floor(time / 60) * 60,
-      open: Math.round(open),
-      high: Math.round(high),
-      low: Math.round(low),
-      close: Math.round(close)
+    if (!candles || !candles.length) {
+      container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Data grafik tidak tersedia untuk koin ini.</div>';
+      return;
+    }
+
+    activeLightweightChart = LightweightCharts.createChart(container, {
+      width: container.clientWidth || 700,
+      height: container.clientHeight || 750,
+      layout: {
+        background: { color: '#121214' },
+        textColor: '#d1d4dc',
+        fontSize: 11,
+      },
+      grid: {
+        vertLines: { color: 'rgba(42, 46, 57, 0.15)' },
+        horzLines: { color: 'rgba(42, 46, 57, 0.15)' },
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(197, 203, 206, 0.2)',
+        visible: true,
+      },
+      timeScale: {
+        borderColor: 'rgba(197, 203, 206, 0.2)',
+        timeVisible: true,
+        secondsVisible: false,
+      },
     });
-  }
 
-  const lastC = nativeCandleData[nativeCandleData.length - 1];
-  if (lastC) {
-    lastC.close = basePrice;
-    lastC.high = Math.max(lastC.high, basePrice);
-    lastC.low = Math.min(lastC.low, basePrice);
-  }
+    activeCandlestickSeries = activeLightweightChart.addCandlestickSeries({
+      upColor: '#26a69a',
+      downColor: '#ef5350',
+      borderVisible: false,
+      wickUpColor: '#26a69a',
+      wickDownColor: '#ef5350',
+    });
 
-  drawNativeCandleChart(nativeCandleData);
+    activeCandlestickSeries.setData(candles);
+    activeLightweightChart.timeScale().fitContent();
+
+    const resizeObserver = new ResizeObserver(entries => {
+      if (activeLightweightChart && container.clientWidth) {
+        activeLightweightChart.resize(container.clientWidth, container.clientHeight || 750);
+      }
+    });
+    resizeObserver.observe(container);
+
+  } catch (err) {
+    console.error('Failed to load internal chart:', err);
+  }
+}
+
+function changeInternalResolution() {
+  const select = document.getElementById('internal-chart-resolution');
+  if (select) {
+    currentResolution = select.value;
+  }
+  const pairSelect = document.getElementById('bot-pair');
+  if (pairSelect) {
+    loadCandlesForPair(pairSelect.value);
+  }
 }
 
 function updateLiveCandle(price, timestamp) {
-  if (!nativeCandleData.length) return;
+  if (!activeCandlestickSeries || !nativeCandleData.length) return;
+  
   const lastC = nativeCandleData[nativeCandleData.length - 1];
+  
   lastC.high = Math.max(lastC.high, price);
   lastC.low = Math.min(lastC.low, price);
   lastC.close = price;
-  drawNativeCandleChart(nativeCandleData);
-}
-
-function drawNativeCandleChart(candles) {
-  const canvas = document.getElementById('candlestick-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const width = canvas.parentElement.clientWidth || 700;
-  const height = canvas.parentElement.clientHeight || 500;
-
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  ctx.fillStyle = '#121212';
-  ctx.fillRect(0, 0, width, height);
-
-  if (!candles || !candles.length) return;
-
-  const paddingRight = 110;
-  const paddingBottom = 25;
-  const chartW = width - paddingRight;
-  const chartH = height - paddingBottom;
-
-  let maxPrice = -Infinity;
-  let minPrice = Infinity;
-  candles.forEach(c => {
-    if (c.high > maxPrice) maxPrice = c.high;
-    if (c.low < minPrice) minPrice = c.low;
-  });
-
-  if (maxPrice === minPrice) { maxPrice *= 1.01; minPrice *= 0.99; }
-  const range = maxPrice - minPrice;
-
-  // Grid Lines & Price Scale on Right
-  ctx.strokeStyle = '#1a202c';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 5; i++) {
-    const y = (chartH / 5) * i + 10;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(chartW, y);
-    ctx.stroke();
-
-    const pVal = maxPrice - (range / 5) * i;
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px JetBrains Mono, monospace';
-    ctx.fillText(fmtIDR(pVal), chartW + 8, y + 4);
-  }
-
-  // Draw Candlesticks
-  const count = candles.length;
-  const step = chartW / count;
-  const candleW = Math.max(3, step - 3);
-
-  candles.forEach((c, i) => {
-    const x = i * step + step / 2;
-    const isUp = c.close >= c.open;
-    const color = isUp ? '#00c087' : '#ff4d4d';
-
-    const yHigh = chartH - ((c.high - minPrice) / range) * (chartH - 20) + 10;
-    const yLow = chartH - ((c.low - minPrice) / range) * (chartH - 20) + 10;
-    const yOpen = chartH - ((c.open - minPrice) / range) * (chartH - 20) + 10;
-    const yClose = chartH - ((c.close - minPrice) / range) * (chartH - 20) + 10;
-
-    // Wick
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(x, yHigh);
-    ctx.lineTo(x, yLow);
-    ctx.stroke();
-
-    // Body
-    const bodyY = Math.min(yOpen, yClose);
-    const bodyH = Math.max(2, Math.abs(yClose - yOpen));
-    ctx.fillStyle = color;
-    ctx.fillRect(x - candleW / 2, bodyY, candleW, bodyH);
-  });
+  
+  activeCandlestickSeries.update(lastC);
 }
 
 // Chart source state (TradingView by default)
@@ -2459,15 +2440,18 @@ function switchChartSource(source) {
   
   const tvContainer = document.getElementById('tradingview-chart-container');
   const nativeContainer = document.getElementById('native-chart-container');
+  const resSelect = document.getElementById('internal-chart-resolution');
   
   if (source === 'tv') {
     if (tvContainer) tvContainer.style.display = 'block';
     if (nativeContainer) nativeContainer.style.display = 'none';
+    if (resSelect) resSelect.style.display = 'none';
     document.getElementById('btn-chart-tv')?.classList.add('active');
     document.getElementById('btn-chart-native')?.classList.remove('active');
   } else {
     if (tvContainer) tvContainer.style.display = 'none';
     if (nativeContainer) nativeContainer.style.display = 'block';
+    if (resSelect) resSelect.style.display = 'inline-block';
     document.getElementById('btn-chart-tv')?.classList.remove('active');
     document.getElementById('btn-chart-native')?.classList.add('active');
   }
@@ -2557,13 +2541,32 @@ function updateChartSymbol() {
     if (pData.low) document.getElementById('banner-low').textContent = fmtIDR(pData.low);
   }
 
-  // Load Chart for Pair depending on selected source
+  // Sync card select to match control panel pair
+  const chartSelect = document.getElementById('chart-card-pair');
+  if (chartSelect) {
+    chartSelect.value = rawPair;
+  }
+
+  loadSelectedChart();
+  updateManualTradePanel();
+}
+
+function loadSelectedChart() {
+  const chartSelect = document.getElementById('chart-card-pair');
+  const rawPair = chartSelect ? chartSelect.value || 'btc_idr' : 'btc_idr';
+  const cleanCoin = rawPair.replace('_idr', '').replace('_', '').toUpperCase();
+
+  document.getElementById('chart-pair-name').textContent = `${cleanCoin}/IDR`;
+
   if (chartSource === 'tv') {
     loadTradingViewChart(rawPair);
   } else {
     loadCandlesForPair(rawPair);
   }
-  updateManualTradePanel();
+}
+
+function changeChartCardPair() {
+  loadSelectedChart();
 }
 
 // OrderBook & Market Depth Loader

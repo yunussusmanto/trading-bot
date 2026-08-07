@@ -1107,6 +1107,40 @@ app.get('/api/orderbook/:pair', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+// Get Candles (OHLCV) History from Indodax
+app.get('/api/candles/:pair', async (req, res) => {
+  try {
+    const pair = req.params.pair.toLowerCase().replace('_', '');
+    const { resolution = '15', from, to } = req.query;
+    
+    const nowSec = Math.floor(Date.now() / 1000);
+    const defaultFrom = nowSec - 2 * 24 * 60 * 60; // default past 48 hours for detail
+    
+    const queryFrom = from || defaultFrom;
+    const queryTo = to || nowSec;
+    
+    const url = `https://indodax.com/api/chart_nest/v2/history?symbol=${pair.toUpperCase()}&resolution=${resolution}&from=${queryFrom}&to=${queryTo}`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    const data = await response.json();
+    
+    if (data.s === 'ok') {
+      const candles = data.t.map((time, idx) => ({
+        time: time,
+        open: parseFloat(data.o[idx]),
+        high: parseFloat(data.h[idx]),
+        low: parseFloat(data.l[idx]),
+        close: parseFloat(data.c[idx])
+      }));
+      res.json(candles);
+    } else {
+      res.json([]);
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // Switch active dashboard streaming pair
 app.post('/api/active-pair', (req, res) => {
