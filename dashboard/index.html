@@ -1489,16 +1489,26 @@
           </div>
         </div>
 
-        <!-- Custom Permission Toggles -->
-        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">Izin Spesifik Panel Dashboard:</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px;background:var(--surface);padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:14px">
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-robot" checked> 🤖 Panel Robot</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-manual" checked> ⚡ Manual Trade</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-orders" checked> 📋 Open Orders</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-reports" checked> 📊 PnL & History</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-equity" checked> 💰 Equity Curve (Profit Harian)</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-coin-perf" checked> 📈 Profit Per Koin</label>
-          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-admin"> ⚙️ Admin User Panel</label>
+        <!-- Custom Permission Toggles (semua panel individual) -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">Izin Spesifik Panel Dashboard (centang = tampil):</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:6px;background:var(--surface);padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:14px">
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_pnl"> 📊 Ringkasan PnL</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_daily_report"> 📋 Daily Report (Tabel)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_positions"> 💼 Open Positions</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_orders"> 📦 Open Orders</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_manual"> ⚡ Manual Trade</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_robot"> 🤖 Robot Trading Control</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_candlestick"> 📈 Grafik Candlestick</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_daily_profit"> 💰 Grafik Profit Harian</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_depth"> 📊 Market Depth Chart</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_equity"> 📈 Equity Curve</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_indicator"> 📊 Indicator Status</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_bots"> 🟢 Robot Aktif</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_log"> 📟 Live Log Console</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_markets"> 🏪 Markets Sidebar</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_mini_candles"> 📊 Visual Performa Koin</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_coin_perf"> 📈 Profit Per Koin</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel_admin"> ⚙️ Kelola User (Admin)</label>
         </div>
 
         <div style="display:flex;justify-content:flex-end;gap:8px">
@@ -4312,69 +4322,64 @@ async function executeManualTrade(side) {
 let currentUserProfile = null;
 let cachedUserList = [];
 
+// Panel ID → permission key mapping (semua panel individual, tidak di-group)
+const PANEL_PERM_MAP = {
+  'pnl-summary-card':              'panel_pnl',
+  'daily-report-card':             'panel_daily_report',
+  'open-positions-card':           'panel_positions',
+  'open-orders-card':              'panel_orders',
+  'manual-trade-card':             'panel_manual',
+  'robot-control-card':            'panel_robot',
+  'candlestick-card':              'panel_candlestick',
+  'daily-profit-chart-card':       'panel_daily_profit',
+  'approval-section':              'panel_orders',
+  'equity-curve-card':             'panel_equity',
+  'indicator-status-card':         'panel_indicator',
+  'active-bots-card':              'panel_bots',
+  'live-log-card':                 'panel_log',
+  'markets-card':                  'panel_markets',
+  'mini-candles-card':             'panel_mini_candles',
+  'coin-performance-report-card':  'panel_coin_perf',
+};
+
+// All permission keys
+const ALL_PERM_KEYS = [
+  'panel_pnl','panel_daily_report','panel_positions','panel_orders','panel_manual',
+  'panel_robot','panel_candlestick','panel_daily_profit','panel_equity',
+  'panel_indicator','panel_bots','panel_log','panel_markets','panel_mini_candles',
+  'panel_coin_perf','panel_admin'
+];
+
 async function loadUserProfile() {
   try {
     const res = await fetch('/api/me');
-    if (res.status === 401) {
-      window.location.href = '/login';
-      return;
-    }
+    if (res.status === 401) { window.location.href = '/login'; return; }
     const data = await res.json();
-    if (!data || !data.loggedIn || !data.user) {
-      window.location.href = '/login';
-      return;
-    }
+    if (!data || !data.loggedIn || !data.user) { window.location.href = '/login'; return; }
     currentUserProfile = data.user;
-    
-    // Update UI Badge
-    const nameEl = document.getElementById('user-display-name');
-    const roleEl = document.getElementById('user-role-label');
-    const avatarEl = document.getElementById('user-avatar-circle');
-    
-    if (nameEl) nameEl.textContent = data.user.username;
-    if (roleEl) roleEl.textContent = (data.user.role || 'trader').toUpperCase();
-    if (avatarEl) avatarEl.textContent = (data.user.username || 'YS').substring(0, 2).toUpperCase();
 
     const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
     const perms = data.user.permissions || {};
 
-    // SUPERADMIN: Show everything 100% unchanged as currently implemented!
+    // SUPERADMIN: tampilkan SEMUA panel 100% tanpa perubahan
     if (isSuperadmin) {
       const adminMenuLink = document.getElementById('menu-user-mgmt');
       if (adminMenuLink) adminMenuLink.style.display = 'flex';
       return;
     }
 
-    // NON-ADMIN USERS: Apply granular per-panel visibility rules
-    if (perms.panel_robot === false) {
-      const card = document.getElementById('robot-control-card');
-      if (card) card.style.display = 'none';
+    // NON-ADMIN: hide panel jika permission BUKAN true (undefined/false → hide)
+    for (const [cardId, permKey] of Object.entries(PANEL_PERM_MAP)) {
+      if (perms[permKey] !== true) {
+        const el = document.getElementById(cardId);
+        if (el) el.style.display = 'none';
+      }
     }
-    if (perms.panel_manual === false) {
-      const card = document.getElementById('manual-trade-card');
-      if (card) card.style.display = 'none';
-    }
-    if (perms.panel_orders === false) {
-      const card = document.getElementById('open-orders-card');
-      if (card) card.style.display = 'none';
-    }
-    if (perms.panel_reports === false) {
-      ['pnl-summary-card', 'daily-report-card'].forEach(id => {
-        const card = document.getElementById(id);
-        if (card) card.style.display = 'none';
-      });
-    }
-    if (perms.panel_equity === false) {
-      const card = document.getElementById('daily-profit-chart-card');
-      if (card) card.style.display = 'none';
-    }
-    if (perms.panel_coin_perf === false) {
-      const card = document.getElementById('coin-performance-report-card');
-      if (card) card.style.display = 'none';
-    }
-    if (!perms.panel_admin) {
-      const adminMenuLink = document.getElementById('menu-user-mgmt');
-      if (adminMenuLink) adminMenuLink.style.display = 'none';
+
+    // Admin menu link
+    const adminMenuLink = document.getElementById('menu-user-mgmt');
+    if (adminMenuLink) {
+      adminMenuLink.style.display = perms.panel_admin === true ? 'flex' : 'none';
     }
   } catch (err) {
     console.warn('loadUserProfile info:', err.message);
@@ -4384,10 +4389,7 @@ async function loadUserProfile() {
 // Admin User Management Functions
 function openUserMgmtModal() {
   const modal = document.getElementById('user-mgmt-modal');
-  if (modal) {
-    modal.style.display = 'flex';
-    loadUserList();
-  }
+  if (modal) { modal.style.display = 'flex'; loadUserList(); }
 }
 
 function closeUserMgmtModal() {
@@ -4401,7 +4403,7 @@ async function loadUserList() {
     const tbody = document.getElementById('user-mgmt-tbody');
     if (!tbody) return;
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Memuat data user...</td></tr>`;
-    
+
     const res = await fetch('/api/admin/users');
     const users = await res.json();
     if (!Array.isArray(users)) {
@@ -4417,18 +4419,18 @@ async function loadUserList() {
 
     tbody.innerHTML = users.map(u => {
       const isRootAdmin = u.username.toLowerCase() === 'admin';
-      const roleBadge = u.role === 'admin' 
+      const roleBadge = u.role === 'admin'
         ? `<span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(245,158,11,0.2);color:var(--yellow)">SUPERADMIN</span>`
         : `<span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(56,189,248,0.2);color:var(--header-blue)">${u.role.toUpperCase()}</span>`;
-      
-      const statusBadge = u.is_active 
+
+      const statusBadge = u.is_active
         ? `<span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(16,185,129,0.2);color:var(--green)">Aktif</span>`
         : `<span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(239,68,68,0.2);color:var(--red)">Nonaktif</span>`;
 
       const perms = u.permissions || {};
-      const permPills = isRootAdmin ? '🔑 Akses Penuh (Full)' : Object.entries(perms)
-        .filter(([_, v]) => v)
-        .map(([k]) => `<span style="font-size:9px;background:var(--surface);border:1px solid var(--border);padding:1px 4px;border-radius:3px;margin-right:2px">${k.replace('panel_','')}</span>`)
+      const permPills = isRootAdmin ? '🔑 Akses Penuh' : ALL_PERM_KEYS
+        .filter(k => perms[k] === true)
+        .map(k => `<span style="font-size:9px;background:var(--surface);border:1px solid var(--border);padding:1px 4px;border-radius:3px;margin-right:2px">${k.replace('panel_','')}</span>`)
         .join('') || '<span style="font-size:10px;color:var(--muted)">Tidak Ada</span>';
 
       return `
@@ -4440,7 +4442,7 @@ async function loadUserList() {
           <td>${statusBadge}</td>
           <td>
             <button onclick="openEditUserForm(${u.id})" class="btn-gray" style="padding:2px 8px;font-size:10px;margin-right:4px">✏ Edit</button>
-            ${!isRootAdmin ? `<button onclick="deleteUserAccount(${u.id}, '${u.username}')" class="btn-gray" style="padding:2px 8px;font-size:10px;color:var(--red);border-color:var(--red)" title="Hapus User">🗑 Hapus</button>` : ''}
+            ${!isRootAdmin ? `<button onclick="deleteUserAccount(${u.id}, '${u.username}')" class="btn-gray" style="padding:2px 8px;font-size:10px;color:var(--red);border-color:var(--red)">🗑 Hapus</button>` : ''}
           </td>
         </tr>
       `;
@@ -4456,14 +4458,14 @@ function openAddUserForm() {
   if (!card) return;
   card.style.display = 'block';
   if (title) title.textContent = '➕ Tambah User Baru';
-  
+
   document.getElementById('user-form-id').value = '';
   document.getElementById('user-form-username').value = '';
   document.getElementById('user-form-username').disabled = false;
   document.getElementById('user-form-password').value = '';
   document.getElementById('user-form-role').value = 'trader';
   document.getElementById('user-form-status').value = 'true';
-  
+
   applyUserRolePreset('trader');
 }
 
@@ -4485,13 +4487,10 @@ function openEditUserForm(userId) {
   document.getElementById('user-form-status').value = String(u.is_active !== false);
 
   const perms = u.permissions || {};
-  document.getElementById('perm-panel-robot').checked = perms.panel_robot !== false;
-  document.getElementById('perm-panel-manual').checked = perms.panel_manual !== false;
-  document.getElementById('perm-panel-orders').checked = perms.panel_orders !== false;
-  document.getElementById('perm-panel-reports').checked = perms.panel_reports !== false;
-  document.getElementById('perm-panel-equity').checked = perms.panel_equity !== false;
-  document.getElementById('perm-panel-coin-perf').checked = perms.panel_coin_perf !== false;
-  document.getElementById('perm-panel-admin').checked = perms.panel_admin === true;
+  ALL_PERM_KEYS.forEach(k => {
+    const el = document.getElementById('perm-' + k);
+    if (el) el.checked = perms[k] === true;
+  });
 }
 
 function closeUserForm() {
@@ -4500,21 +4499,27 @@ function closeUserForm() {
 }
 
 function applyUserRolePreset(role) {
-  const isRobot = role === 'admin' || role === 'trader';
-  const isManual = role === 'admin' || role === 'trader';
-  const isOrders = role === 'admin' || role === 'trader';
-  const isReports = true;
-  const isEquity = true;
-  const isCoinPerf = true;
-  const isAdmin = role === 'admin';
-
-  document.getElementById('perm-panel-robot').checked = isRobot;
-  document.getElementById('perm-panel-manual').checked = isManual;
-  document.getElementById('perm-panel-orders').checked = isOrders;
-  document.getElementById('perm-panel-reports').checked = isReports;
-  document.getElementById('perm-panel-equity').checked = isEquity;
-  document.getElementById('perm-panel-coin-perf').checked = isCoinPerf;
-  document.getElementById('perm-panel-admin').checked = isAdmin;
+  // Preset: admin=semua, trader=trading+report, viewer=report saja
+  const presets = {
+    admin:  ALL_PERM_KEYS.reduce((o,k) => ({...o,[k]:true}), {}),
+    trader: {
+      panel_pnl:true, panel_daily_report:true, panel_positions:true, panel_orders:true,
+      panel_manual:true, panel_robot:true, panel_candlestick:true, panel_daily_profit:true,
+      panel_equity:true, panel_indicator:true, panel_bots:true, panel_log:true,
+      panel_markets:true, panel_mini_candles:true, panel_coin_perf:true, panel_admin:false
+    },
+    viewer: {
+      panel_pnl:true, panel_daily_report:true, panel_positions:false, panel_orders:false,
+      panel_manual:false, panel_robot:false, panel_candlestick:true, panel_daily_profit:true,
+      panel_equity:true, panel_indicator:false, panel_bots:false, panel_log:false,
+      panel_markets:true, panel_mini_candles:false, panel_coin_perf:true, panel_admin:false
+    }
+  };
+  const p = presets[role] || presets.viewer;
+  ALL_PERM_KEYS.forEach(k => {
+    const el = document.getElementById('perm-' + k);
+    if (el) el.checked = !!p[k];
+  });
 }
 
 async function saveUserFromForm() {
@@ -4524,15 +4529,11 @@ async function saveUserFromForm() {
   const role = document.getElementById('user-form-role').value;
   const isActive = document.getElementById('user-form-status').value === 'true';
 
-  const permissions = {
-    panel_robot: document.getElementById('perm-panel-robot').checked,
-    panel_manual: document.getElementById('perm-panel-manual').checked,
-    panel_orders: document.getElementById('perm-panel-orders').checked,
-    panel_reports: document.getElementById('perm-panel-reports').checked,
-    panel_equity: document.getElementById('perm-panel-equity').checked,
-    panel_coin_perf: document.getElementById('perm-panel-coin-perf').checked,
-    panel_admin: document.getElementById('perm-panel-admin').checked
-  };
+  const permissions = {};
+  ALL_PERM_KEYS.forEach(k => {
+    const el = document.getElementById('perm-' + k);
+    permissions[k] = el ? el.checked : false;
+  });
 
   if (!id && (!username || !password)) {
     alert('Username dan Password wajib diisi untuk user baru!');
