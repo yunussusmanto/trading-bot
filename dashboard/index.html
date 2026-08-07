@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.8 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.9 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -271,9 +271,17 @@
   .field-box { display: flex; flex-direction: column; gap: 4px; }
   .field-label { font-size: 11px; font-weight: 600; color: var(--muted); }
   .field-help { font-size: 10px; color: var(--muted); }
-  input, select {
+  input:not([type="radio"]):not([type="checkbox"]), select {
     background: var(--surface2); border: 1px solid var(--border); color: var(--text);
     padding: 8px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; width: 100%; outline: none;
+  }
+  input[type="radio"] {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer;
+    vertical-align: middle;
   }
   input:focus, select:focus { border-color: var(--header-blue); }
   select option {
@@ -476,7 +484,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.8</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.9</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
