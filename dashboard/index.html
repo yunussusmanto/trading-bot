@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.4</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.5</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -834,6 +834,17 @@
           <span id="depth-pair-label" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
         </div>
         
+        <!-- Live Depth Ratio Bar -->
+        <div style="margin-bottom:10px">
+          <div id="depth-ratio-text" style="font-size:11px;font-weight:600;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--green)">🟢 Buy Depth: --%</span>
+            <span style="color:var(--red)">🔴 Sell Depth: --%</span>
+          </div>
+          <div style="height:6px;width:100%;background:var(--red);border-radius:3px;overflow:hidden">
+            <div id="depth-ratio-buy" style="height:100%;width:50%;background:var(--green);transition:width 0.3s ease"></div>
+          </div>
+        </div>
+
         <!-- Canvas Visual Depth Area Chart -->
         <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
           <canvas id="depth-chart-canvas" style="width:100%;height:100%;display:block"></canvas>
@@ -3152,7 +3163,7 @@ function renderOrderBookData(data) {
   }
 }
 
-// 1:1 Visual Market Depth Canvas Chart
+// 1:1 Visual Market Depth Canvas Chart built from live orderbook (top 15 bids & asks)
 function drawMarketDepthChart(bids, asks) {
   const canvas = document.getElementById('depth-chart-canvas');
   if (!canvas) return;
@@ -3166,75 +3177,122 @@ function drawMarketDepthChart(bids, asks) {
     canvas.height = height;
   }
 
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
   ctx.clearRect(0, 0, width, height);
 
-  if (!bids.length || !asks.length) return;
+  if (!bids || !bids.length || !asks || !asks.length) return;
 
-  const bidsSorted = bids.slice(0, 25).map(b => [parseFloat(b[0]), parseFloat(b[1])]).sort((a, b) => b[0] - a[0]);
-  const asksSorted = asks.slice(0, 25).map(a => [parseFloat(a[0]), parseFloat(a[1])]).sort((a, b) => a[0] - b[0]);
+  // Use top 15 bids & asks from manual orderbook
+  const bidsTop = bids.slice(0, 15).map(b => [parseFloat(b[0]), parseFloat(b[1])]);
+  const asksTop = asks.slice(0, 15).map(a => [parseFloat(a[0]), parseFloat(a[1])]);
 
-  let cumBid = 0;
-  const bidPoints = bidsSorted.map(b => { cumBid += (b[0] * b[1]); return { price: b[0], volume: cumBid }; }).reverse();
+  let sumB = 0;
+  const bidPoints = bidsTop.map(b => {
+    sumB += (b[0] * b[1]);
+    return { price: b[0], volume: sumB };
+  });
 
-  let cumAsk = 0;
-  const askPoints = asksSorted.map(a => { cumAsk += (a[0] * a[1]); return { price: a[0], volume: cumAsk }; });
+  let sumA = 0;
+  const askPoints = asksTop.map(a => {
+    sumA += (a[0] * a[1]);
+    return { price: a[0], volume: sumA };
+  });
 
-  const maxVolume = Math.max(cumBid, cumAsk, 0.001);
+  // Calculate live buy/sell volume ratio
+  const totalVol = sumB + sumA;
+  const buyPct = totalVol > 0 ? Math.round((sumB / totalVol) * 100) : 50;
+  const sellPct = 100 - buyPct;
+
+  const ratioText = document.getElementById('depth-ratio-text');
+  const ratioBarBuy = document.getElementById('depth-ratio-buy');
+  if (ratioText) {
+    ratioText.innerHTML = `<span style="color:var(--green)">🟢 Beli: ${buyPct}% (${fmtIDR(sumB)})</span><span style="color:var(--red)">🔴 Jual: ${sellPct}% (${fmtIDR(sumA)})</span>`;
+  }
+  if (ratioBarBuy) {
+    ratioBarBuy.style.width = `${buyPct}%`;
+  }
+
+  const maxVolume = Math.max(sumB, sumA, 1);
   const midX = width / 2;
+  const paddingBottom = 22;
+  const chartH = height - paddingBottom - 10;
 
-  // Draw Bids (Blue Area on Left)
+  // 1. Draw Bids (Green area on Left, sloping down from center midX to left)
   ctx.beginPath();
-  ctx.moveTo(0, height);
-  const bidStep = midX / Math.max(bidPoints.length - 1, 1);
+  ctx.moveTo(midX, height - paddingBottom);
+
+  const bidStep = (midX - 10) / Math.max(bidPoints.length, 1);
   bidPoints.forEach((pt, i) => {
-    const x = i * bidStep;
-    const y = height - (pt.volume / maxVolume) * (height - 25);
+    const x = midX - (i + 1) * bidStep;
+    const y = height - paddingBottom - (pt.volume / maxVolume) * chartH;
     ctx.lineTo(x, y);
   });
-  ctx.lineTo(midX, height);
+
+  const lastBidX = Math.max(0, midX - bidPoints.length * bidStep);
+  ctx.lineTo(lastBidX, height - paddingBottom);
   ctx.closePath();
 
   const bidGrad = ctx.createLinearGradient(0, 0, 0, height);
-  bidGrad.addColorStop(0, 'rgba(0, 102, 255, 0.6)');
-  bidGrad.addColorStop(1, 'rgba(0, 102, 255, 0.05)');
+  bidGrad.addColorStop(0, 'rgba(16, 185, 129, 0.45)');
+  bidGrad.addColorStop(1, 'rgba(16, 185, 129, 0.05)');
   ctx.fillStyle = bidGrad;
   ctx.fill();
 
-  ctx.strokeStyle = '#0066FF';
+  ctx.strokeStyle = '#10b981';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Draw Asks (Red Area on Right)
+  // 2. Draw Asks (Red area on Right, sloping up from center midX to right)
   ctx.beginPath();
-  ctx.moveTo(midX, height);
-  const askStep = (width - midX) / Math.max(askPoints.length - 1, 1);
+  ctx.moveTo(midX, height - paddingBottom);
+
+  const askStep = (width - midX - 10) / Math.max(askPoints.length, 1);
   askPoints.forEach((pt, i) => {
-    const x = midX + i * askStep;
-    const y = height - (pt.volume / maxVolume) * (height - 25);
+    const x = midX + (i + 1) * askStep;
+    const y = height - paddingBottom - (pt.volume / maxVolume) * chartH;
     ctx.lineTo(x, y);
   });
-  ctx.lineTo(width, height);
+
+  const lastAskX = Math.min(width, midX + askPoints.length * askStep);
+  ctx.lineTo(lastAskX, height - paddingBottom);
   ctx.closePath();
 
   const askGrad = ctx.createLinearGradient(0, 0, 0, height);
-  askGrad.addColorStop(0, 'rgba(255, 77, 77, 0.6)');
-  askGrad.addColorStop(1, 'rgba(255, 77, 77, 0.05)');
+  askGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
+  askGrad.addColorStop(1, 'rgba(239, 68, 68, 0.05)');
   ctx.fillStyle = askGrad;
   ctx.fill();
 
-  ctx.strokeStyle = '#FF4D4D';
+  ctx.strokeStyle = '#ef4444';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Draw Vertical Midline (Green Center Line)
+  // 3. Center Midline (Current Price Line)
   ctx.beginPath();
-  ctx.strokeStyle = '#00C087';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 1;
   ctx.setLineDash([4, 4]);
-  ctx.moveTo(midX, 0);
-  ctx.lineTo(midX, height);
+  ctx.moveTo(midX, 6);
+  ctx.lineTo(midX, height - paddingBottom);
   ctx.stroke();
   ctx.setLineDash([]);
+
+  // Price Labels at Bottom
+  ctx.font = '10px Inter, sans-serif';
+  ctx.fillStyle = isDark ? '#9ca3af' : '#6b7280';
+
+  const lowestBidPrice = bidsTop[bidsTop.length - 1][0];
+  const highestAskPrice = asksTop[asksTop.length - 1][0];
+  const midPrice = bidsTop[0][0];
+
+  ctx.textAlign = 'left';
+  ctx.fillText(fmtIDR(lowestBidPrice), 8, height - 6);
+
+  ctx.textAlign = 'center';
+  ctx.fillText(fmtIDR(midPrice), midX, height - 6);
+
+  ctx.textAlign = 'right';
+  ctx.fillText(fmtIDR(highestAskPrice), width - 8, height - 6);
 }
 
 // Active Bots Rendering
