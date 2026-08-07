@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.0 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.1 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -467,7 +467,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.0</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.1</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1143,36 +1143,42 @@
         </div>
 
         <!-- Controls Panel (Indodax style matching requested layout) -->
-        <div class="chart-controls-panel" style="display:flex;flex-direction:column;gap:10px;background:var(--surface2);padding:12px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)">
-          <!-- Row 1: Coin Search & Selector -->
-          <!-- Row 1: Coin Search & Selector -->
-          <div style="display:flex;align-items:center;gap:10px;width:100%">
-            <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 8px;width:160px;min-width:120px">
-              <span style="font-size:11px;color:var(--muted)">🔍</span>
-              <input type="text" id="chart-search-coin" placeholder="Cari koin..." oninput="filterChartPairs()" style="background:transparent;border:none;color:var(--text);font-size:11px;width:100%;outline:none;padding:4px 0">
+        <div class="chart-controls-panel" style="display:flex;flex-direction:column;gap:8px;background:var(--surface2);padding:10px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)">
+          <!-- Row 1: Coin Search, Selector, Timeframe, & Range Toggle Button -->
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%">
+            <!-- Search -->
+            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px;flex:1;min-width:100px;max-width:140px">
+              <span style="font-size:10px;color:var(--muted)">🔍</span>
+              <input type="text" id="chart-search-coin" placeholder="Cari..." oninput="filterChartPairs()" style="background:transparent;border:none;color:var(--text);font-size:11px;width:100%;outline:none;padding:4px 0">
             </div>
             
-            <select id="chart-card-pair" onchange="changeChartCardPair()" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-size:11px;padding:6px 12px;outline:none;cursor:pointer;font-weight:700;text-transform:uppercase">
+            <!-- Select Pair -->
+            <select id="chart-card-pair" onchange="changeChartCardPair()" style="flex:2;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;font-weight:700;text-transform:uppercase">
               <option value="btc_idr">BTC/IDR</option>
             </select>
             <span id="chart-pair-name" style="display:none">BTC/IDR</span>
-          </div>
 
-          <!-- Row 2: Resolution, Date Pickers, & Time Range Pills -->
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <!-- Resolution Selector (Timeframe) -->
-            <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 8px">
-              <span style="font-size:11px;color:var(--muted)">🕒</span>
+            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px">
+              <span style="font-size:10px;color:var(--muted)">🕒</span>
               <select id="internal-chart-resolution" onchange="changeInternalResolution()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;padding:4px 0">
-                <option value="1">Per Menit</option>
-                <option value="5">5 Menit</option>
-                <option value="15" selected>15 Menit</option>
-                <option value="60">Per Jam</option>
-                <option value="240">4 Jam</option>
-                <option value="1D">Per Hari</option>
+                <option value="1">1m</option>
+                <option value="5">5m</option>
+                <option value="15" selected>15m</option>
+                <option value="60">1h</option>
+                <option value="240">4h</option>
+                <option value="1D">1d</option>
               </select>
             </div>
 
+            <!-- Toggle Button for Date Picker -->
+            <button onclick="toggleAdvancedChartFilters()" class="btn-gray" style="padding:4px 8px;font-size:11px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);outline:none;cursor:pointer;display:flex;align-items:center;gap:4px" title="Buka Filter Tanggal">
+              <span>📅</span><span class="btn-text-range">Rentang</span>
+            </button>
+          </div>
+
+          <!-- Row 2: Advanced Date Pickers & Time Range Pills (Collapsible on mobile) -->
+          <div id="chart-advanced-filters" class="collapsed" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <!-- Date Range Pickers -->
             <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px">
               <input type="date" id="chart-start-date" onchange="changeChartDateRange()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer">
@@ -2539,6 +2545,13 @@ function changeChartDateRange() {
   const select = document.getElementById('chart-card-pair');
   if (select) {
     loadCandlesForPair(select.value);
+  }
+}
+
+function toggleAdvancedChartFilters() {
+  const el = document.getElementById('chart-advanced-filters');
+  if (el) {
+    el.classList.toggle('collapsed');
   }
 }
 
