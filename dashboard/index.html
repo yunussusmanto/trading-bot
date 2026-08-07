@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.9.3 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.9.4 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -419,6 +419,14 @@
   .card.card-collapsed [style*="border-bottom"] {
     border-bottom: none !important;
   }
+  #native-chart-container {
+    height: 480px;
+  }
+  @media (max-width: 768px) {
+    #native-chart-container {
+      height: 350px;
+    }
+  }
 </style>
   <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
@@ -431,7 +439,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.3</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.4</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1104,7 +1112,8 @@
             <span>📈 Grafik Candlestick (Real-Time Indodax)</span>
             <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
           </span>
-          <div style="display:flex;align-items:center;gap:8px">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <input type="text" id="chart-search-coin" placeholder="Cari koin..." oninput="filterChartPairs()" class="btn-gray" style="padding:4px 8px; font-size:11px; width:90px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); color:var(--text); outline:none;">
             <select id="chart-card-pair" onchange="changeChartCardPair()" class="btn-gray" style="padding:4px 8px; font-size:11px; outline:none; cursor:pointer; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--accent2); font-weight:700; text-transform:uppercase;">
               <option value="btc_idr">BTC/IDR</option>
             </select>
@@ -1118,11 +1127,14 @@
               <option value="240">4 Jam</option>
               <option value="1D">1 Hari</option>
             </select>
+
+            <span style="font-size:11px;color:var(--muted)">Mulai:</span>
+            <input type="date" id="chart-start-date" onchange="changeChartDate()" class="btn-gray" style="padding:4px 8px; font-size:11px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); color:var(--text); outline:none;">
           </div>
         </div>
         
         <!-- Native Candlestick Container (Lightweight Charts) -->
-        <div id="native-chart-container" style="height:700px;width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
           <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
         </div>
       </div>
@@ -2336,7 +2348,14 @@ async function loadCandlesForPair(pair) {
       return;
     }
 
-    const res = await fetch(`/api/candles/${rawPair}?resolution=${currentResolution}`);
+    let url = `/api/candles/${rawPair}?resolution=${currentResolution}`;
+    const dateInput = document.getElementById('chart-start-date');
+    if (dateInput && dateInput.value) {
+      const fromSec = Math.floor(new Date(dateInput.value).getTime() / 1000);
+      url += `&from=${fromSec}`;
+    }
+
+    const res = await fetch(url);
     const candles = await res.json();
     
     if (candles && candles.error) {
@@ -2378,10 +2397,11 @@ async function loadCandlesForPair(pair) {
     }
 
     const chartWidth = container.clientWidth || container.parentElement.clientWidth || 800;
+    const chartHeight = Math.max((container.parentElement.clientHeight || 480) - 10, 300);
     
     activeLightweightChart = LightweightCharts.createChart(container, {
       width: chartWidth,
-      height: 680,
+      height: chartHeight,
       layout: {
         background: { color: '#121214' },
         textColor: '#d1d4dc',
@@ -2415,7 +2435,8 @@ async function loadCandlesForPair(pair) {
 
     const resizeObserver = new ResizeObserver(entries => {
       if (activeLightweightChart && container.clientWidth) {
-        activeLightweightChart.resize(container.clientWidth, 680);
+        const newHeight = Math.max((container.parentElement.clientHeight || 480) - 10, 300);
+        activeLightweightChart.resize(container.clientWidth, newHeight);
       }
     });
     resizeObserver.observe(container);
@@ -2431,9 +2452,31 @@ function changeInternalResolution() {
   if (select) {
     currentResolution = select.value;
   }
-  const pairSelect = document.getElementById('bot-pair');
+  const pairSelect = document.getElementById('chart-card-pair');
   if (pairSelect) {
     loadCandlesForPair(pairSelect.value);
+  }
+}
+
+function filterChartPairs() {
+  const query = (document.getElementById('chart-search-coin')?.value || '').toLowerCase();
+  const select = document.getElementById('chart-card-pair');
+  if (!select || !allPairsData) return;
+  
+  const currentVal = select.value;
+  select.innerHTML = allPairsData
+    .filter(p => p.symbol.toLowerCase().includes(query) || (p.name && p.name.toLowerCase().includes(query)))
+    .map(p => {
+      const sym = p.symbol;
+      const symName = p.name || `${sym.replace('_idr','').toUpperCase()}/IDR`;
+      return `<option value="${sym}" ${sym === currentVal ? 'selected' : ''}>${symName}</option>`;
+    }).join('');
+}
+
+function changeChartDate() {
+  const select = document.getElementById('chart-card-pair');
+  if (select) {
+    loadCandlesForPair(select.value);
   }
 }
 
