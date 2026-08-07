@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.7 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.8 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -376,10 +376,19 @@
   .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
 
   /* Responsive Breakpoints */
+  .manual-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
   @media(max-width:992px) {
     .form-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media(max-width:768px) {
+    .manual-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
     .app-shell { flex-direction: column; }
     aside.sidebar { display: none; }
     main.workspace { flex-direction: column; padding: 10px; gap: 12px; }
@@ -467,7 +476,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.7</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.8</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -783,17 +792,17 @@
 
       <!-- Manual Trading Panel -->
       <div id="manual-trade-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin:0">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin:0; white-space: nowrap;">
             <span>⚡ Transaksi Jual Beli Manual</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <button id="toggle-manual-nominal-btn" onclick="toggleManualNominalVisibility()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">👁 Show Nominal</button>
-            <span style="font-size:10px; font-weight:700; color:var(--accent2)">Indodax Market Order</span>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="toggle-manual-nominal-btn" onclick="toggleManualNominalVisibility()" class="btn-gray" style="padding: 4px 10px; font-size: 11px; white-space: nowrap;">👁 Show Nominal</button>
+            <span style="font-size:10px; font-weight:700; color:var(--accent2); white-space: nowrap;">Indodax Market Order</span>
           </div>
         </div>
 
-        <div class="card-body-collapsible" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="card-body-collapsible manual-grid">
           
           <!-- Beli Form (Buy) -->
           <div style="background: rgba(16,192,135,0.02); border: 1px solid rgba(16,192,135,0.12); padding: 16px; border-radius: 10px; display: flex; flex-direction: column;">
@@ -804,12 +813,12 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: flex; gap: 12px; font-size: 12px;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')"> Limit Order
+              <div style="display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                  <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')"> Instan / Market
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                  <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
             </div>
@@ -882,12 +891,12 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: flex; gap: 12px; font-size: 12px;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')"> Limit Order
+              <div style="display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                  <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                  <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')"> Instan / Market
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                  <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
             </div>
