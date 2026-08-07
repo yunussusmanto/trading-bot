@@ -369,11 +369,16 @@
   .btn-blue:hover { filter: brightness(1.1); }
   .btn-gray { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
 
-  /* Status Badges */
-  .badge { display: inline-flex; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-  .badge-green { background: rgba(0,192,135,.15); color: var(--green); }
-  .badge-red { background: rgba(255,77,77,.15); color: var(--red); }
-  .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
+  /* Standardized Panel Title Styling (Sleek, Clean & Consistent Size) */
+  .card-title,
+  .card-header > span,
+  .card-header .card-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+  }
 
   /* Responsive Breakpoints */
   .manual-grid {
@@ -1308,10 +1313,12 @@
       </div>
       <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
-            <span>📈 Laporan Profit Realisasi Per Koin</span>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div class="card-title" style="margin:0">📈 Laporan Profit Realisasi Per Koin</div>
+            <div>
+              <button class="btn-gray" style="padding:3px 8px; font-size:10px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
+            </div>
           </div>
-          <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="loadCoinPerformanceReport()">🔄 Refresh</button>
         </div>
 
         <div class="card-body-collapsible">
@@ -3974,13 +3981,14 @@ async function makeCardsCollapsible() {
   document.querySelectorAll('.card').forEach((card, idx) => {
     try {
       if (card.closest('.modal-content') || card.id === 'paper-mode-banner') return;
-      if (excludedIds.includes(card.id)) return;
-      if (card.querySelector('.card-body-collapsible')) return;
       
       // Assign a persistent id if not present
       if (!card.id) {
         card.id = `card-collapsible-${idx}`;
       }
+
+      // Avoid adding duplicate toggle buttons
+      if (card.querySelector('.card-toggle-btn')) return;
 
       // Bulletproof header container detection
       let header = null;
@@ -4026,20 +4034,23 @@ async function makeCardsCollapsible() {
 
       header.appendChild(btn);
 
-      // Create wrapper for body elements
-      const wrapper = document.createElement('div');
-      wrapper.className = 'card-body-collapsible';
-      wrapper.style.transition = 'all 0.3s ease';
-      
-      // Collect siblings in array first to avoid loop mutation side effects
-      const siblings = [];
-      let next = header.nextSibling;
-      while (next) {
-        siblings.push(next);
-        next = next.nextSibling;
+      // Find or create wrapper for body elements
+      let wrapper = card.querySelector('.card-body-collapsible');
+      if (!wrapper) {
+        wrapper = document.createElement('div');
+        wrapper.className = 'card-body-collapsible';
+        wrapper.style.transition = 'all 0.3s ease';
+        
+        // Collect siblings in array first to avoid loop mutation side effects
+        const siblings = [];
+        let next = header.nextSibling;
+        while (next) {
+          siblings.push(next);
+          next = next.nextSibling;
+        }
+        siblings.forEach(sib => wrapper.appendChild(sib));
+        card.appendChild(wrapper);
       }
-      siblings.forEach(sib => wrapper.appendChild(sib));
-      card.appendChild(wrapper);
 
     // Restore state (server value takes precedence)
     const isCollapsed = serverStates[card.id] !== undefined
