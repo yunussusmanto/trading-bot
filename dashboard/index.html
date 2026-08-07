@@ -4295,6 +4295,17 @@ async function executeManualTrade(side) {
     } else {
       alert(`Gagal: ${data.error || 'Terjadi kesalahan sistem'}`);
     }
+  } catch (err) {
+    alert(`Terjadi error: ${err.message}`);
+  } finally {
+    const btn = document.getElementById(`manual-${side}-btn`);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = side === 'buy' ? `Beli ${cleanCoin}` : `Jual ${cleanCoin}`;
+    }
+  }
+}
+
 // ── User Permissions & Profile Management ─────────────────────
 let currentUserProfile = null;
 let cachedUserList = [];
