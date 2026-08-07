@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.9.7 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.9.8 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -467,7 +467,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.7</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.8</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1619,15 +1619,17 @@ function handleWS(msg) {
       const elLow = document.getElementById('banner-low');
       if (elLow) elLow.textContent = fmtIDR(low);
 
-      updateLiveCandle(last, msg.timestamp);
+      // Update chart with currently selected chart pair from the tickers list
+      const chartSelect = document.getElementById('chart-card-pair');
+      const chartPair = (chartSelect ? chartSelect.value || 'btc_idr' : 'btc_idr').toLowerCase().replace('_', '');
+      const chartTicker = msg.tickers[chartPair] || msg.tickers[chartPair.toUpperCase()];
+      if (chartTicker) {
+        updateLiveCandle(chartPair, parseFloat(chartTicker.last), msg.timestamp);
+      }
     }
   } else if (msg.type === 'price') {
     prices[msg.pair] = msg.price;
-    const select = document.getElementById('bot-pair');
-    const currentPair = select ? select.value : 'btc_idr';
-    if (msg.pair.replace('_', '') === currentPair.replace('_', '')) {
-      updateLiveCandle(msg.price, msg.timestamp);
-    }
+    updateLiveCandle(msg.pair, msg.price, msg.timestamp);
   } else if (msg.type === 'trade') {
     log(`TRADE ${msg.trade.action} ${msg.trade.pair} @ ${fmtIDR(msg.trade.price)}`, 'trade');
     loadTrades();
@@ -2566,8 +2568,14 @@ function setChartRangeDays(days) {
   }
 }
 
-function updateLiveCandle(price, timestamp) {
-  if (!activeCandlestickSeries || !nativeCandleData.length) return;
+function updateLiveCandle(pair, price, timestamp) {
+  if (!pair || !activeCandlestickSeries || !nativeCandleData.length) return;
+  
+  const chartSelect = document.getElementById('chart-card-pair');
+  const chartPair = (chartSelect ? chartSelect.value || 'btc_idr' : 'btc_idr').toLowerCase().replace('_', '');
+  
+  // Verify that the price update is for the currently viewed chart pair
+  if (pair.toLowerCase().replace('_', '') !== chartPair) return;
   
   const lastC = nativeCandleData[nativeCandleData.length - 1];
   
