@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.4 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.5 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -467,7 +467,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.4</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.5</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -3985,11 +3985,14 @@ function setManualPriceAndAmount(side, price, amount) {
   calcManualTrade(side, 'amount');
 }
 
+let lastManualTradePair = '';
 function updateManualTradePanel() {
   const select = document.getElementById('bot-pair');
   if (!select) return;
   const rawPair = select.value || 'btc_idr';
   const cleanCoin = rawPair.replace('_idr', '').toUpperCase();
+  const pairChanged = (rawPair !== lastManualTradePair);
+  lastManualTradePair = rawPair;
 
   // Update headers/titles
   const buyCoinTitle = document.getElementById('manual-buy-coin-title');
@@ -4018,8 +4021,8 @@ function updateManualTradePanel() {
   if (currentPrice > 0) {
     const buyPriceInput = document.getElementById('manual-buy-price');
     const sellPriceInput = document.getElementById('manual-sell-price');
-    if (buyPriceInput && !buyPriceInput.value) buyPriceInput.value = currentPrice;
-    if (sellPriceInput && !sellPriceInput.value) sellPriceInput.value = currentPrice;
+    if (buyPriceInput && (pairChanged || !buyPriceInput.value)) buyPriceInput.value = currentPrice;
+    if (sellPriceInput && (pairChanged || !sellPriceInput.value)) sellPriceInput.value = currentPrice;
   }
 
   // Update Saldo display
