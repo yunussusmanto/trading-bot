@@ -211,8 +211,6 @@ app.use(session({
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
 }));
 
-const db = require('./api/db');
-
 // Auth middlewares
 function requireAuth(req, res, next) {
   if (req.session && req.session.loggedIn) {
