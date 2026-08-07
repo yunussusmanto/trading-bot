@@ -456,8 +456,8 @@
     background: rgba(255,255,255,0.05);
   }
   .chart-controls-panel select option {
-    background: #1e1e24 !important;
-    color: #fff !important;
+    background: var(--surface2) !important;
+    color: var(--text) !important;
   }
   @media (max-width: 768px) {
     #native-chart-container {
@@ -813,12 +813,12 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-                <label style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 8px 6px; border-radius: 6px; font-weight: 600;">
-                  <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Limit Order
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; font-weight: 700; text-align: center;">
+                  <input type="radio" name="manual-buy-type" value="limit" checked onchange="toggleManualOrderType('buy')" style="margin:0; width:14px; height:14px; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 8px 6px; border-radius: 6px; font-weight: 600;">
-                  <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')" style="margin:0; flex-shrink:0;"> Instan / Market
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; font-weight: 700; text-align: center;">
+                  <input type="radio" name="manual-buy-type" value="market" onchange="toggleManualOrderType('buy')" style="margin:0; width:14px; height:14px; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
             </div>
@@ -865,7 +865,7 @@
                 <span>Market Jual (Antrian Sell)</span>
                 <span style="color: var(--red); font-weight: 800;">ASK</span>
               </div>
-              <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: #18181c;">
+              <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2);">
                 <table class="indodax-table" style="font-size: 10px; font-family: 'JetBrains Mono', monospace; margin: 0; width: 100%; table-layout: fixed;">
                   <thead>
                     <tr>
@@ -891,12 +891,12 @@
             <!-- Order Type Selector -->
             <div class="form-group" style="margin-bottom: 12px;">
               <label class="field-label" style="font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; display: block;">Order Type</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-                <label style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 8px 6px; border-radius: 6px; font-weight: 600;">
-                  <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Limit Order
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px;">
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; font-weight: 700; text-align: center;">
+                  <input type="radio" name="manual-sell-type" value="limit" checked onchange="toggleManualOrderType('sell')" style="margin:0; width:14px; height:14px; flex-shrink:0;"> Limit Order
                 </label>
-                <label style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 8px 6px; border-radius: 6px; font-weight: 600;">
-                  <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')" style="margin:0; flex-shrink:0;"> Instan / Market
+                <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; background: var(--surface2); border: 1px solid var(--border); padding: 6px 2px; border-radius: 6px; font-weight: 700; text-align: center;">
+                  <input type="radio" name="manual-sell-type" value="market" onchange="toggleManualOrderType('sell')" style="margin:0; width:14px; height:14px; flex-shrink:0;"> Instan / Market
                 </label>
               </div>
             </div>
@@ -943,13 +943,13 @@
                 <span>Market Beli (Antrian Buy)</span>
                 <span style="color: var(--green); font-weight: 800;">BID</span>
               </div>
-              <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: #18181c;">
-                <table class="indodax-table" style="font-size: 11px; margin: 0; width: 100%;">
+              <div style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2);">
+                <table class="indodax-table" style="font-size: 10px; font-family: 'JetBrains Mono', monospace; margin: 0; width: 100%; table-layout: fixed;">
                   <thead>
                     <tr>
-                      <th style="padding: 6px 8px; text-align: left;">Harga (Rp)</th>
-                      <th style="padding: 6px 8px; text-align: right;" class="manual-coin-header-label">Coin</th>
-                      <th style="padding: 6px 8px; text-align: right;">Total IDR</th>
+                      <th style="width: 42%; padding: 6px 4px; text-align: left; font-family: sans-serif;">Harga (Rp)</th>
+                      <th style="width: 26%; padding: 6px 4px; text-align: right; font-family: sans-serif;" class="manual-coin-header-label">Coin</th>
+                      <th style="width: 32%; padding: 6px 4px; text-align: right; font-family: sans-serif;">Total IDR</th>
                     </tr>
                   </thead>
                   <tbody id="manual-bids-tbody">
@@ -1185,7 +1185,7 @@
         </div>
         
         <!-- Native Candlestick Container (Lightweight Charts) -->
-        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:var(--surface);border:1px solid var(--border);position:relative">
           <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
         </div>
       </div>
@@ -1246,7 +1246,7 @@
           </div>
         </div>
 
-        <div id="profit-chart-wrapper" style="width:100%;background:#121212;border-radius:8px;border:1px solid var(--border);padding:10px 4px 4px 4px">
+        <div id="profit-chart-wrapper" style="width:100%;background:var(--surface);border-radius:8px;border:1px solid var(--border);padding:10px;margin-top:10px">
           <div id="daily-profit-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
@@ -2487,7 +2487,7 @@ async function loadCandlesForPair(pair) {
       width: chartWidth,
       height: chartHeight,
       layout: {
-        background: { color: '#121214' },
+        background: { color: 'var(--surface)' },
         textColor: '#d1d4dc',
         fontSize: 11,
       },
@@ -3510,7 +3510,7 @@ async function loadPositions() {
           <div onclick="selectPairFromMarket('${p.pair}')" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 8px; background:var(--surface2); border-radius:6px; border:1px solid var(--border); transition: background 0.15s;" title="Klik untuk tampilkan grafik koin ini" class="progress-bar-row">
             <div style="width:70px; font-weight:700; font-size:12px; color:var(--text); text-align:left; text-transform:uppercase;">${coinSymbol}</div>
             
-            <div style="flex:1; height:12px; background:#18181a; border-radius:4px; overflow:hidden; border:1px solid var(--border); position:relative;">
+            <div style="flex:1; height:12px; background:var(--surface2); border-radius:4px; overflow:hidden; border: 1px solid var(--border); position:relative;">
               <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.35); z-index: 1;"></div>
               <div style="position: absolute; height:100%; ${fillStyle} border-radius:1px; transition: all 0.3s ease; z-index: 2;"></div>
             </div>
