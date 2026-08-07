@@ -1306,24 +1306,27 @@ app.get('/api/candles/:pair', async (req, res) => {
     const pair = req.params.pair.toLowerCase().replace('_', '');
     const { resolution = '15', from, to } = req.query;
     
-    let tf = resolution;
-    if (resolution.toUpperCase() === '1D') tf = '1440';
+    let tf = '15';
+    const tfUpper = (resolution || '').toString().toUpperCase();
+    if (tfUpper === '1D' || tfUpper === 'D' || tfUpper === '1440') tf = '1D';
+    else if (tfUpper === '4H' || tfUpper === '240') tf = '240';
+    else if (tfUpper === '1H' || tfUpper === '60') tf = '60';
+    else if (tfUpper === '30M' || tfUpper === '30') tf = '30';
+    else if (tfUpper === '15M' || tfUpper === '15') tf = '15';
+    else if (tfUpper === '1M' || tfUpper === '1') tf = '1';
     
     const nowSec = Math.floor(Date.now() / 1000);
     
-    let defaultFrom = nowSec - 2 * 24 * 60 * 60; // default 2 days
-    const tfUpper = resolution.toUpperCase();
-    if (tfUpper === '1D' || tf === '1440') {
-      defaultFrom = nowSec - 90 * 24 * 60 * 60; // 90 days
-    } else if (tfUpper === '240') {
+    let defaultFrom = nowSec - 5 * 24 * 60 * 60; // default 5 days
+    if (tf === '1D') {
+      defaultFrom = nowSec - 180 * 24 * 60 * 60; // 180 days
+    } else if (tf === '240') {
       defaultFrom = nowSec - 45 * 24 * 60 * 60; // 45 days
-    } else if (tfUpper === '60') {
+    } else if (tf === '60') {
       defaultFrom = nowSec - 15 * 24 * 60 * 60; // 15 days
-    } else if (tfUpper === '15') {
+    } else if (tf === '30' || tf === '15') {
       defaultFrom = nowSec - 5 * 24 * 60 * 60; // 5 days
-    } else if (tfUpper === '5') {
-      defaultFrom = nowSec - 2 * 24 * 60 * 60; // 2 days
-    } else if (tfUpper === '1') {
+    } else if (tf === '1') {
       defaultFrom = nowSec - 12 * 60 * 60; // 12 hours
     }
     

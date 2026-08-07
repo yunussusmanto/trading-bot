@@ -569,7 +569,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.6</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.7</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -2679,7 +2679,12 @@ async function loadCandlesForPair(pair) {
     }
 
     const res = await fetch(url);
-    const candles = await res.json();
+    let candles = [];
+    try {
+      candles = await res.json();
+    } catch (_) {
+      candles = [];
+    }
     
     if (candles && candles.error) {
       container.innerHTML = `<div style="color:var(--red); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Gagal memuat: ${candles.error}</div>`;
