@@ -447,7 +447,7 @@
 
     /* Chart on mobile */
     #candlestick-card { min-height: 0; }
-    #native-chart-container { height: clamp(240px, 38vh, 380px); }
+    #native-chart-container { height: clamp(320px, 48vh, 480px); }
     #lightweight-chart-div { min-height: 0; height: 100%; }
     /* Date inputs wrap on mobile */
     #chart-advanced-filters input[type="date"] { width: 100% !important; min-width: 0; }
@@ -482,7 +482,7 @@
     .card-title { font-size: 10px !important; }
     .tab-nav-btn { font-size: 10px !important; padding: 6px 8px !important; }
     main.workspace { padding: 6px 4px; gap: 8px; }
-    #native-chart-container { height: clamp(200px, 35vh, 300px); }
+    #native-chart-container { height: clamp(300px, 45vh, 420px); }
     .ticker-metrics .metric-val { font-size: 11px; }
     .metric-label { font-size: 9px; }
     input, select { font-size: 14px; } /* prevent iOS zoom */
@@ -491,11 +491,11 @@
   }
   /* ── LANDSCAPE PHONE ──────────────────────────────────────────── */
   @media(max-height: 500px) and (orientation: landscape) {
-    #native-chart-container { height: clamp(180px, 55vw, 350px); }
+    #native-chart-container { height: clamp(220px, 62vw, 420px); }
   }
   /* ── LARGE DESKTOP (1400px+) ────────────────────────────────── */
   @media(min-width: 1400px) {
-    #native-chart-container { height: clamp(480px, 48vh, 680px); }
+    #native-chart-container { height: clamp(560px, 55vh, 800px); }
   }
   .card-toggle-btn {
     transition: all 0.2s ease;
@@ -527,7 +527,7 @@
   }
   #native-chart-container {
     /* Desktop: tall chart */
-    height: clamp(300px, 42vh, 560px);
+    height: clamp(420px, 52vh, 680px);
   }
   .chart-range-pill {
     background: var(--surface);
@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.1</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.2</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -2838,24 +2838,29 @@ async function loadCandlesForPair(pair) {
     const chartWidth = container.clientWidth || container.parentElement.clientWidth || 800;
     const chartHeight = Math.max((container.parentElement.clientHeight || 480) - 10, 300);
     
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const chartTheme = isDark
+      ? { bg: '#1a1a1c', text: '#d1d5db', grid: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)' }
+      : { bg: '#ffffff', text: '#111827', grid: 'rgba(0,0,0,0.07)', border: 'rgba(0,0,0,0.15)' };
+
     activeLightweightChart = LightweightCharts.createChart(container, {
       width: chartWidth,
       height: chartHeight,
       layout: {
-        background: { color: 'var(--surface)' },
-        textColor: '#d1d4dc',
+        background: { color: chartTheme.bg },
+        textColor: chartTheme.text,
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: 'rgba(42, 46, 57, 0.15)' },
-        horzLines: { color: 'rgba(42, 46, 57, 0.15)' },
+        vertLines: { color: chartTheme.grid },
+        horzLines: { color: chartTheme.grid },
       },
       rightPriceScale: {
-        borderColor: 'rgba(197, 203, 206, 0.2)',
+        borderColor: chartTheme.border,
         visible: true,
       },
       timeScale: {
-        borderColor: 'rgba(197, 203, 206, 0.2)',
+        borderColor: chartTheme.border,
         timeVisible: true,
         secondsVisible: false,
       },
@@ -3501,6 +3506,20 @@ function toggleTheme() {
   localStorage.setItem('theme', next);
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) btn.textContent = next === 'light' ? '🌙 Gelap' : '☀️ Terang';
+
+  // Re-apply LightweightChart theme colors immediately
+  if (activeLightweightChart) {
+    const isDark = next !== 'light';
+    const chartTheme = isDark
+      ? { bg: '#1a1a1c', text: '#d1d5db', grid: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)' }
+      : { bg: '#ffffff', text: '#111827', grid: 'rgba(0,0,0,0.07)', border: 'rgba(0,0,0,0.15)' };
+    activeLightweightChart.applyOptions({
+      layout: { background: { color: chartTheme.bg }, textColor: chartTheme.text },
+      grid: { vertLines: { color: chartTheme.grid }, horzLines: { color: chartTheme.grid } },
+      rightPriceScale: { borderColor: chartTheme.border },
+      timeScale: { borderColor: chartTheme.border },
+    });
+  }
 }
 
 async function logout() {
