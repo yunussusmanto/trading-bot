@@ -122,8 +122,8 @@
   .app-shell { display: flex; min-height: calc(100vh - 54px); width: 100%; max-width: 100vw; overflow-x: hidden; }
 
   /* Left Sidebar */
-  aside.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; transition: all 0.25s ease-in-out; }
-  body.sidebar-collapsed aside.sidebar { display: none !important; }
+  aside.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; transition: all 0.25s ease-in-out; position: relative; z-index: 10; pointer-events: all; }
+  body.sidebar-collapsed aside.sidebar { display: none !important; pointer-events: none; }
   .user-badge {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -142,6 +142,8 @@
     padding: 9px 12px; border-radius: 8px;
     font-size: 12px; font-weight: 500; color: var(--muted);
     text-decoration: none; transition: all .15s; cursor: pointer;
+    user-select: none; -webkit-user-select: none;
+    position: relative; z-index: 1;
   }
   .menu-item:hover, .menu-item.active { background: rgba(156, 163, 175, 0.12); color: var(--header-blue); font-weight: 600; }
 
@@ -3162,10 +3164,16 @@ function initTheme() {
 }
 
 function initSidebarState() {
-  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (isCollapsed) {
+  // Only collapse if user explicitly set it (not null/missing = always show on desktop)
+  const stored = localStorage.getItem('sidebarCollapsed');
+  if (stored === 'true') {
     document.body.classList.add('sidebar-collapsed');
     updateSidebarToggleBtn(true);
+  } else {
+    // Ensure expanded state is visible
+    document.body.classList.remove('sidebar-collapsed');
+    updateSidebarToggleBtn(false);
+    if (stored === null) localStorage.setItem('sidebarCollapsed', 'false');
   }
 }
 
