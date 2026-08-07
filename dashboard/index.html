@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.0</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.1</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -816,10 +816,9 @@
               <input type="date" id="chart-end-date" onchange="changeChartDateRange()"
                 style="background:transparent;border:none;color:var(--text);font-size:10px;outline:none;cursor:pointer;width:108px">
             </div>
-            <!-- Range Pills (1H, 30H, All) -->
-            <button id="btn-range-1d" class="chart-range-pill" onclick="setChartRangeDays(1)" style="flex:1;min-width:32px;padding:5px 2px;font-size:10px">1H</button>
-            <button id="btn-range-30d" class="chart-range-pill active" onclick="setChartRangeDays(30)" style="flex:1;min-width:36px;padding:5px 2px;font-size:10px">30H</button>
-            <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')" style="flex:1;min-width:32px;padding:5px 2px;font-size:10px">All</button>
+            <!-- Range Pills (1H, All - default 1H) -->
+            <button id="btn-range-1d" class="chart-range-pill active" onclick="setChartRangeDays(1)" style="flex:1;min-width:40px;padding:5px 4px;font-size:11px">1H</button>
+            <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')" style="flex:1;min-width:40px;padding:5px 4px;font-size:11px">All</button>
           </div>
         </div>
 
@@ -3443,16 +3442,16 @@ window.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initSidebarState();
 
-  // Initialize date picker values on load
+  // Initialize date picker values on load (Default 1H / 1 day)
   const startInput = document.getElementById('chart-start-date');
   const endInput = document.getElementById('chart-end-date');
   if (startInput && endInput) {
     const end = new Date();
     const start = new Date();
-    start.setDate(end.getDate() - 7); // Default 7 days
+    start.setDate(end.getDate() - 1); // Default 1 day (1H)
     startInput.value = start.toISOString().substring(0, 10);
     endInput.value = end.toISOString().substring(0, 10);
-    document.getElementById('btn-range-7d')?.classList.add('active');
+    document.getElementById('btn-range-1d')?.classList.add('active');
   }
 });
 
