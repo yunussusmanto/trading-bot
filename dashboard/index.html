@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.9.1 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.9.2 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -431,7 +431,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.1</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.9.2</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -2324,14 +2324,49 @@ let currentResolution = '15';
 
 async function loadCandlesForPair(pair) {
   const rawPair = pair || 'btc_idr';
+  const container = document.getElementById('lightweight-chart-div');
+  if (!container) return;
+
+  // Show beautiful loading state
+  container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:100px; font-family:sans-serif; font-size:13px; display:flex; flex-direction:column; align-items:center; gap:12px;"><span>⏳ Memuat data grafik real-time Indodax...</span></div>';
+
   try {
+    if (typeof LightweightCharts === 'undefined') {
+      container.innerHTML = '<div style="color:var(--red); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Error: Library grafik LightweightCharts tidak termuat. Harap periksa koneksi internet Anda atau refresh halaman.</div>';
+      return;
+    }
+
     const res = await fetch(`/api/candles/${rawPair}?resolution=${currentResolution}`);
     const candles = await res.json();
     
-    nativeCandleData = candles;
+    if (candles && candles.error) {
+      container.innerHTML = `<div style="color:var(--red); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Gagal memuat: ${candles.error}</div>`;
+      return;
+    }
 
-    const container = document.getElementById('lightweight-chart-div');
-    if (!container) return;
+    if (!candles || !candles.length || !Array.isArray(candles)) {
+      container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:100px; font-family:sans-serif; font-size:13px;">Data grafik tidak tersedia untuk koin ini pada interval terpilih.</div>';
+      return;
+    }
+
+    // Clean, sort strictly ascending, and deduplicate candles by time
+    candles.sort((a, b) => a.time - b.time);
+    const cleanCandles = [];
+    const seenTimes = new Set();
+    candles.forEach(c => {
+      if (c.time && !seenTimes.has(c.time)) {
+        seenTimes.add(c.time);
+        cleanCandles.push({
+          time: c.time,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close
+        });
+      }
+    });
+
+    nativeCandleData = cleanCandles;
 
     container.innerHTML = '';
     if (activeLightweightChart) {
@@ -2342,14 +2377,11 @@ async function loadCandlesForPair(pair) {
       activeCandlestickSeries = null;
     }
 
-    if (!candles || !candles.length) {
-      container.innerHTML = '<div style="color:var(--muted); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Data grafik tidak tersedia untuk koin ini.</div>';
-      return;
-    }
-
+    const chartWidth = container.clientWidth || container.parentElement.clientWidth || 800;
+    
     activeLightweightChart = LightweightCharts.createChart(container, {
-      width: container.clientWidth || 700,
-      height: container.clientHeight || 750,
+      width: chartWidth,
+      height: 680,
       layout: {
         background: { color: '#121214' },
         textColor: '#d1d4dc',
@@ -2378,17 +2410,18 @@ async function loadCandlesForPair(pair) {
       wickDownColor: '#ef5350',
     });
 
-    activeCandlestickSeries.setData(candles);
+    activeCandlestickSeries.setData(cleanCandles);
     activeLightweightChart.timeScale().fitContent();
 
     const resizeObserver = new ResizeObserver(entries => {
       if (activeLightweightChart && container.clientWidth) {
-        activeLightweightChart.resize(container.clientWidth, container.clientHeight || 750);
+        activeLightweightChart.resize(container.clientWidth, 680);
       }
     });
     resizeObserver.observe(container);
 
   } catch (err) {
+    container.innerHTML = `<div style="color:var(--red); text-align:center; padding:40px; font-family:sans-serif; font-size:13px;">Terjadi error sistem: ${err.message}</div>`;
     console.error('Failed to load internal chart:', err);
   }
 }

@@ -1120,7 +1120,22 @@ app.get('/api/candles/:pair', async (req, res) => {
     if (resolution.toUpperCase() === '1D') tf = '1440';
     
     const nowSec = Math.floor(Date.now() / 1000);
-    const defaultFrom = nowSec - 2 * 24 * 60 * 60; // default 48h ago
+    
+    let defaultFrom = nowSec - 2 * 24 * 60 * 60; // default 2 days
+    const tfUpper = resolution.toUpperCase();
+    if (tfUpper === '1D' || tf === '1440') {
+      defaultFrom = nowSec - 90 * 24 * 60 * 60; // 90 days
+    } else if (tfUpper === '240') {
+      defaultFrom = nowSec - 45 * 24 * 60 * 60; // 45 days
+    } else if (tfUpper === '60') {
+      defaultFrom = nowSec - 15 * 24 * 60 * 60; // 15 days
+    } else if (tfUpper === '15') {
+      defaultFrom = nowSec - 5 * 24 * 60 * 60; // 5 days
+    } else if (tfUpper === '5') {
+      defaultFrom = nowSec - 2 * 24 * 60 * 60; // 2 days
+    } else if (tfUpper === '1') {
+      defaultFrom = nowSec - 12 * 60 * 60; // 12 hours
+    }
     
     const queryFrom = from || defaultFrom;
     const queryTo = to || nowSec;
