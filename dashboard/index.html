@@ -1368,7 +1368,7 @@
           Markets (Pasar Indodax)
         </div>
         <div style="padding:8px">
-          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
+          <input type="text" id="market-search" name="search_coin_filter_input" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" autocomplete="new-password" style="margin-bottom:8px">
         </div>
         <div style="max-height:540px;overflow-y:auto">
           <table class="indodax-table">
@@ -2518,7 +2518,13 @@ function renderMarketsList(list) {
 }
 
 function filterMarkets() {
-  const q = document.getElementById('market-search').value.toLowerCase();
+  const input = document.getElementById('market-search');
+  if (!input) return;
+  let q = input.value.trim().toLowerCase();
+  if (q === 'admin' || q === 'root') {
+    input.value = '';
+    q = '';
+  }
   const filtered = allPairsData.filter(p => p.symbol.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
   renderMarketsList(filtered);
 }
