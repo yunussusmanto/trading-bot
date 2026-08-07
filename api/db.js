@@ -136,55 +136,70 @@ async function getAllUsers() {
 }
 
 async function createUser({ username, password, role = 'trader', permissions = {} }) {
-  const hash = hashPassword(password);
-  const permsJson = JSON.stringify(permissions);
-  const res = await pool.query(`
-    INSERT INTO users (username, password_hash, role, permissions, is_active)
-    VALUES ($1, $2, $3, $4, TRUE)
-    RETURNING id, username, role, permissions, is_active, created_at
-  `, [username, hash, role, permsJson]);
-  return res.rows[0];
+  try {
+    const hash = hashPassword(password);
+    const permsJson = JSON.stringify(permissions);
+    const res = await pool.query(`
+      INSERT INTO users (username, password_hash, role, permissions, is_active)
+      VALUES ($1, $2, $3, $4, TRUE)
+      RETURNING id, username, role, permissions, is_active, created_at
+    `, [username, hash, role, permsJson]);
+    return res.rows[0];
+  } catch (err) {
+    console.error('createUser error:', err.message);
+    throw err;
+  }
 }
 
 async function updateUser(id, { password, role, permissions, is_active }) {
-  const fields = [];
-  const values = [];
-  let idx = 1;
+  try {
+    const fields = [];
+    const values = [];
+    let idx = 1;
 
-  if (password && password.trim().length > 0) {
-    fields.push(`password_hash = $${idx++}`);
-    values.push(hashPassword(password));
-  }
-  if (role) {
-    fields.push(`role = $${idx++}`);
-    values.push(role);
-  }
-  if (permissions !== undefined) {
-    fields.push(`permissions = $${idx++}`);
-    values.push(JSON.stringify(permissions));
-  }
-  if (is_active !== undefined) {
-    fields.push(`is_active = $${idx++}`);
-    values.push(Boolean(is_active));
-  }
+    if (password && password.trim().length > 0) {
+      fields.push(`password_hash = $${idx++}`);
+      values.push(hashPassword(password));
+    }
+    if (role) {
+      fields.push(`role = $${idx++}`);
+      values.push(role);
+    }
+    if (permissions !== undefined) {
+      fields.push(`permissions = $${idx++}`);
+      values.push(JSON.stringify(permissions));
+    }
+    if (is_active !== undefined) {
+      fields.push(`is_active = $${idx++}`);
+      values.push(Boolean(is_active));
+    }
 
-  fields.push(`updated_at = NOW()`);
-  values.push(id);
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
 
-  const query = `
-    UPDATE users 
-    SET ${fields.join(', ')}
-    WHERE id = $${idx}
-    RETURNING id, username, role, permissions, is_active, updated_at
-  `;
+    const query = `
+      UPDATE users 
+      SET ${fields.join(', ')}
+      WHERE id = $${idx}
+      RETURNING id, username, role, permissions, is_active, updated_at
+    `;
 
-  const res = await pool.query(query, values);
-  return res.rows[0];
+    const res = await pool.query(query, values);
+    return res.rows[0];
+  } catch (err) {
+    console.error('updateUser error:', err.message);
+    throw err;
+  }
 }
 
 async function deleteUser(id) {
-  const res = await pool.query('DELETE FROM users WHERE id = $1 AND LOWER(username) != \'admin\' RETURNING id', [id]);
-  return res.rowCount > 0;
+  try {
+    const res = await pool.query('DELETE FROM users WHERE id = $1 AND LOWER(username) != \'admin\' RETURNING id', [id]);
+    return res.rowCount > 0;
+  } catch (err) {
+    console.error('deleteUser error:', err.message);
+    return false;
+  }
 }
 
 async function addTrade(t) {
