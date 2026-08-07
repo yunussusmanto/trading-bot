@@ -445,21 +445,29 @@
     table.indodax-table th, table.indodax-table td { padding: 6px 8px; font-size: 10px; }
     .table-responsive { max-height: 240px !important; }
 
-    /* Chart fullscreen on mobile - proper sizing */
+    /* Chart on mobile */
     #candlestick-card { min-height: 0; }
-    #lightweight-chart-div { min-height: 280px; }
+    #native-chart-container { height: clamp(240px, 38vh, 380px); }
+    #lightweight-chart-div { min-height: 0; height: 100%; }
+    /* Date inputs wrap on mobile */
+    #chart-advanced-filters input[type="date"] { width: 100% !important; min-width: 0; }
+    #chart-advanced-filters > div:first-child { flex-direction: column !important; }
+    #chart-advanced-filters > div:first-child > div { width: 100% !important; flex-shrink: 1; }
+    /* Fullscreen mobile */
     #candlestick-card.fullscreen-card {
       position: fixed !important;
       top: 0 !important; left: 0 !important;
-      width: 100vw !important; height: 100vh !important;
+      width: 100vw !important; height: 100dvh !important;
       z-index: 99990 !important;
       border-radius: 0 !important;
       padding: 8px !important;
-      overflow: hidden !important;
+      overflow-y: auto !important;
+      gap: 6px !important;
     }
-    #candlestick-card.fullscreen-card #lightweight-chart-div {
-      height: calc(100vh - 100px) !important;
-      min-height: 0 !important;
+    #candlestick-card.fullscreen-card #native-chart-container {
+      flex: 1 !important;
+      height: auto !important;
+      min-height: 200px !important;
     }
   }
 
@@ -474,10 +482,20 @@
     .card-title { font-size: 10px !important; }
     .tab-nav-btn { font-size: 10px !important; padding: 6px 8px !important; }
     main.workspace { padding: 6px 4px; gap: 8px; }
-    #lightweight-chart-div { min-height: 240px; }
+    #native-chart-container { height: clamp(200px, 35vh, 300px); }
     .ticker-metrics .metric-val { font-size: 11px; }
     .metric-label { font-size: 9px; }
     input, select { font-size: 14px; } /* prevent iOS zoom */
+    /* Date row: each date input takes full row */
+    #chart-advanced-filters input[type="date"] { width: 100% !important; }
+  }
+  /* ── LANDSCAPE PHONE ──────────────────────────────────────────── */
+  @media(max-height: 500px) and (orientation: landscape) {
+    #native-chart-container { height: clamp(180px, 55vw, 350px); }
+  }
+  /* ── LARGE DESKTOP (1400px+) ────────────────────────────────── */
+  @media(min-width: 1400px) {
+    #native-chart-container { height: clamp(480px, 48vh, 680px); }
   }
   .card-toggle-btn {
     transition: all 0.2s ease;
@@ -508,7 +526,8 @@
     border-bottom: none !important;
   }
   #native-chart-container {
-    height: 480px;
+    /* Desktop: tall chart */
+    height: clamp(300px, 42vh, 560px);
   }
   .chart-range-pill {
     background: var(--surface);
@@ -625,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.0</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.2.1</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -2504,10 +2523,8 @@ function toggleChartFullscreen() {
 
   if (isChartFullscreen) {
     card.classList.add('fullscreen-card');
-    if (btn) btn.innerHTML = '✕ Tutup';
+    if (btn) { btn.innerHTML = '✕'; btn.title = 'Tutup Fullscreen'; }
     document.body.style.overflow = 'hidden';
-
-    // Request native fullscreen on mobile
     if (isMobile && card.requestFullscreen) {
       card.requestFullscreen().catch(() => {});
     } else if (isMobile && card.webkitRequestFullscreen) {
@@ -2515,17 +2532,14 @@ function toggleChartFullscreen() {
     }
   } else {
     card.classList.remove('fullscreen-card');
-    if (btn) btn.innerHTML = '🖵 Fullscreen';
+    if (btn) { btn.innerHTML = '⤢'; btn.title = 'Fullscreen'; }
     document.body.style.overflow = '';
-
-    // Exit native fullscreen if active
     if (document.fullscreenElement || document.webkitFullscreenElement) {
       (document.exitFullscreen || document.webkitExitFullscreen || (() => {})).call(document);
     }
   }
 
-  // Force chart re-render after size change
-  setTimeout(() => loadSelectedChart(), 100);
+  setTimeout(() => loadSelectedChart(), 120);
 }
 
 // Exit profit chart fullscreen or candlestick chart fullscreen on Escape key press
