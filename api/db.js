@@ -141,7 +141,7 @@ async function createUser({ username, password, role = 'trader', permissions = {
     const permsJson = JSON.stringify(permissions);
     const res = await pool.query(`
       INSERT INTO users (username, password_hash, role, permissions, is_active)
-      VALUES ($1, $2, $3, $4, TRUE)
+      VALUES ($1, $2, $3, $4::jsonb, TRUE)
       RETURNING id, username, role, permissions, is_active, created_at
     `, [username, hash, role, permsJson]);
     return res.rows[0];
@@ -166,7 +166,7 @@ async function updateUser(id, { password, role, permissions, is_active }) {
       values.push(role);
     }
     if (permissions !== undefined) {
-      fields.push(`permissions = $${idx++}`);
+      fields.push(`permissions = $${idx++}::jsonb`);
       values.push(JSON.stringify(permissions));
     }
     if (is_active !== undefined) {
