@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v3.6.0 – Trading Robot Dashboard</title>
+<title>Indodax Pro v3.6.1 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <style>
@@ -432,7 +432,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.6.0</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v3.6.1</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -695,8 +695,8 @@
                 <th>Pair</th>
                 <th>Modal Beli (Rp)</th>
                 <th>Avg Entry</th>
-                <th>Jumlah Koin</th>
                 <th>Harga Live</th>
+                <th>Jumlah Koin</th>
                 <th>Nilai Live (Rp)</th>
                 <th>Untung / Rugi (P&L)</th>
                 <th>Slot DCA</th>
@@ -3127,8 +3127,8 @@ async function loadPositions() {
           <td style="text-transform:uppercase;font-weight:700;color:var(--accent2)">${p.pair}</td>
           <td style="font-weight:600">${capitalStr}</td>
           <td>${fmtIDR(p.entryPrice)}</td>
-          <td style="font-weight:600">${amountText}</td>
           <td style="font-weight:600">${fmtIDR(p.currentPrice)}</td>
+          <td style="font-weight:600">${amountText}</td>
           <td style="font-weight:600">${liveValStr}</td>
           <td>
             <span style="background:${bgBadge}; ${cls}; padding:3px 8px; border-radius:4px; font-weight:800; display:inline-block; font-size:11px;">
