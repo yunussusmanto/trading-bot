@@ -10,6 +10,10 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
 });
 
+pool.on('error', (err) => {
+  console.error('[DB] Idle client pool error:', err.message);
+});
+
 const crypto = require('crypto');
 
 function hashPassword(password, salt = 'trading_bot_salt_2026') {
