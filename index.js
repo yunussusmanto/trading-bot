@@ -192,7 +192,10 @@ app.use(session({
 
 // Auth middleware (Nginx Basic Auth handles perimeter authentication)
 function requireAuth(req, res, next) {
-  return next();
+  if (req.session && req.session.loggedIn) {
+    return next();
+  }
+  res.redirect('/login');
 }
 
 // Login page
