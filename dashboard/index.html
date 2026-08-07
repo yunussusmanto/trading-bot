@@ -1259,7 +1259,7 @@
       </div>
 
       <!-- 1:1 Official Indodax MARKET DEPTH CHART Layout -->
-      <div class="card">
+      <div id="market-depth-card" class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>MARKET DEPTH CHART</span>
           <span id="depth-pair-label" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
@@ -1489,20 +1489,32 @@
           </div>
         </div>
 
-        <!-- Custom Permission Toggles (4 Group Utama Best Practice) -->
-        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">Hak Akses Modul Dashboard (Best Practice):</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px;background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border);margin-bottom:14px">
-          <label style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="perm-group-robot"> 🤖 Kontrol Bot & Otomatisasi
+        <!-- Custom Permission Toggles (8 Modul Teratur & Presisi) -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">Modul Dashboard Yang Ditampilkan (Centang = Tampil):</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:8px;background:var(--surface);padding:12px;border-radius:8px;border:1px solid var(--border);margin-bottom:14px">
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_robot"> 🤖 Robot Trading Control & Log
           </label>
-          <label style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="perm-group-trade"> ⚡ Eksekusi Trading & Orders
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_manual"> ⚡ Form Trade Manual Beli/Jual
           </label>
-          <label style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="perm-group-reports"> 📊 Laporan Profit & Analitik
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_orders"> 📦 Open Orders & Open Positions
           </label>
-          <label style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="perm-group-admin"> ⚙️ Administrasi User & Hak Akses
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_candlestick"> 📈 Grafik Candlestick Realtime
+          </label>
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_markets"> 📊 Market Depth & Pasar Indodax
+          </label>
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_reports"> 💰 Ringkasan PnL & History Trade
+          </label>
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_profit_stats"> 📈 Grafik Equity & Profit Koin
+          </label>
+          <label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="perm-panel_admin"> ⚙️ Administrasi User & Hak Akses
           </label>
         </div>
 
@@ -4317,27 +4329,50 @@ async function executeManualTrade(side) {
 let currentUserProfile = null;
 let cachedUserList = [];
 
-// Panel ID → permission group mapping (Best Practice 4 Group System)
-const PANEL_GROUP_MAP = {
-  'robot-control-card':            'perm_group_robot',
-  'active-bots-card':              'perm_group_robot',
-  'live-log-card':                 'perm_group_robot',
+// Panel ID → Permission Module Key Mapping (Presisi 8 Modul)
+const PANEL_PERM_MAP = {
+  // 🤖 Robot Control & Log
+  'robot-control-card':            'panel_robot',
+  'active-bots-card':              'panel_robot',
+  'live-log-card':                 'panel_robot',
   
-  'manual-trade-card':             'perm_group_trade',
-  'open-orders-card':              'perm_group_trade',
-  'open-positions-card':           'perm_group_trade',
-  'approval-section':              'perm_group_trade',
+  // ⚡ Manual Trade
+  'manual-trade-card':             'panel_manual',
+  
+  // 📦 Orders & Positions
+  'open-orders-card':              'panel_orders',
+  'open-positions-card':           'panel_orders',
+  'approval-section':              'panel_orders',
 
-  'pnl-summary-card':              'perm_group_reports',
-  'daily-report-card':             'perm_group_reports',
-  'candlestick-card':              'perm_group_reports',
-  'daily-profit-chart-card':       'perm_group_reports',
-  'equity-curve-card':             'perm_group_reports',
-  'indicator-status-card':         'perm_group_reports',
-  'markets-card':                  'perm_group_reports',
-  'mini-candles-card':             'perm_group_reports',
-  'coin-performance-report-card':  'perm_group_reports',
+  // 📈 Candlestick Chart
+  'candlestick-card':              'panel_candlestick',
+
+  // 📊 Market Depth & Sidebar
+  'market-depth-card':             'panel_markets',
+  'markets-card':                  'panel_markets',
+
+  // 💰 PnL & History Trade
+  'pnl-summary-card':              'panel_reports',
+  'daily-report-card':             'panel_reports',
+
+  // 📈 Equity Curve & Profit Stats
+  'daily-profit-chart-card':       'panel_profit_stats',
+  'equity-curve-card':             'panel_profit_stats',
+  'coin-performance-report-card':  'panel_profit_stats',
+  'mini-candles-card':             'panel_profit_stats',
+  'indicator-status-card':         'panel_profit_stats',
 };
+
+const ALL_MODULE_KEYS = [
+  'panel_robot',
+  'panel_manual',
+  'panel_orders',
+  'panel_candlestick',
+  'panel_markets',
+  'panel_reports',
+  'panel_profit_stats',
+  'panel_admin'
+];
 
 async function loadUserProfile() {
   try {
@@ -4350,27 +4385,26 @@ async function loadUserProfile() {
     const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
     const perms = data.user.permissions || {};
 
-    // SUPERADMIN: Tampilkan SEMUA panel 100% tanpa perubahan
+    // 1. SUPERADMIN: Tampilkan SEMUA panel 100% tanpa perubahan (Admin view untouched)
     if (isSuperadmin) {
       const adminMenuLink = document.getElementById('menu-user-mgmt');
       if (adminMenuLink) adminMenuLink.style.display = 'flex';
       return;
     }
 
-    // NON-ADMIN: Evaluasi 4 Modul Utama
-    for (const [cardId, groupKey] of Object.entries(PANEL_GROUP_MAP)) {
-      // Buka panel jika grup diizinkan OR permission individual bernilai true
-      const isAllowed = (perms[groupKey] === true) || (perms['panel_' + cardId.replace('-card','').replace(/-/g,'_')] === true);
+    // 2. NON-SUPERADMIN: Strict allowlist (hanya tampilkan jika permission === true)
+    for (const [cardId, permKey] of Object.entries(PANEL_PERM_MAP)) {
+      const isAllowed = perms[permKey] === true;
       const el = document.getElementById(cardId);
       if (el) {
         el.style.display = isAllowed ? 'block' : 'none';
       }
     }
 
-    // Admin menu link
+    // Menu Kelola User Admin
     const adminMenuLink = document.getElementById('menu-user-mgmt');
     if (adminMenuLink) {
-      adminMenuLink.style.display = (perms.perm_group_admin === true || perms.panel_admin === true) ? 'flex' : 'none';
+      adminMenuLink.style.display = (perms.panel_admin === true) ? 'flex' : 'none';
     }
   } catch (err) {
     console.warn('loadUserProfile info:', err.message);
@@ -4421,22 +4455,30 @@ async function loadUserList() {
         : `<span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(239,68,68,0.2);color:var(--red)">Nonaktif</span>`;
 
       const perms = u.permissions || {};
-      const activeGroups = [];
-      if (perms.perm_group_robot || perms.panel_robot) activeGroups.push('🤖 Bot');
-      if (perms.perm_group_trade || perms.panel_manual) activeGroups.push('⚡ Trade');
-      if (perms.perm_group_reports || perms.panel_reports || perms.panel_daily_report) activeGroups.push('📊 Laporan');
-      if (perms.perm_group_admin || perms.panel_admin) activeGroups.push('⚙️ Admin');
+      const labels = {
+        panel_robot: '🤖 Bot',
+        panel_manual: '⚡ Manual',
+        panel_orders: '📦 Orders',
+        panel_candlestick: '📈 Candle',
+        panel_markets: '📊 Depth',
+        panel_reports: '💰 PnL',
+        panel_profit_stats: '📈 Equity',
+        panel_admin: '⚙️ Admin'
+      };
 
-      const permPills = isRootAdmin ? '🔑 Akses Penuh (Superadmin)' : activeGroups
-        .map(g => `<span style="font-size:9px;background:var(--surface);border:1px solid var(--border);padding:2px 6px;border-radius:4px;margin-right:2px;font-weight:600">${g}</span>`)
-        .join('') || '<span style="font-size:10px;color:var(--muted)">Hanya Lihat (Kosong)</span>';
+      const activePills = ALL_MODULE_KEYS
+        .filter(k => perms[k] === true)
+        .map(k => `<span style="font-size:9px;background:var(--surface);border:1px solid var(--border);padding:2px 5px;border-radius:4px;margin-right:2px;font-weight:600">${labels[k] || k}</span>`)
+        .join('');
+
+      const permPills = isRootAdmin ? '🔑 Akses Penuh (Superadmin)' : (activePills || '<span style="font-size:10px;color:var(--muted)">Tidak Ada Modul</span>');
 
       return `
         <tr>
           <td>${u.id}</td>
           <td style="font-weight:700;color:var(--accent2)">${u.username}</td>
           <td>${roleBadge}</td>
-          <td style="white-space:normal;max-width:240px">${permPills}</td>
+          <td style="white-space:normal;max-width:260px">${permPills}</td>
           <td>${statusBadge}</td>
           <td>
             <button onclick="openEditUserForm(${u.id})" class="btn-gray" style="padding:2px 8px;font-size:10px;margin-right:4px">✏ Edit</button>
@@ -4485,10 +4527,10 @@ function openEditUserForm(userId) {
   document.getElementById('user-form-status').value = String(u.is_active !== false);
 
   const perms = u.permissions || {};
-  document.getElementById('perm-group-robot').checked = !!(perms.perm_group_robot || perms.panel_robot);
-  document.getElementById('perm-group-trade').checked = !!(perms.perm_group_trade || perms.panel_manual);
-  document.getElementById('perm-group-reports').checked = !!(perms.perm_group_reports || perms.panel_reports || perms.panel_daily_report);
-  document.getElementById('perm-group-admin').checked = !!(perms.perm_group_admin || perms.panel_admin);
+  ALL_MODULE_KEYS.forEach(k => {
+    const el = document.getElementById('perm-' + k);
+    if (el) el.checked = perms[k] === true;
+  });
 }
 
 function closeUserForm() {
@@ -4498,20 +4540,20 @@ function closeUserForm() {
 
 function applyUserRolePreset(role) {
   if (role === 'admin') {
-    document.getElementById('perm-group-robot').checked = true;
-    document.getElementById('perm-group-trade').checked = true;
-    document.getElementById('perm-group-reports').checked = true;
-    document.getElementById('perm-group-admin').checked = true;
+    ALL_MODULE_KEYS.forEach(k => {
+      const el = document.getElementById('perm-' + k);
+      if (el) el.checked = true;
+    });
   } else if (role === 'trader') {
-    document.getElementById('perm-group-robot').checked = true;
-    document.getElementById('perm-group-trade').checked = true;
-    document.getElementById('perm-group-reports').checked = true;
-    document.getElementById('perm-group-admin').checked = false;
+    ALL_MODULE_KEYS.forEach(k => {
+      const el = document.getElementById('perm-' + k);
+      if (el) el.checked = (k !== 'panel_admin');
+    });
   } else if (role === 'viewer') {
-    document.getElementById('perm-group-robot').checked = false;
-    document.getElementById('perm-group-trade').checked = false;
-    document.getElementById('perm-group-reports').checked = true;
-    document.getElementById('perm-group-admin').checked = false;
+    ALL_MODULE_KEYS.forEach(k => {
+      const el = document.getElementById('perm-' + k);
+      if (el) el.checked = (k === 'panel_reports' || k === 'panel_profit_stats');
+    });
   }
 }
 
@@ -4522,23 +4564,11 @@ async function saveUserFromForm() {
   const role = document.getElementById('user-form-role').value;
   const isActive = document.getElementById('user-form-status').value === 'true';
 
-  const isRobot = document.getElementById('perm-group-robot').checked;
-  const isTrade = document.getElementById('perm-group-trade').checked;
-  const isReports = document.getElementById('perm-group-reports').checked;
-  const isAdmin = document.getElementById('perm-group-admin').checked;
-
-  const permissions = {
-    perm_group_robot: isRobot,
-    perm_group_trade: isTrade,
-    perm_group_reports: isReports,
-    perm_group_admin: isAdmin,
-    // Sync backward compatibility keys
-    panel_robot: isRobot,
-    panel_manual: isTrade,
-    panel_orders: isTrade,
-    panel_reports: isReports,
-    panel_admin: isAdmin
-  };
+  const permissions = {};
+  ALL_MODULE_KEYS.forEach(k => {
+    const el = document.getElementById('perm-' + k);
+    permissions[k] = el ? el.checked : false;
+  });
 
   if (!id && (!username || !password)) {
     alert('Username dan Password wajib diisi untuk user baru!');
