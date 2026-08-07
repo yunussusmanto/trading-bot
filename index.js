@@ -210,12 +210,65 @@ app.use(session({
   cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
 }));
 
-// Auth middleware (Nginx Basic Auth handles perimeter authentication)
+// Auth middleware
 function requireAuth(req, res, next) {
   if (req.session && req.session.loggedIn) {
+    if (!req.session.user) {
+      req.session.user = {
+        id: 1,
+        username: process.env.ADMIN_USER || 'admin',
+        role: 'admin',
+        permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+      };
+    }
     return next();
   }
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Unauthorized. Harap login terlebih dahulu.' });
+  }
   res.redirect('/login');
+}
+
+function requirePermission(permKey) {
+  return (req, res, next) => {
+    if (!req.session || !req.session.loggedIn) {
+      return res.status(401).json({ error: 'Unauthorized. Harap login terlebih dahulu.' });
+    }
+    if (!req.session.user) {
+      req.session.user = {
+        id: 1,
+        username: process.env.ADMIN_USER || 'admin',
+        role: 'admin',
+        permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+      };
+    }
+    const user = req.session.user;
+    if (user.role === 'admin' || user.username === 'admin') {
+      return next();
+    }
+    if (user.permissions && user.permissions[permKey] === true) {
+      return next();
+    }
+    return res.status(403).json({ error: 'Akses ditolak: Anda tidak memiliki izin untuk fitur ini.' });
+  };
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session || !req.session.loggedIn) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (!req.session.user) {
+    req.session.user = {
+      id: 1,
+      username: process.env.ADMIN_USER || 'admin',
+      role: 'admin',
+      permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+    };
+  }
+  if (req.session.user.role === 'admin' || req.session.user.username === 'admin' || req.session.user.permissions?.panel_admin === true) {
+    return next();
+  }
+  return res.status(403).json({ error: 'Akses khusus Administrator.' });
 }
 
 // Login page
@@ -225,19 +278,120 @@ app.get('/login', (req, res) => {
 });
 
 // Login POST
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    req.session.loggedIn = true;
-    return res.json({ ok: true });
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username dan password wajib diisi' });
+    }
+
+    const user = await db.getUserByUsername(username);
+    if (user) {
+      if (user.is_active === false) {
+        return res.status(403).json({ error: 'Akun Anda dinonaktifkan oleh Administrator.' });
+      }
+      if (db.verifyPassword(password, user.password_hash)) {
+        req.session.loggedIn = true;
+        req.session.user = {
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          permissions: user.permissions || {}
+        };
+        return res.json({ ok: true, user: req.session.user });
+      }
+    }
+
+    // Fallback to env admin
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+      req.session.loggedIn = true;
+      req.session.user = {
+        id: 1,
+        username: ADMIN_USER,
+        role: 'admin',
+        permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+      };
+      return res.json({ ok: true, user: req.session.user });
+    }
+
+    res.status(401).json({ error: 'Username atau password salah' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  res.status(401).json({ error: 'Username atau password salah' });
 });
 
 // Logout
 app.post('/api/logout', (req, res) => {
   req.session.destroy();
   res.json({ ok: true });
+});
+
+// Get Current Logged In User Info
+app.get('/api/me', (req, res) => {
+  if (req.session && req.session.loggedIn) {
+    if (!req.session.user) {
+      req.session.user = {
+        id: 1,
+        username: process.env.ADMIN_USER || 'admin',
+        role: 'admin',
+        permissions: { panel_robot: true, panel_manual: true, panel_orders: true, panel_reports: true, panel_admin: true }
+      };
+    }
+    return res.json({ loggedIn: true, user: req.session.user });
+  }
+  res.status(401).json({ loggedIn: false });
+});
+
+// Admin User Management REST APIs
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const users = await db.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const { username, password, role, permissions } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username dan password wajib diisi' });
+    }
+    const existing = await db.getUserByUsername(username);
+    if (existing) {
+      return res.status(400).json({ error: `Username "${username}" sudah digunakan.` });
+    }
+    const newUser = await db.createUser({ username, password, role, permissions });
+    res.json({ ok: true, user: newUser });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { password, role, permissions, is_active } = req.body;
+    const updated = await db.updateUser(id, { password, role, permissions, is_active });
+    res.json({ ok: true, user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const deleted = await db.deleteUser(id);
+    if (deleted) {
+      res.json({ ok: true });
+    } else {
+      res.status(400).json({ error: 'Gagal menghapus user (user admin utama tidak dapat dihapus).' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Protect all routes below

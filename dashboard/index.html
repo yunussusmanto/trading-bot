@@ -507,15 +507,16 @@
   <!-- Left Navigation Sidebar -->
   <aside class="sidebar">
     <div class="user-badge">
-      <div class="avatar-circle">YS</div>
+      <div class="avatar-circle" id="user-avatar-circle">YS</div>
       <div>
-        <div class="user-name">Yunus Susmanto</div>
-        <div class="user-handle">yunussusmanto</div>
+        <div class="user-name" id="user-display-name">admin</div>
+        <div class="user-handle" id="user-role-label">Superadmin</div>
       </div>
     </div>
 
     <div class="menu-group">
       <a class="menu-item active">📊 Marketplace</a>
+      <a id="menu-user-mgmt" class="menu-item" onclick="openUserMgmtModal()" style="display:none">👥 Kelola User Login</a>
       <a href="/guide.html" target="_blank" class="menu-item">📖 Documentation & Panduan Lengkap</a>
       <a class="menu-item" onclick="openHelpModal()">❓ Quick Help Modal</a>
       <a class="menu-item" onclick="openAboutModal()">ℹ️ About App</a>
@@ -1419,6 +1420,107 @@
     </div>
 
   </main>
+</div>
+
+<!-- Modal Kelola User Login & Hak Akses -->
+<div id="user-mgmt-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;justify-content:center;align-items:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:850px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 36px rgba(0,0,0,0.7);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <div style="font-size:15px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:8px">
+        <span>👥 Admin Management — Kelola User Login & Hak Akses</span>
+      </div>
+      <button onclick="closeUserMgmtModal()" class="btn-gray" style="padding:4px 10px;font-size:13px">✕ Tutup</button>
+    </div>
+
+    <div style="padding:20px;overflow-y:auto;flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:12px;color:var(--muted)">Kelola akun pengguna dan izin akses tiap panel di dashboard trading</div>
+        <button onclick="openAddUserForm()" class="btn-green" style="padding:6px 14px;font-size:12px;font-weight:700">+ Tambah User Baru</button>
+      </div>
+
+      <!-- User List Table -->
+      <div class="table-responsive" style="margin-bottom:16px">
+        <table class="indodax-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Izin Akses Panel</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="user-mgmt-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Memuat daftar user...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add / Edit User Form Card -->
+      <div id="user-form-card" class="card" style="display:none;background:var(--surface2);border:1px solid var(--header-blue);padding:16px;margin-top:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--header-blue);margin-bottom:12px" id="user-form-title">➕ Tambah User Baru</div>
+        <input type="hidden" id="user-form-id">
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label class="field-label">Username</label>
+            <input type="text" id="user-form-username" placeholder="Username login..." autocomplete="off">
+          </div>
+          <div>
+            <label class="field-label">Password <span style="font-weight:normal;color:var(--muted)">(Kosongkan jika tak diubah saat edit)</span></label>
+            <input type="password" id="user-form-password" placeholder="Password...">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <label class="field-label">Role Akses Preset</label>
+            <select id="user-form-role" onchange="applyUserRolePreset(this.value)">
+              <option value="admin">Superadmin (Akses Penuh)</option>
+              <option value="trader" selected>Trader (Robot & Trading Manual)</option>
+              <option value="viewer">Viewer (Hanya Lihat Monitor & Chart)</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Status Akun</label>
+            <select id="user-form-status">
+              <option value="true" selected>Aktif (Dapat Login)</option>
+              <option value="false">Nonaktif (Blokir Login)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Individual Panel Permissions -->
+        <div style="margin-bottom:16px">
+          <label class="field-label" style="margin-bottom:8px;display:block">Hak Akses Panel Granular:</label>
+          <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;font-size:12px;background:var(--surface);padding:12px;border-radius:6px;border:1px solid var(--border)">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="perm-panel-robot" checked> 🤖 Robot Trading Control Panel
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="perm-panel-manual" checked> ⚡ Transaksi Manual Jual/Beli
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="perm-panel-orders" checked> 📋 Antrian Order & Pembatalan
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="perm-panel-reports" checked> 📈 Laporan Profit & Equity Curve
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" id="perm-panel-admin"> ⚙️ Admin Management (Kelola User)
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button onclick="closeUserForm()" class="btn-gray" style="padding:6px 12px;font-size:12px">Batal</button>
+          <button onclick="saveUserFromForm()" class="btn-blue" style="padding:6px 16px;font-size:12px;font-weight:700">Simpan User</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- Modal Detail Konfigurasi Bot -->
@@ -4209,7 +4311,268 @@ async function executeManualTrade(side) {
       btn.textContent = side === 'buy' ? `Beli ${cleanCoin}` : `Jual ${cleanCoin}`;
     }
   }
+// ── User Permissions & Profile Management ─────────────────────
+let currentUserProfile = null;
+let cachedUserList = [];
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch('/api/me');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.loggedIn && data.user) {
+      currentUserProfile = data.user;
+      
+      // Update UI Badge
+      const nameEl = document.getElementById('user-display-name');
+      const roleEl = document.getElementById('user-role-label');
+      const avatarEl = document.getElementById('user-avatar-circle');
+      
+      if (nameEl) nameEl.textContent = data.user.username;
+      if (roleEl) roleEl.textContent = (data.user.role || 'trader').toUpperCase();
+      if (avatarEl) avatarEl.textContent = (data.user.username || 'YS').substring(0, 2).toUpperCase();
+
+      const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
+      const perms = data.user.permissions || {};
+
+      // Show/Hide Admin Mgmt Menu Link
+      const adminMenuLink = document.getElementById('menu-user-mgmt');
+      if (adminMenuLink) {
+        adminMenuLink.style.display = (isSuperadmin || perms.panel_admin) ? 'flex' : 'none';
+      }
+
+      // Front-end Panel Masking ONLY for non-superadmin users with explicit false flags
+      if (!isSuperadmin) {
+        if (perms.panel_robot === false) {
+          const card = document.getElementById('robot-control-card');
+          if (card) card.style.display = 'none';
+        }
+        if (perms.panel_manual === false) {
+          const card = document.getElementById('manual-trade-card');
+          if (card) card.style.display = 'none';
+        }
+        if (perms.panel_orders === false) {
+          const card = document.getElementById('open-orders-card');
+          if (card) card.style.display = 'none';
+        }
+        if (perms.panel_reports === false) {
+          ['pnl-summary-card', 'daily-report-card', 'equity-curve-card', 'coin-performance-report-card'].forEach(id => {
+            const card = document.getElementById(id);
+            if (card) card.style.display = 'none';
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('loadUserProfile info:', err.message);
+  }
 }
+
+// Admin User Management Functions
+function openUserMgmtModal() {
+  const modal = document.getElementById('user-mgmt-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    loadUserList();
+  }
+}
+
+function closeUserMgmtModal() {
+  const modal = document.getElementById('user-mgmt-modal');
+  if (modal) modal.style.display = 'none';
+  closeUserForm();
+}
+
+async function loadUserList() {
+  try {
+    const tbody = document.getElementById('user-mgmt-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Memuat data user...</td></tr>`;
+    
+    const res = await fetch('/api/admin/users');
+    const users = await res.json();
+    if (!Array.isArray(users)) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:16px">Gagal memuat user: ${users.error || 'Akses ditolak'}</td></tr>`;
+      return;
+    }
+
+    cachedUserList = users;
+    if (users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Belum ada user tambahan</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+      const isRootAdmin = u.username.toLowerCase() === 'admin';
+      const roleBadge = u.role === 'admin' 
+        ? `<span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(245,158,11,0.2);color:var(--yellow)">SUPERADMIN</span>`
+        : `<span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(56,189,248,0.2);color:var(--header-blue)">${u.role.toUpperCase()}</span>`;
+      
+      const statusBadge = u.is_active 
+        ? `<span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(16,185,129,0.2);color:var(--green)">Aktif</span>`
+        : `<span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(239,68,68,0.2);color:var(--red)">Nonaktif</span>`;
+
+      const perms = u.permissions || {};
+      const permPills = isRootAdmin ? '🔑 Akses Penuh (Full)' : Object.entries(perms)
+        .filter(([_, v]) => v)
+        .map(([k]) => `<span style="font-size:9px;background:var(--surface);border:1px solid var(--border);padding:1px 4px;border-radius:3px;margin-right:2px">${k.replace('panel_','')}</span>`)
+        .join('') || '<span style="font-size:10px;color:var(--muted)">Tidak Ada</span>';
+
+      return `
+        <tr>
+          <td>${u.id}</td>
+          <td style="font-weight:700;color:var(--accent2)">${u.username}</td>
+          <td>${roleBadge}</td>
+          <td style="white-space:normal;max-width:220px">${permPills}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button onclick="openEditUserForm(${u.id})" class="btn-gray" style="padding:2px 8px;font-size:10px;margin-right:4px">✏ Edit</button>
+            ${!isRootAdmin ? `<button onclick="deleteUserAccount(${u.id}, '${u.username}')" class="btn-gray" style="padding:2px 8px;font-size:10px;color:var(--red);border-color:var(--red)" title="Hapus User">🗑 Hapus</button>` : ''}
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('loadUserList error:', err);
+  }
+}
+
+function openAddUserForm() {
+  const card = document.getElementById('user-form-card');
+  const title = document.getElementById('user-form-title');
+  if (!card) return;
+  card.style.display = 'block';
+  if (title) title.textContent = '➕ Tambah User Baru';
+  
+  document.getElementById('user-form-id').value = '';
+  document.getElementById('user-form-username').value = '';
+  document.getElementById('user-form-username').disabled = false;
+  document.getElementById('user-form-password').value = '';
+  document.getElementById('user-form-role').value = 'trader';
+  document.getElementById('user-form-status').value = 'true';
+  
+  applyUserRolePreset('trader');
+}
+
+function openEditUserForm(userId) {
+  const u = cachedUserList.find(x => x.id === userId);
+  if (!u) return;
+
+  const card = document.getElementById('user-form-card');
+  const title = document.getElementById('user-form-title');
+  if (!card) return;
+  card.style.display = 'block';
+  if (title) title.textContent = `✏ Edit User: ${u.username}`;
+
+  document.getElementById('user-form-id').value = u.id;
+  document.getElementById('user-form-username').value = u.username;
+  document.getElementById('user-form-username').disabled = true;
+  document.getElementById('user-form-password').value = '';
+  document.getElementById('user-form-role').value = u.role || 'trader';
+  document.getElementById('user-form-status').value = String(u.is_active !== false);
+
+  const perms = u.permissions || {};
+  document.getElementById('perm-panel-robot').checked = perms.panel_robot !== false;
+  document.getElementById('perm-panel-manual').checked = perms.panel_manual !== false;
+  document.getElementById('perm-panel-orders').checked = perms.panel_orders !== false;
+  document.getElementById('perm-panel-reports').checked = perms.panel_reports !== false;
+  document.getElementById('perm-panel-admin').checked = perms.panel_admin === true;
+}
+
+function closeUserForm() {
+  const card = document.getElementById('user-form-card');
+  if (card) card.style.display = 'none';
+}
+
+function applyUserRolePreset(role) {
+  if (role === 'admin') {
+    document.getElementById('perm-panel-robot').checked = true;
+    document.getElementById('perm-panel-manual').checked = true;
+    document.getElementById('perm-panel-orders').checked = true;
+    document.getElementById('perm-panel-reports').checked = true;
+    document.getElementById('perm-panel-admin').checked = true;
+  } else if (role === 'trader') {
+    document.getElementById('perm-panel-robot').checked = true;
+    document.getElementById('perm-panel-manual').checked = true;
+    document.getElementById('perm-panel-orders').checked = true;
+    document.getElementById('perm-panel-reports').checked = true;
+    document.getElementById('perm-panel-admin').checked = false;
+  } else if (role === 'viewer') {
+    document.getElementById('perm-panel-robot').checked = false;
+    document.getElementById('perm-panel-manual').checked = false;
+    document.getElementById('perm-panel-orders').checked = false;
+    document.getElementById('perm-panel-reports').checked = true;
+    document.getElementById('perm-panel-admin').checked = false;
+  }
+}
+
+async function saveUserFromForm() {
+  const id = document.getElementById('user-form-id').value;
+  const username = document.getElementById('user-form-username').value.trim();
+  const password = document.getElementById('user-form-password').value;
+  const role = document.getElementById('user-form-role').value;
+  const isActive = document.getElementById('user-form-status').value === 'true';
+
+  const permissions = {
+    panel_robot: document.getElementById('perm-panel-robot').checked,
+    panel_manual: document.getElementById('perm-panel-manual').checked,
+    panel_orders: document.getElementById('perm-panel-orders').checked,
+    panel_reports: document.getElementById('perm-panel-reports').checked,
+    panel_admin: document.getElementById('perm-panel-admin').checked
+  };
+
+  if (!id && (!username || !password)) {
+    alert('Username dan Password wajib diisi untuk user baru!');
+    return;
+  }
+
+  try {
+    let res, data;
+    if (id) {
+      res = await fetch(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, role, permissions, is_active: isActive })
+      });
+    } else {
+      res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role, permissions })
+      });
+    }
+
+    data = await res.json();
+    if (data.ok) {
+      alert(id ? 'User berhasil diperbarui!' : 'User baru berhasil ditambahkan!');
+      closeUserForm();
+      loadUserList();
+    } else {
+      alert(`Gagal: ${data.error || 'Terjadi kesalahan'}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
+}
+
+async function deleteUserAccount(userId, username) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus akun user "${username}"?`)) return;
+  try {
+    const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      alert('User berhasil dihapus!');
+      loadUserList();
+    } else {
+      alert(`Gagal: ${data.error || 'Gagal menghapus user'}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
+}
+
+// Call loadUserProfile on page load
+loadUserProfile();
 </script>
 </body>
 </html>

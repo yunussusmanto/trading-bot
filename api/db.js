@@ -10,6 +10,18 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
 });
 
+const crypto = require('crypto');
+
+function hashPassword(password, salt = 'trading_bot_salt_2026') {
+  return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+}
+
+function verifyPassword(password, storedHash) {
+  if (!storedHash) return false;
+  const hash = hashPassword(password);
+  return hash === storedHash;
+}
+
 async function initDb() {
   try {
     await pool.query(`
@@ -51,6 +63,40 @@ async function initDb() {
         value TEXT
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        role VARCHAR(20) DEFAULT 'trader',
+        permissions JSONB DEFAULT '{}',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // Seed default root admin user if users table is empty
+    const userCountRes = await pool.query('SELECT COUNT(*) FROM users');
+    if (parseInt(userCountRes.rows[0].count) === 0) {
+      const defaultAdmin = process.env.ADMIN_USER || 'admin';
+      const defaultPass = process.env.ADMIN_PASS || 'R@sendriya#2024';
+      const defaultHash = hashPassword(defaultPass);
+      const fullPerms = JSON.stringify({
+        panel_robot: true,
+        panel_manual: true,
+        panel_orders: true,
+        panel_reports: true,
+        panel_admin: true
+      });
+      await pool.query(`
+        INSERT INTO users (username, password_hash, role, permissions, is_active)
+        VALUES ($1, $2, $3, $4, TRUE)
+      `, [defaultAdmin, defaultHash, 'admin', fullPerms]);
+      console.log(`[DB] Created default superadmin account: ${defaultAdmin}`);
+    }
+
     console.log('PostgreSQL trading_bot database initialized successfully.');
   } catch (err) {
     console.error('PostgreSQL init error:', err.message);
@@ -58,6 +104,88 @@ async function initDb() {
 }
 
 initDb();
+
+// ── User Management DB Methods ─────────────────────────────────
+async function getUserByUsername(username) {
+  try {
+    const res = await pool.query('SELECT * FROM users WHERE LOWER(username) = LOWER($1)', [username]);
+    return res.rows[0] || null;
+  } catch (err) {
+    console.error('getUserByUsername error:', err.message);
+    return null;
+  }
+}
+
+async function getUserById(id) {
+  try {
+    const res = await pool.query('SELECT id, username, role, permissions, is_active, created_at, updated_at FROM users WHERE id = $1', [id]);
+    return res.rows[0] || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function getAllUsers() {
+  try {
+    const res = await pool.query('SELECT id, username, role, permissions, is_active, created_at, updated_at FROM users ORDER BY id ASC');
+    return res.rows;
+  } catch (err) {
+    console.error('getAllUsers error:', err.message);
+    return [];
+  }
+}
+
+async function createUser({ username, password, role = 'trader', permissions = {} }) {
+  const hash = hashPassword(password);
+  const permsJson = JSON.stringify(permissions);
+  const res = await pool.query(`
+    INSERT INTO users (username, password_hash, role, permissions, is_active)
+    VALUES ($1, $2, $3, $4, TRUE)
+    RETURNING id, username, role, permissions, is_active, created_at
+  `, [username, hash, role, permsJson]);
+  return res.rows[0];
+}
+
+async function updateUser(id, { password, role, permissions, is_active }) {
+  const fields = [];
+  const values = [];
+  let idx = 1;
+
+  if (password && password.trim().length > 0) {
+    fields.push(`password_hash = $${idx++}`);
+    values.push(hashPassword(password));
+  }
+  if (role) {
+    fields.push(`role = $${idx++}`);
+    values.push(role);
+  }
+  if (permissions !== undefined) {
+    fields.push(`permissions = $${idx++}`);
+    values.push(JSON.stringify(permissions));
+  }
+  if (is_active !== undefined) {
+    fields.push(`is_active = $${idx++}`);
+    values.push(Boolean(is_active));
+  }
+
+  fields.push(`updated_at = NOW()`);
+  values.push(id);
+
+  const query = `
+    UPDATE users 
+    SET ${fields.join(', ')}
+    WHERE id = $${idx}
+    RETURNING id, username, role, permissions, is_active, updated_at
+  `;
+
+  const res = await pool.query(query, values);
+  return res.rows[0];
+}
+
+async function deleteUser(id) {
+  const res = await pool.query('DELETE FROM users WHERE id = $1 AND LOWER(username) != \'admin\' RETURNING id', [id]);
+  return res.rowCount > 0;
+}
 
 async function addTrade(t) {
   const query = `
@@ -249,4 +377,9 @@ async function getProfitPerCoin() {
   } catch (_) { return []; }
 }
 
-module.exports = { addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, getSetting, saveSetting, getProfitPerCoin };
+module.exports = { 
+  addTrade, getTrades, getTodayLoss, getPnLSummary, getDailyReportByDate, 
+  addEquitySnapshot, getEquityCurve, saveBotConfig, getActiveBotConfigs, 
+  getSetting, saveSetting, getProfitPerCoin,
+  hashPassword, verifyPassword, getUserByUsername, getUserById, getAllUsers, createUser, updateUser, deleteUser
+};
