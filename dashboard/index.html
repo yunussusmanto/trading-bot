@@ -449,10 +449,10 @@
     #candlestick-card { min-height: 0; }
     #native-chart-container { height: clamp(320px, 48vh, 480px); }
     #lightweight-chart-div { min-height: 0; height: 100%; }
-    /* Date inputs wrap on mobile */
-    #chart-advanced-filters input[type="date"] { width: 100% !important; min-width: 0; }
-    #chart-advanced-filters > div:first-child { flex-direction: column !important; }
-    #chart-advanced-filters > div:first-child > div { width: 100% !important; flex-shrink: 1; }
+    /* Date inputs single horizontal row on mobile */
+    #chart-advanced-filters { flex-direction: row !important; flex-wrap: nowrap !important; }
+    #chart-advanced-filters > div:first-child { flex-direction: row !important; width: auto !important; flex-shrink: 0 !important; }
+    #chart-advanced-filters input[type="date"] { width: 95px !important; font-size: 10px !important; }
     /* Fullscreen mobile */
     #candlestick-card.fullscreen-card {
       position: fixed !important;
@@ -486,8 +486,8 @@
     .ticker-metrics .metric-val { font-size: 11px; }
     .metric-label { font-size: 9px; }
     input, select { font-size: 14px; } /* prevent iOS zoom */
-    /* Date row: each date input takes full row */
-    #chart-advanced-filters input[type="date"] { width: 100% !important; }
+    /* Date inputs single horizontal row on phone */
+    #chart-advanced-filters input[type="date"] { width: 95px !important; }
   }
   /* ── LANDSCAPE PHONE ──────────────────────────────────────────── */
   @media(max-height: 500px) and (orientation: landscape) {
@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.1</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.2</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
