@@ -612,6 +612,21 @@ async function botTick(pair) {
   }
 }
 
+
+async function getTodayProfitSum() {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0,0,0,0);
+    const startTs = startOfDay.getTime();
+    const res = await db.pool.query("SELECT SUM(pnl) as total_pnl, COUNT(*) as count FROM trades WHERE action = 'SELL' AND timestamp >= $1", [startTs]);
+    const totalPnl = Math.round(parseFloat(res.rows[0]?.total_pnl || 0));
+    const count = parseInt(res.rows[0]?.count || 0);
+    return { totalPnl, count };
+  } catch (e) {
+    return { totalPnl: 0, count: 0 };
+  }
+}
+
 async function executeOrder(pair, signal, price, config, customReason = '') {
   // DCA per-slot: modal dibagi maxDcaOrders
   const maxDcaOrders = config.maxDcaOrders || 5;
