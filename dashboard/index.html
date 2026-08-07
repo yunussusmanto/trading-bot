@@ -241,6 +241,7 @@
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
+    z-index: auto;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
@@ -370,6 +371,8 @@
   button {
     padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
     font-size: 12px; font-weight: 600; font-family: inherit; transition: all .15s;
+    position: relative; z-index: 2;
+    pointer-events: auto;
   }
   .btn-green { background: var(--green); color: #fff; }
   .btn-green:hover { filter: brightness(1.1); }
@@ -1196,8 +1199,8 @@
         </div>
         
         <!-- Native Candlestick Container (Lightweight Charts) -->
-        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
-          <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
+        <div id="native-chart-container" style="width:100%;height:480px;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+          <div id="lightweight-chart-div" style="width:100%;height:480px"></div>
         </div>
       </div>
 
@@ -4093,6 +4096,7 @@ async function initApp() {
   loadCoinPerformanceReport();
   loadBots();
   makeCardsCollapsible();
+  loadCandlesForPair('btc_idr');
 
   setInterval(loadOrderBook, 8000);
   setInterval(loadPnL, 30000);
