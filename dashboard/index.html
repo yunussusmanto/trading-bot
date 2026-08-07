@@ -569,7 +569,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.3</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.4</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -2600,10 +2600,57 @@ function filterMarkets() {
   renderMarketsList(filtered);
 }
 
-let activeLightweightChart = null;
-let activeCandlestickSeries = null;
-let nativeCandleData = [];
-let currentResolution = '15';
+function updateIndicatorStatusFromCandles(cleanCandles) {
+  if (!cleanCandles || cleanCandles.length < 15) return;
+  
+  try {
+    const closes = cleanCandles.map(c => parseFloat(c.close));
+    let gains = 0, losses = 0;
+    for (let i = 1; i <= 14; i++) {
+      const diff = closes[i] - closes[i - 1];
+      if (diff >= 0) gains += diff;
+      else losses -= diff;
+    }
+    let avgGain = gains / 14;
+    let avgLoss = losses / 14;
+    for (let i = 15; i < closes.length; i++) {
+      const diff = closes[i] - closes[i - 1];
+      avgGain = (avgGain * 13 + (diff > 0 ? diff : 0)) / 14;
+      avgLoss = (avgLoss * 13 + (diff < 0 ? -diff : 0)) / 14;
+    }
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    const rsiVal = parseFloat((100 - (100 / (1 + rs))).toFixed(1));
+
+    const calcEMA = (data, p) => {
+      const k = 2 / (p + 1);
+      let ema = data[0];
+      for (let i = 1; i < data.length; i++) {
+        ema = data[i] * k + ema * (1 - k);
+      }
+      return ema;
+    };
+    const ema12 = calcEMA(closes, 12);
+    const ema26 = calcEMA(closes, 26);
+    const macdVal = ema12 - ema26;
+    const isBullish = macdVal >= 0;
+
+    const rsiEl = document.getElementById('mini-rsi');
+    if (rsiEl) {
+      rsiEl.textContent = `${rsiVal} (${rsiVal < 30 ? 'Oversold 🟢' : rsiVal > 70 ? 'Overbought 🔴' : 'Netral'})`;
+      if (rsiVal < 30) rsiEl.style.color = 'var(--green)';
+      else if (rsiVal > 70) rsiEl.style.color = 'var(--red)';
+      else rsiEl.style.color = 'var(--text)';
+    }
+
+    const macdEl = document.getElementById('mini-macd');
+    if (macdEl) {
+      macdEl.textContent = isBullish ? '↑ Bullish (Golden Cross 🟢)' : '↓ Bearish (Death Cross 🔴)';
+      macdEl.style.color = isBullish ? 'var(--green)' : 'var(--red)';
+    }
+  } catch (e) {
+    console.error('updateIndicatorStatusFromCandles error:', e);
+  }
+}
 
 async function loadCandlesForPair(pair) {
   const rawPair = pair || 'btc_idr';
@@ -2657,6 +2704,7 @@ async function loadCandlesForPair(pair) {
     });
 
     nativeCandleData = cleanCandles;
+    updateIndicatorStatusFromCandles(cleanCandles);
 
     container.innerHTML = '';
     if (activeLightweightChart) {
