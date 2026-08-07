@@ -547,7 +547,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.9</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.1.0</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -575,6 +575,15 @@
         <div class="user-name">Yunus Susmanto</div>
         <div class="user-handle">yunussusmanto</div>
       </div>
+    </div>
+
+    <!-- Estimasi Saldo Akun (Sidebar Panel) -->
+    <div id="saldo-sidebar-card" class="card" style="padding:12px; margin-bottom:14px; background:var(--surface2); border:1px solid var(--border); border-radius:10px;">
+      <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:8px;">
+        <span class="card-title" style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:0;">Estimasi Saldo Akun</span>
+        <button id="toggle-balance-btn" onclick="toggleBalanceVisibility()" class="btn-gray" style="padding:2px 6px; font-size:10px;">👁 Show</button>
+      </div>
+      <div class="saldo-amount" id="display-saldo-idr" style="font-size:14px; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--accent2); text-align:center; padding:4px 0;">••••••••</div>
     </div>
 
     <div class="menu-group">
@@ -649,19 +658,6 @@
         </div>
       </div>
 
-      
-        <!-- Header Row (OUTSIDE PANEL) -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Estimasi Saldo Akun</span>
-        <button id="toggle-balance-btn" onclick="toggleBalanceVisibility()" class="btn-gray" style="width:105px; min-width:105px; text-align:center; padding:3px 8px; font-size:11px;">👁 Show Saldo</button>
-      </div>
-
-      <!-- Saldo Value Box (INSIDE PANEL) -->
-      <div class="card" style="padding:16px; margin-bottom:16px;">
-        <div class="saldo-amount" id="display-saldo-idr" style="line-height:1.5;">••••••••</div>
-      </div>
-
-      
         <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
         <div id="candlestick-card" class="card">
         <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
@@ -940,12 +936,12 @@
         </div>
       </div>
         <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
-        <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div style="display:flex; align-items:center; gap:8px;">
+        <div class="card-header" style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div class="card-title" style="display:flex; align-items:center; gap:8px; margin:0;">
             <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
             <span id="pos-count-badge" style="font-size:10px; background:var(--surface); border:1px solid var(--border); padding:2px 6px; border-radius:10px; font-weight:700; color:var(--accent2)">0 Koin Active</span>
           </div>
-          <div style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">
+          <div style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px; margin-left:auto; margin-right:8px;">
             ● Real-Time Live Monitoring
           </div>
         </div>
@@ -1000,15 +996,17 @@
         </div>
       </div>
         <div class="card" id="approval-section">
-        <div class="card-title">🔔 Pending Approval (Semi-Auto)</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">🔔 Pending Approval (Semi-Auto)</div>
+        </div>
         <div id="approvals-list"><div style="color:var(--muted);font-size:12px">Tidak ada pending approval</div></div>
       </div>
       </div>
 
       <div class="tab-side-col" style="display:flex;flex-direction:column;gap:16px">
         <div id="markets-card" class="card" style="padding:0;overflow:hidden">
-        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
-          Markets (Pasar Indodax)
+        <div class="card-header" style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <span class="card-title" style="margin:0;">Markets (Pasar Indodax)</span>
         </div>
         <div style="padding:8px">
           <input id="market-search" type="search" name="market_search_query_off" autocomplete="off" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
@@ -1187,7 +1185,9 @@
         </div>
       </div>
         <div id="indicator-status-card" class="card">
-        <div class="card-title">📊 Indicator Status</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">📊 Indicator Status</div>
+        </div>
         <div style="display: flex; gap: 16px;">
           <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
           <div><span class="metric-label">MACD:</span> <span id="mini-macd" style="font-weight:bold; font-size:16px;">--</span></div>
@@ -1197,11 +1197,15 @@
 
       <div class="tab-side-col" style="display:flex;flex-direction:column;gap:16px">
         <div id="active-bots-card" class="card">
-        <div class="card-title">🟢 Robot Aktif</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">🟢 Robot Aktif</div>
+        </div>
         <div id="bots-list"><div style="color:var(--muted);font-size:12px">Belum ada robot aktif</div></div>
       </div>
         <div id="live-log-card" class="card">
-        <div class="card-title">📟 Live Log Console</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">📟 Live Log Console</div>
+        </div>
         <div id="log-box" style="height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:8px;border-radius:6px"></div>
       </div>
       </div>
@@ -1297,7 +1301,9 @@
         </div>
       </div>
       <div id="equity-curve-card" class="card">
-        <div class="card-title">📈 Equity Curve (Pertumbuhan Modal)</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">📈 Equity Curve (Pertumbuhan Modal)</div>
+        </div>
         <div id="equity-chart-div" style="width:100%; min-height:200px;"></div>
       </div>
       <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
@@ -1327,7 +1333,9 @@
         </div>
       </div>
       <div id="mini-candles-card" class="card">
-        <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="card-title" style="margin:0;">📊 Visual Performa Koin (Bar Chart)</div>
+        </div>
         <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:8px; padding: 4px 0;">
           <div style="color:var(--muted); font-size:11px; text-align:center;">Belum ada koin berjalan</div>
         </div>
@@ -3961,19 +3969,7 @@ async function makeCardsCollapsible() {
     console.error('Failed to load collapsed states from server:', e);
   }
 
-  const excludedIds = ['pnl-summary-card', 'daily-report-card', 'open-positions-card'];
-  excludedIds.forEach(id => {
-    const cardEl = document.getElementById(id);
-    if (cardEl) {
-      cardEl.classList.remove('card-collapsed');
-      const wrapperEl = cardEl.querySelector('.card-body-collapsible');
-      if (wrapperEl) {
-        wrapperEl.style.display = 'block';
-      }
-      const btnEl = cardEl.querySelector('.card-toggle-btn');
-      if (btnEl) btnEl.remove();
-    }
-  });
+  const excludedIds = [];
 
   document.querySelectorAll('.card').forEach((card, idx) => {
     try {
