@@ -1682,7 +1682,7 @@ let ws;
 const prices = {};
 const activeBots = {};
 let allPairsData = [];
-let showBalance = false;
+let showBalance = true;
 let cachedBalance = null;
 
 // Clock
@@ -3251,7 +3251,7 @@ async function emergencyStop() {
   } catch (e) { log('Emergency Stop Failed', 'err'); }
 }
 
-let showPnL = false;
+let showPnL = true;
 let cachedPnLData = null;
 let selectedPnLTimeframe = 'today';
 

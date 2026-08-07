@@ -1234,7 +1234,15 @@ app.get('/api/reports/daily', async (req, res) => {
 });
 
 // Get available pairs from Indodax (200+ pairs)
+let cachedPairsData = null;
+let lastPairsFetchTime = 0;
+
 app.get('/api/pairs', async (req, res) => {
+  const now = Date.now();
+  if (cachedPairsData && (now - lastPairsFetchTime < 30000)) {
+    return res.json(cachedPairsData);
+  }
+
   try {
     const resSummary = await fetch('https://indodax.com/api/summaries', {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
@@ -1254,6 +1262,8 @@ app.get('/api/pairs', async (req, res) => {
       .sort((a, b) => b.vol - a.vol); // Sort by 24h Volume
 
     if (pairs.length > 5) {
+      cachedPairsData = pairs;
+      lastPairsFetchTime = now;
       return res.json(pairs);
     }
     throw new Error('Less than 5 pairs returned');
