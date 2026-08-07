@@ -526,6 +526,14 @@
       font-size: 12px !important;
       justify-content: center;
     }
+  /* Override Chrome/Edge autofill blue background */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--surface) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    transition: background-color 5000s ease-in-out 0s !important;
   }
 </style>
   <script src="https://unpkg.com/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
@@ -539,7 +547,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.8</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.9</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1003,7 +1011,7 @@
           Markets (Pasar Indodax)
         </div>
         <div style="padding:8px">
-          <input id="market-search" type="search" name="market_search_query_off" autocomplete="off" autocomplete="new-password" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
+          <input id="market-search" type="search" name="market_search_query_off" autocomplete="off" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
         </div>
         <div style="max-height:540px;overflow-y:auto">
           <table class="indodax-table">
@@ -4103,6 +4111,20 @@ if (defaultEndInput) defaultEndInput.value = profitTodayStr;
 async function initApp() {
   initTheme();
   await loadUserProfile();
+
+  // Clear any browser autofilled 'admin' credentials from search inputs continuously
+  let clearCount = 0;
+  const autofillInterval = setInterval(() => {
+    ['market-search', 'custom-dropdown-search'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value.toLowerCase().trim() === 'admin') {
+        el.value = '';
+        if (id === 'market-search' && typeof filterMarkets === 'function') filterMarkets();
+      }
+    });
+    clearCount++;
+    if (clearCount > 20) clearInterval(autofillInterval);
+  }, 300);
 
   connectWS();
   loadTrades();
