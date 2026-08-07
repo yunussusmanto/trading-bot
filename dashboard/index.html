@@ -517,13 +517,25 @@
   </aside>
 
   <!-- Main Workspace -->
-  <main class="workspace">
+  <main class="workspace" style="display:flex;flex-direction:column;gap:16px">
 
-    <!-- Left Main Column (70% width) -->
-    <div class="main-column">
+    <!-- Best Practice 3-Tab Main Navigation Bar -->
+    <div class="main-tab-nav" style="display:flex;gap:10px;background:var(--surface2);padding:6px;border-radius:12px;border:1px solid var(--border);width:100%">
+      <button id="tab-btn-trade" class="tab-nav-btn active" onclick="switchMainTab('trade')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:var(--surface);color:var(--accent2);border-color:var(--accent2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3)">
+        ⚡ Marketplace & Manual Trade
+      </button>
+      <button id="tab-btn-robot" class="tab-nav-btn" onclick="switchMainTab('robot')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        🤖 Robot Trading Hub
+      </button>
+      <button id="tab-btn-reports" class="tab-nav-btn" onclick="switchMainTab('reports')" style="flex:1;padding:12px 16px;font-size:13px;font-weight:700;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        📈 Laporan Profit & Analytics
+      </button>
+    </div>
 
-      <!-- Ticker Banner -->
-      <div class="pair-banner">
+    <!-- TAB 1: MARKETPLACE & MANUAL TRADE -->
+    <div id="tab-view-trade" class="tab-view-container" style="display:grid;grid-template-columns:1fr 340px;gap:16px;width:100%">
+      <div class="tab-main-col" style="display:flex;flex-direction:column;gap:16px">
+        <div class="pair-banner">
         <div class="pair-title" style="align-items:center;gap:10px">
           <div class="coin-icon" id="banner-coin-icon">฿</div>
           <div class="field-box" style="position:relative">
@@ -566,7 +578,8 @@
         </div>
       </div>
 
-      <!-- Header Row (OUTSIDE PANEL) -->
+      
+        <!-- Header Row (OUTSIDE PANEL) -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <span style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Estimasi Saldo Akun</span>
         <button id="toggle-balance-btn" onclick="toggleBalanceVisibility()" class="btn-gray" style="width:105px; min-width:105px; text-align:center; padding:3px 8px; font-size:11px;">👁 Show Saldo</button>
@@ -577,222 +590,114 @@
         <div class="saldo-amount" id="display-saldo-idr" style="line-height:1.5;">••••••••</div>
       </div>
 
-      <!-- Audio for alerts -->
-      <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
-
-      <!-- P&L Performance Summary Card (Trading Best Practice) -->
-      <div id="pnl-summary-card" class="card" style="padding: 16px; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
-            <span>📊 Ringkasan Performa Profit (P&L)</span>
-          </div>
-          
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
-              <button class="pnl-pill active" onclick="switchPnLTimeframe('today', this)">1D (Hari Ini)</button>
-              <button class="pnl-pill" onclick="switchPnLTimeframe('week', this)">7D (Minggu Ini)</button>
-              <button class="pnl-pill" onclick="switchPnLTimeframe('month', this)">30D (Bulan Ini)</button>
-              <button class="pnl-pill" onclick="switchPnLTimeframe('total', this)">All (Total)</button>
-            </div>
-            <button id="toggle-pnl-btn" onclick="togglePnLVisibility()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">👁 Show Profit</button>
-          </div>
+      
+        <audio id="alert-sound" src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" preload="auto"></audio>
+        <div id="candlestick-card" class="card">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span>📈 GRAFIK CANDLESTICK (REAL-TIME INDODAX)</span>
+            <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
+          </span>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px;">
-          <div>
-            <div id="pnl-display-label" style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600;">Profit Hari Ini (1D)</div>
-            <div id="pnl-display-amount" style="font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text);">••••••••</div>
+        <!-- Controls Panel (Indodax style matching requested layout) -->
+        <div class="chart-controls-panel" style="display:flex;flex-direction:column;gap:8px;background:var(--surface2);padding:10px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)">
+          <!-- Row 1: Coin Search, Selector, Timeframe, & Range Toggle Button -->
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%">
+            <!-- Search -->
+            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px;flex:1;min-width:100px;max-width:140px">
+              <span style="font-size:10px;color:var(--muted)">🔍</span>
+              <input type="text" id="chart-search-coin" placeholder="Cari..." oninput="filterChartPairs()" style="background:transparent;border:none;color:var(--text);font-size:11px;width:100%;outline:none;padding:4px 0">
+            </div>
+            
+            <!-- Select Pair -->
+            <select id="chart-card-pair" onchange="changeChartCardPair()" style="flex:2;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;font-weight:700;text-transform:uppercase">
+              <option value="btc_idr">BTC/IDR</option>
+            </select>
+            <span id="chart-pair-name" style="display:none">BTC/IDR</span>
+
+            <!-- Resolution Selector (Timeframe) -->
+            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px">
+              <span style="font-size:10px;color:var(--muted)">🕒</span>
+              <select id="internal-chart-resolution" onchange="changeInternalResolution()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;padding:4px 0">
+                <option value="1">1m</option>
+                <option value="5">5m</option>
+                <option value="15" selected>15m</option>
+                <option value="60">1h</option>
+                <option value="240">4h</option>
+                <option value="1D">1d</option>
+              </select>
+            </div>
+
+            <!-- Toggle Button for Date Picker -->
+            <button onclick="toggleAdvancedChartFilters()" class="btn-gray" style="padding:4px 8px;font-size:11px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);outline:none;cursor:pointer;display:flex;align-items:center;gap:4px" title="Buka Filter Tanggal">
+              <span>📅</span><span class="btn-text-range">Rentang</span>
+            </button>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px;">Status Anti-Loss</div>
-            <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
+
+          <!-- Row 2: Advanced Date Pickers & Time Range Pills (Collapsible on mobile) -->
+          <div id="chart-advanced-filters" class="collapsed" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <!-- Date Range Pickers -->
+            <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px">
+              <input type="date" id="chart-start-date" onchange="changeChartDateRange()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer">
+              <span style="color:var(--muted);font-size:10px;padding:0 2px">s/d</span>
+              <input type="date" id="chart-end-date" onchange="changeChartDateRange()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer">
+            </div>
+
+            <!-- Time Range Pills -->
+            <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px;gap:2px">
+              <button id="btn-range-1d" class="chart-range-pill" onclick="setChartRangeDays(1)">1 Hari</button>
+              <button id="btn-range-7d" class="chart-range-pill" onclick="setChartRangeDays(7)">7 Hari</button>
+              <button id="btn-range-30d" class="chart-range-pill" onclick="setChartRangeDays(30)">30 Hari</button>
+              <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')">Semua</button>
+            </div>
           </div>
+        </div>
+        
+        <!-- Native Candlestick Container (Lightweight Charts) -->
+        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:var(--surface);border:1px solid var(--border);position:relative">
+          <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
         </div>
       </div>
-
-      <!-- Historical & Daily Report Card with Filters, Sorting, and Pagination -->
-      <div id="daily-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <!-- Top Bar: Mode Switcher & Expand Button -->
-        <div class="daily-report-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
-              <span>📊 Laporan Trading & History</span>
-            </div>
-            <!-- Mode Switcher Pills -->
-            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
-              <button id="btn-report-mode-date" class="pnl-pill active" onclick="switchReportMode('date')">📅 Per Tanggal</button>
-              <button id="btn-report-mode-all" class="pnl-pill" onclick="switchReportMode('all')">📜 Tampilkan Semua</button>
-            </div>
-          </div>
-          
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="window.open('/api/trades/export')">📥 Export CSV</button>
-            <span style="font-weight:600;font-size:11px;color:var(--green);margin-right:8px;display:inline-flex;align-items:center;gap:4px">● Auto-Backup Active</span>
-            <button id="toggle-expand-report-btn" onclick="toggleExpandDailyReport()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">↔️ Expand View</button>
-          </div>
+        <div id="market-depth-card" class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>MARKET DEPTH CHART</span>
+          <span id="depth-pair-label" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
+        </div>
+        
+        <!-- Canvas Visual Depth Area Chart -->
+        <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
+          <canvas id="depth-chart-canvas" style="width:100%;height:100%;display:block"></canvas>
         </div>
 
-        <!-- Filter Controls Bar -->
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background: var(--surface2); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);">
-          <div id="date-picker-box" style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tanggal:</span>
-            <input type="date" id="report-date-picker" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; width: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Koin:</span>
-            <select id="report-pair-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
-              <option value="all">Semua Koin</option>
-              <option value="bico_idr">BICO/IDR</option>
-              <option value="koma_idr">KOMA/IDR</option>
-              <option value="xrp_idr">XRP/IDR</option>
-              <option value="sol_idr">SOL/IDR</option>
-              <option value="btc_idr">BTC/IDR</option>
-              <option value="eth_idr">ETH/IDR</option>
-            </select>
-          </div>
-
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tipe:</span>
-            <select id="report-type-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
-              <option value="all">Semua Tipe</option>
-              <option value="buy">BUY / DCA_BUY</option>
-              <option value="sell">SELL</option>
-            </select>
-          </div>
-
-          <button onclick="onReportFilterChange()" class="btn-blue" style="padding: 4px 12px; font-size: 11px; margin-left: auto;">🔍 Apply Filter</button>
-        </div>
-
-        <div id="daily-report-content" style="display: flex; flex-direction: column; gap: 12px;">
-          <!-- 3-Metrics Summary -->
-          <div class="daily-report-metrics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
-              <div id="daily-report-pnl-label" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Profit Realisasi</div>
-              <div id="daily-report-pnl" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">••••••••</div>
-            </div>
-            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
-              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Eksekusi Trade</div>
-              <div id="daily-report-trades-count" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text); margin-top: 2px;">0 Transaksi</div>
-            </div>
-            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
-              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Win Rate / SL Status</div>
-              <div id="daily-report-winrate" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">100% (SL 0%)</div>
-            </div>
-          </div>
-
-          <!-- Interactive Table with Column Sort -->
-          <div id="daily-report-table-wrapper" class="table-responsive" style="max-height: 250px; overflow-y: auto; margin-top: 4px; transition: max-height 0.3s ease;">
+        <!-- Side-by-side Market Beli and Market Jual Tables -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Beli</div>
             <table class="indodax-table">
               <thead>
-                <tr>
-                  <th onclick="handleReportSort('timestamp')" style="cursor:pointer; user-select:none;">Waktu <span id="sort-icon-timestamp">↕</span></th>
-                  <th onclick="handleReportSort('pair')" style="cursor:pointer; user-select:none;">Pair <span id="sort-icon-pair">↕</span></th>
-                  <th onclick="handleReportSort('action')" style="cursor:pointer; user-select:none;">Tipe <span id="sort-icon-action">↕</span></th>
-                  <th onclick="handleReportSort('price')" style="cursor:pointer; user-select:none;">Harga (Rp) <span id="sort-icon-price">↕</span></th>
-                  <th onclick="handleReportSort('amount')" style="cursor:pointer; user-select:none;">Total Modal (Rp) <span id="sort-icon-amount">↕</span></th>
-                  <th onclick="handleReportSort('pnl')" style="cursor:pointer; user-select:none;">Profit (Rp) <span id="sort-icon-pnl">↕</span></th>
-                </tr>
+                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
               </thead>
-              <tbody id="daily-report-trades-tbody">
-                <tr><td colspan="6" style="color:var(--muted); text-align:center;">Memuat data...</td></tr>
+              <tbody id="bids-tbody">
+                <tr><td colspan="3" style="color:var(--muted)">Loading market beli...</td></tr>
               </tbody>
             </table>
           </div>
 
-          <!-- Pagination Bar (Only active when reportMode === 'all') -->
-          <div id="report-pagination-bar" style="display: none; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 10px; background: var(--surface2); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
-            <div id="report-pagination-info" style="font-size: 11px; color: var(--muted); font-weight: 600;">Menampilkan 0-0 dari 0 transaksi</div>
-            
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 4px;">
-                <span style="font-size: 11px; color: var(--muted);">Tampilkan:</span>
-                <select id="report-items-per-page" onchange="onReportItemsPerPageChange()" style="padding: 2px 6px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 4px; outline: none; cursor: pointer;">
-                  <option value="50" selected>50 Baris</option>
-                  <option value="100">100 Baris</option>
-                  <option value="200">200 Baris</option>
-                </select>
-              </div>
-
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <button id="report-prev-page-btn" onclick="changeReportPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
-                <span id="report-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
-                <button id="report-next-page-btn" onclick="changeReportPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Open Positions (Pro Trading Dashboard Card) -->
-      <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
-        <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
-            <span id="pos-count-badge" style="font-size:10px; background:var(--surface); border:1px solid var(--border); padding:2px 6px; border-radius:10px; font-weight:700; color:var(--accent2)">0 Koin Active</span>
-          </div>
-          <div style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">
-            ● Real-Time Live Monitoring
-          </div>
-        </div>
-
-        <!-- Summary Strip -->
-        <div id="positions-summary-bar" style="display:none; justify-content:space-between; align-items:center; background:var(--surface); padding:8px 14px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:10px;">
-          <div style="font-size:11px;">
-            <span style="color:var(--muted)">Total Modal Beli Di-Hold: </span>
-            <span id="pos-total-capital" style="font-weight:700; color:var(--text); font-family:'JetBrains Mono', monospace">Rp 0</span>
-          </div>
-          <div style="font-size:11px;">
-            <span style="color:var(--muted)">Floating Untung / Rugi (P&L): </span>
-            <span id="pos-floating-pnl" style="font-weight:700; font-family:'JetBrains Mono', monospace">Rp 0</span>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table class="indodax-table">
-            <thead>
-              <tr>
-                <th>Pair</th>
-                <th>Modal Beli (Rp)</th>
-                <th>Avg Entry</th>
-                <th>Harga Live</th>
-                <th>Jumlah Koin</th>
-                <th>Nilai Live (Rp)</th>
-                <th>Untung / Rugi (P&L)</th>
-                <th>Slot DCA</th>
-              </tr>
-            </thead>
-            <tbody id="positions-tbody">
-              <tr><td colspan="8" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-
-      <!-- Antrian Order Indodax (Open Orders / Limit Order) -->
-      <div id="open-orders-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
-            <span>📋 Antrian Order Indodax (Limit Order)</span>
-          </div>
-          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time API</span>
-        </div>
-
-        <div class="card-body-collapsible">
-          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Jual</div>
             <table class="indodax-table">
-              <thead><tr><th>Pair</th><th>Tipe</th><th>Sumber</th><th>Target Harga</th><th>Jumlah Koin</th><th>Estimasi Total</th><th>Aksi</th></tr></thead>
-              <tbody id="open-orders-tbody"><tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Belum ada antrian order</td></tr></tbody>
+              <thead>
+                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
+              </thead>
+              <tbody id="asks-tbody">
+                <tr><td colspan="3" style="color:var(--muted)">Loading market jual...</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
-
-      <div id="paper-mode-banner" style="display:none; background: var(--yellow); color: #000; font-weight: 700; text-align: center; padding: 8px; border-radius: 8px; margin-bottom: 16px;">PAPER MODE - Simulasi Tanpa Uang Nyata</div>
-
-      <!-- Manual Trading Panel -->
-      <div id="manual-trade-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div id="manual-trade-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
           <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin:0; white-space: nowrap;">
             <span>⚡ Transaksi Jual Beli Manual</span>
@@ -963,9 +868,98 @@
 
         </div>
       </div>
+        <div id="open-positions-card" class="card" style="padding:0; overflow:hidden; margin-bottom:16px; border: 1px solid var(--border);">
+        <div style="background:var(--surface2); padding:10px 14px; font-size:12px; font-weight:700; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>🔓 Open Positions (Posisi Koin Berjalan)</span>
+            <span id="pos-count-badge" style="font-size:10px; background:var(--surface); border:1px solid var(--border); padding:2px 6px; border-radius:10px; font-weight:700; color:var(--accent2)">0 Koin Active</span>
+          </div>
+          <div style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">
+            ● Real-Time Live Monitoring
+          </div>
+        </div>
 
-      <!-- Robot Control Form -->
-      <div id="robot-control-card" class="card">
+        <!-- Summary Strip -->
+        <div id="positions-summary-bar" style="display:none; justify-content:space-between; align-items:center; background:var(--surface); padding:8px 14px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:10px;">
+          <div style="font-size:11px;">
+            <span style="color:var(--muted)">Total Modal Beli Di-Hold: </span>
+            <span id="pos-total-capital" style="font-weight:700; color:var(--text); font-family:'JetBrains Mono', monospace">Rp 0</span>
+          </div>
+          <div style="font-size:11px;">
+            <span style="color:var(--muted)">Floating Untung / Rugi (P&L): </span>
+            <span id="pos-floating-pnl" style="font-weight:700; font-family:'JetBrains Mono', monospace">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="indodax-table">
+            <thead>
+              <tr>
+                <th>Pair</th>
+                <th>Modal Beli (Rp)</th>
+                <th>Avg Entry</th>
+                <th>Harga Live</th>
+                <th>Jumlah Koin</th>
+                <th>Nilai Live (Rp)</th>
+                <th>Untung / Rugi (P&L)</th>
+                <th>Slot DCA</th>
+              </tr>
+            </thead>
+            <tbody id="positions-tbody">
+              <tr><td colspan="8" style="color:var(--muted); text-align:center; padding:12px;">Memuat posisi aktif...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+        <div id="open-orders-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
+            <span>📋 Antrian Order Indodax (Limit Order)</span>
+          </div>
+          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time API</span>
+        </div>
+
+        <div class="card-body-collapsible">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="indodax-table">
+              <thead><tr><th>Pair</th><th>Tipe</th><th>Sumber</th><th>Target Harga</th><th>Jumlah Koin</th><th>Estimasi Total</th><th>Aksi</th></tr></thead>
+              <tbody id="open-orders-tbody"><tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Belum ada antrian order</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+        <div class="card" id="approval-section">
+        <div class="card-title">🔔 Pending Approval (Semi-Auto)</div>
+        <div id="approvals-list"><div style="color:var(--muted);font-size:12px">Tidak ada pending approval</div></div>
+      </div>
+      </div>
+
+      <div class="tab-side-col" style="display:flex;flex-direction:column;gap:16px">
+        <div id="markets-card" class="card" style="padding:0;overflow:hidden">
+        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
+          Markets (Pasar Indodax)
+        </div>
+        <div style="padding:8px">
+          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
+        </div>
+        <div style="max-height:540px;overflow-y:auto">
+          <table class="indodax-table">
+            <thead>
+              <tr><th>Market</th><th>Price</th><th>24h Vol</th></tr>
+            </thead>
+            <tbody id="markets-list-tbody">
+              <tr><td colspan="3" style="color:var(--muted)">Loading markets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: ROBOT TRADING HUB -->
+    <div id="tab-view-robot" class="tab-view-container" style="display:grid;grid-template-columns:1fr 340px;gap:16px;width:100%;display:none">
+      <div class="tab-main-col" style="display:flex;flex-direction:column;gap:16px">
+        <div id="robot-control-card" class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px">
           <div class="card-title" style="margin:0">🤖 Robot Trading Control Panel</div>
         </div>
@@ -1121,77 +1115,57 @@
           <button class="btn-blue" style="flex:1;padding:10px;font-size:13px" onclick="runBacktest()">📊 Run Backtest</button>
         </div>
       </div>
-
-      <!-- Candlestick Chart (Native HTML5 Real-Time Indodax Rupiah IDR) -->
-      <div id="candlestick-card" class="card">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
-          <span style="display:flex;align-items:center;gap:8px">
-            <span>📈 GRAFIK CANDLESTICK (REAL-TIME INDODAX)</span>
-            <button id="btn-chart-fullscreen" onclick="toggleChartFullscreen()" class="btn-gray" style="padding:3px 8px;font-size:10px">🖵 Fullscreen</button>
-          </span>
-        </div>
-
-        <!-- Controls Panel (Indodax style matching requested layout) -->
-        <div class="chart-controls-panel" style="display:flex;flex-direction:column;gap:8px;background:var(--surface2);padding:10px;border-radius:8px;margin-bottom:12px;border:1px solid var(--border)">
-          <!-- Row 1: Coin Search, Selector, Timeframe, & Range Toggle Button -->
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%">
-            <!-- Search -->
-            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px;flex:1;min-width:100px;max-width:140px">
-              <span style="font-size:10px;color:var(--muted)">🔍</span>
-              <input type="text" id="chart-search-coin" placeholder="Cari..." oninput="filterChartPairs()" style="background:transparent;border:none;color:var(--text);font-size:11px;width:100%;outline:none;padding:4px 0">
-            </div>
-            
-            <!-- Select Pair -->
-            <select id="chart-card-pair" onchange="changeChartCardPair()" style="flex:2;min-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--accent2);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;font-weight:700;text-transform:uppercase">
-              <option value="btc_idr">BTC/IDR</option>
-            </select>
-            <span id="chart-pair-name" style="display:none">BTC/IDR</span>
-
-            <!-- Resolution Selector (Timeframe) -->
-            <div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 6px">
-              <span style="font-size:10px;color:var(--muted)">🕒</span>
-              <select id="internal-chart-resolution" onchange="changeInternalResolution()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer;padding:4px 0">
-                <option value="1">1m</option>
-                <option value="5">5m</option>
-                <option value="15" selected>15m</option>
-                <option value="60">1h</option>
-                <option value="240">4h</option>
-                <option value="1D">1d</option>
-              </select>
-            </div>
-
-            <!-- Toggle Button for Date Picker -->
-            <button onclick="toggleAdvancedChartFilters()" class="btn-gray" style="padding:4px 8px;font-size:11px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);outline:none;cursor:pointer;display:flex;align-items:center;gap:4px" title="Buka Filter Tanggal">
-              <span>📅</span><span class="btn-text-range">Rentang</span>
-            </button>
-          </div>
-
-          <!-- Row 2: Advanced Date Pickers & Time Range Pills (Collapsible on mobile) -->
-          <div id="chart-advanced-filters" class="collapsed" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <!-- Date Range Pickers -->
-            <div style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px">
-              <input type="date" id="chart-start-date" onchange="changeChartDateRange()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer">
-              <span style="color:var(--muted);font-size:10px;padding:0 2px">s/d</span>
-              <input type="date" id="chart-end-date" onchange="changeChartDateRange()" style="background:transparent;border:none;color:var(--text);font-size:11px;outline:none;cursor:pointer">
-            </div>
-
-            <!-- Time Range Pills -->
-            <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px;gap:2px">
-              <button id="btn-range-1d" class="chart-range-pill" onclick="setChartRangeDays(1)">1 Hari</button>
-              <button id="btn-range-7d" class="chart-range-pill" onclick="setChartRangeDays(7)">7 Hari</button>
-              <button id="btn-range-30d" class="chart-range-pill" onclick="setChartRangeDays(30)">30 Hari</button>
-              <button id="btn-range-all" class="chart-range-pill" onclick="setChartRangeDays('all')">Semua</button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Native Candlestick Container (Lightweight Charts) -->
-        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:var(--surface);border:1px solid var(--border);position:relative">
-          <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
+        <div id="indicator-status-card" class="card">
+        <div class="card-title">📊 Indicator Status</div>
+        <div style="display: flex; gap: 16px;">
+          <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
+          <div><span class="metric-label">MACD:</span> <span id="mini-macd" style="font-weight:bold; font-size:16px;">--</span></div>
         </div>
       </div>
+      </div>
 
-      <!-- Daily Profit Chart Card -->
+      <div class="tab-side-col" style="display:flex;flex-direction:column;gap:16px">
+        <div id="active-bots-card" class="card">
+        <div class="card-title">🟢 Robot Aktif</div>
+        <div id="bots-list"><div style="color:var(--muted);font-size:12px">Belum ada robot aktif</div></div>
+      </div>
+        <div id="live-log-card" class="card">
+        <div class="card-title">📟 Live Log Console</div>
+        <div id="log-box" style="height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:8px;border-radius:6px"></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: LAPORAN PROFIT & ANALYTICS -->
+    <div id="tab-view-reports" class="tab-view-container" style="display:flex;flex-direction:column;gap:16px;width:100%;display:none">
+      <div id="pnl-summary-card" class="card" style="padding: 16px; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+            <span>📊 Ringkasan Performa Profit (P&L)</span>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
+              <button class="pnl-pill active" onclick="switchPnLTimeframe('today', this)">1D (Hari Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('week', this)">7D (Minggu Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('month', this)">30D (Bulan Ini)</button>
+              <button class="pnl-pill" onclick="switchPnLTimeframe('total', this)">All (Total)</button>
+            </div>
+            <button id="toggle-pnl-btn" onclick="togglePnLVisibility()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">👁 Show Profit</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px;">
+          <div>
+            <div id="pnl-display-label" style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600;">Profit Hari Ini (1D)</div>
+            <div id="pnl-display-amount" style="font-size: 12px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--text);">••••••••</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px;">Status Anti-Loss</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
+          </div>
+        </div>
+      </div>
       <div id="daily-profit-chart-card" class="card">
         <!-- Title Row (Spans 100%) -->
         <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">
@@ -1251,137 +1225,10 @@
           <div id="daily-profit-apex-chart" style="width:100%;height:220px;"></div>
         </div>
       </div>
-
-      <!-- Pending Approvals & Open Orders -->
-      <div class="card" id="approval-section">
-        <div class="card-title">🔔 Pending Approval (Semi-Auto)</div>
-        <div id="approvals-list"><div style="color:var(--muted);font-size:12px">Tidak ada pending approval</div></div>
-      </div>
-
-      <!-- 1:1 Official Indodax MARKET DEPTH CHART Layout -->
-      <div id="market-depth-card" class="card">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>MARKET DEPTH CHART</span>
-          <span id="depth-pair-label" style="color:var(--header-blue);font-weight:700">BTC/IDR</span>
-        </div>
-        
-        <!-- Canvas Visual Depth Area Chart -->
-        <div style="height:200px;width:100%;position:relative;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid var(--border)">
-          <canvas id="depth-chart-canvas" style="width:100%;height:100%;display:block"></canvas>
-        </div>
-
-        <!-- Side-by-side Market Beli and Market Jual Tables -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Beli</div>
-            <table class="indodax-table">
-              <thead>
-                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
-              </thead>
-              <tbody id="bids-tbody">
-                <tr><td colspan="3" style="color:var(--muted)">Loading market beli...</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">Market Jual</div>
-            <table class="indodax-table">
-              <thead>
-                <tr><th>Harga</th><th>SUM <span class="coin-symbol-label">BTC</span></th><th>SUM IDR</th></tr>
-              </thead>
-              <tbody id="asks-tbody">
-                <tr><td colspan="3" style="color:var(--muted)">Loading market jual...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-
-
-      <!-- Backtest Result Card -->
-      <div class="card" style="display:none" id="backtest-card">
-        <div class="card-title">📊 Hasil Backtesting (Simulasi)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-          <div style="background:var(--surface2);padding:10px;border-radius:6px">
-            <div style="font-size:10px;color:var(--muted)">WIN RATE</div>
-            <div style="font-size:18px;font-weight:700;color:var(--green)" id="bt-winrate">0%</div>
-          </div>
-          <div style="background:var(--surface2);padding:10px;border-radius:6px">
-            <div style="font-size:10px;color:var(--muted)">NET PROFIT</div>
-            <div style="font-size:18px;font-weight:700" id="bt-profit">0%</div>
-          </div>
-          <div style="background:var(--surface2);padding:10px;border-radius:6px">
-            <div style="font-size:10px;color:var(--muted)">MAX DRAWDOWN</div>
-            <div style="font-size:18px;font-weight:700;color:var(--red)" id="bt-drawdown">0%</div>
-          </div>
-        </div>
-        <div id="bt-summary" style="font-size:12px;color:var(--muted)"></div>
-      </div>
-
-      <!-- Equity Curve Chart -->
       <div id="equity-curve-card" class="card">
         <div class="card-title">📈 Equity Curve (Pertumbuhan Modal)</div>
         <div id="equity-chart-div" style="width:100%; min-height:200px;"></div>
       </div>
-
-      <!-- RSI/MACD Mini Indicators -->
-      <div id="indicator-status-card" class="card">
-        <div class="card-title">📊 Indicator Status</div>
-        <div style="display: flex; gap: 16px;">
-          <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
-          <div><span class="metric-label">MACD:</span> <span id="mini-macd" style="font-weight:bold; font-size:16px;">--</span></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Right Side Column (Markets Sidebar & Active Bots) -->
-    <div class="side-column">
-
-      <!-- Active Bots Widget -->
-      <div id="active-bots-card" class="card">
-        <div class="card-title">🟢 Robot Aktif</div>
-        <div id="bots-list"><div style="color:var(--muted);font-size:12px">Belum ada robot aktif</div></div>
-      </div>
-
-      <!-- Live Logs (Moved below Robot Aktif) -->
-      <div id="live-log-card" class="card">
-        <div class="card-title">📟 Live Log Console</div>
-        <div id="log-box" style="height:120px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);padding:8px;border-radius:6px"></div>
-      </div>
-
-
-
-      <!-- Indodax Markets Sidebar Panel -->
-      <div id="markets-card" class="card" style="padding:0;overflow:hidden">
-        <div style="background:var(--surface2);padding:10px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)">
-          Markets (Pasar Indodax)
-        </div>
-        <div style="padding:8px">
-          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
-        </div>
-        <div style="max-height:540px;overflow-y:auto">
-          <table class="indodax-table">
-            <thead>
-              <tr><th>Market</th><th>Price</th><th>24h Vol</th></tr>
-            </thead>
-            <tbody id="markets-list-tbody">
-              <tr><td colspan="3" style="color:var(--muted)">Loading markets...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <!-- Mini Bar Chart Performance Panel -->
-      <div id="mini-candles-card" class="card">
-        <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
-        <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:8px; padding: 4px 0;">
-          <div style="color:var(--muted); font-size:11px; text-align:center;">Belum ada koin berjalan</div>
-        </div>
-      </div>
-
-      <!-- Realized Profit Per Coin Summary Card -->
       <div id="coin-performance-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
           <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
@@ -1408,7 +1255,124 @@
           </div>
         </div>
       </div>
+      <div id="mini-candles-card" class="card">
+        <div class="card-title">📊 Visual Performa Koin (Bar Chart)</div>
+        <div id="mini-candles-list" style="display:flex; flex-direction:column; gap:8px; padding: 4px 0;">
+          <div style="color:var(--muted); font-size:11px; text-align:center;">Belum ada koin berjalan</div>
+        </div>
+      </div>
+      <div id="daily-report-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <!-- Top Bar: Mode Switcher & Expand Button -->
+        <div class="daily-report-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">
+              <span>📊 Laporan Trading & History</span>
+            </div>
+            <!-- Mode Switcher Pills -->
+            <div class="pnl-timeframe-pills" style="display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 2px;">
+              <button id="btn-report-mode-date" class="pnl-pill active" onclick="switchReportMode('date')">📅 Per Tanggal</button>
+              <button id="btn-report-mode-all" class="pnl-pill" onclick="switchReportMode('all')">📜 Tampilkan Semua</button>
+            </div>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button class="btn-gray" style="padding:4px 8px; font-size:11px;" onclick="window.open('/api/trades/export')">📥 Export CSV</button>
+            <span style="font-weight:600;font-size:11px;color:var(--green);margin-right:8px;display:inline-flex;align-items:center;gap:4px">● Auto-Backup Active</span>
+            <button id="toggle-expand-report-btn" onclick="toggleExpandDailyReport()" class="btn-gray" style="padding: 4px 10px; font-size: 11px;">↔️ Expand View</button>
+          </div>
+        </div>
 
+        <!-- Filter Controls Bar -->
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; background: var(--surface2); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);">
+          <div id="date-picker-box" style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tanggal:</span>
+            <input type="date" id="report-date-picker" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; width: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Koin:</span>
+            <select id="report-pair-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+              <option value="all">Semua Koin</option>
+              <option value="bico_idr">BICO/IDR</option>
+              <option value="koma_idr">KOMA/IDR</option>
+              <option value="xrp_idr">XRP/IDR</option>
+              <option value="sol_idr">SOL/IDR</option>
+              <option value="btc_idr">BTC/IDR</option>
+              <option value="eth_idr">ETH/IDR</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">Tipe:</span>
+            <select id="report-type-filter" onchange="onReportFilterChange()" style="padding: 4px 8px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; cursor: pointer;">
+              <option value="all">Semua Tipe</option>
+              <option value="buy">BUY / DCA_BUY</option>
+              <option value="sell">SELL</option>
+            </select>
+          </div>
+
+          <button onclick="onReportFilterChange()" class="btn-blue" style="padding: 4px 12px; font-size: 11px; margin-left: auto;">🔍 Apply Filter</button>
+        </div>
+
+        <div id="daily-report-content" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- 3-Metrics Summary -->
+          <div class="daily-report-metrics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div id="daily-report-pnl-label" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Profit Realisasi</div>
+              <div id="daily-report-pnl" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">••••••••</div>
+            </div>
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Total Eksekusi Trade</div>
+              <div id="daily-report-trades-count" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text); margin-top: 2px;">0 Transaksi</div>
+            </div>
+            <div style="background: var(--surface2); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);">
+              <div style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Win Rate / SL Status</div>
+              <div id="daily-report-winrate" style="font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--green); margin-top: 2px;">100% (SL 0%)</div>
+            </div>
+          </div>
+
+          <!-- Interactive Table with Column Sort -->
+          <div id="daily-report-table-wrapper" class="table-responsive" style="max-height: 250px; overflow-y: auto; margin-top: 4px; transition: max-height 0.3s ease;">
+            <table class="indodax-table">
+              <thead>
+                <tr>
+                  <th onclick="handleReportSort('timestamp')" style="cursor:pointer; user-select:none;">Waktu <span id="sort-icon-timestamp">↕</span></th>
+                  <th onclick="handleReportSort('pair')" style="cursor:pointer; user-select:none;">Pair <span id="sort-icon-pair">↕</span></th>
+                  <th onclick="handleReportSort('action')" style="cursor:pointer; user-select:none;">Tipe <span id="sort-icon-action">↕</span></th>
+                  <th onclick="handleReportSort('price')" style="cursor:pointer; user-select:none;">Harga (Rp) <span id="sort-icon-price">↕</span></th>
+                  <th onclick="handleReportSort('amount')" style="cursor:pointer; user-select:none;">Total Modal (Rp) <span id="sort-icon-amount">↕</span></th>
+                  <th onclick="handleReportSort('pnl')" style="cursor:pointer; user-select:none;">Profit (Rp) <span id="sort-icon-pnl">↕</span></th>
+                </tr>
+              </thead>
+              <tbody id="daily-report-trades-tbody">
+                <tr><td colspan="6" style="color:var(--muted); text-align:center;">Memuat data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar (Only active when reportMode === 'all') -->
+          <div id="report-pagination-bar" style="display: none; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 10px; background: var(--surface2); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);">
+            <div id="report-pagination-info" style="font-size: 11px; color: var(--muted); font-weight: 600;">Menampilkan 0-0 dari 0 transaksi</div>
+            
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 11px; color: var(--muted);">Tampilkan:</span>
+                <select id="report-items-per-page" onchange="onReportItemsPerPageChange()" style="padding: 2px 6px; font-size: 11px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 4px; outline: none; cursor: pointer;">
+                  <option value="50" selected>50 Baris</option>
+                  <option value="100">100 Baris</option>
+                  <option value="200">200 Baris</option>
+                </select>
+              </div>
+
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="report-prev-page-btn" onclick="changeReportPage(-1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">◀ Prev</button>
+                <span id="report-page-num" style="font-size: 11px; font-weight: 700; color: var(--accent2); padding: 0 4px;">Page 1 of 1</span>
+                <button id="report-next-page-btn" onclick="changeReportPage(1)" class="btn-gray" style="padding: 3px 10px; font-size: 11px;">Next ▶</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -4383,28 +4347,44 @@ async function loadUserProfile() {
     currentUserProfile = data.user;
 
     const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
+    const role = data.user.role || 'trader';
     const perms = data.user.permissions || {};
 
-    // 1. SUPERADMIN: Tampilkan SEMUA panel 100% tanpa perubahan (Admin view untouched)
+    const btnTrade = document.getElementById('tab-btn-trade');
+    const btnRobot = document.getElementById('tab-btn-robot');
+    const btnReports = document.getElementById('tab-btn-reports');
+    const adminMenuLink = document.getElementById('menu-user-mgmt');
+
+    // 1. SUPERADMIN: Access to all 3 Tabs + Admin Menu
     if (isSuperadmin) {
-      const adminMenuLink = document.getElementById('menu-user-mgmt');
+      if (btnTrade) btnTrade.style.display = 'flex';
+      if (btnRobot) btnRobot.style.display = 'flex';
+      if (btnReports) btnReports.style.display = 'flex';
       if (adminMenuLink) adminMenuLink.style.display = 'flex';
+      switchMainTab('trade');
       return;
     }
 
-    // 2. NON-SUPERADMIN: Strict allowlist (hanya tampilkan jika permission === true)
-    for (const [cardId, permKey] of Object.entries(PANEL_PERM_MAP)) {
-      const isAllowed = perms[permKey] === true;
-      const el = document.getElementById(cardId);
-      if (el) {
-        el.style.display = isAllowed ? 'block' : 'none';
-      }
+    // 2. VIEWER / INVESTOR: Access ONLY to Tab 3 (Laporan Profit & Analytics)
+    if (role === 'viewer') {
+      if (btnTrade) btnTrade.style.display = 'none';
+      if (btnRobot) btnRobot.style.display = 'none';
+      if (btnReports) btnReports.style.display = 'flex';
+      if (adminMenuLink) adminMenuLink.style.display = 'none';
+
+      switchMainTab('reports');
+      return;
     }
 
-    // Menu Kelola User Admin
-    const adminMenuLink = document.getElementById('menu-user-mgmt');
-    if (adminMenuLink) {
-      adminMenuLink.style.display = (perms.panel_admin === true) ? 'flex' : 'none';
+    // 3. TRADER: Access to Tab 1 (Trade), Tab 2 (Robot), Tab 3 (Reports)
+    if (role === 'trader') {
+      if (btnTrade) btnTrade.style.display = 'flex';
+      if (btnRobot) btnRobot.style.display = 'flex';
+      if (btnReports) btnReports.style.display = 'flex';
+      if (adminMenuLink) adminMenuLink.style.display = (perms.panel_admin === true) ? 'flex' : 'none';
+
+      switchMainTab('trade');
+      return;
     }
   } catch (err) {
     console.warn('loadUserProfile info:', err.message);
