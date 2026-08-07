@@ -4077,25 +4077,31 @@ if (defaultEndInput) defaultEndInput.value = profitTodayStr;
 
 
 
-initTheme();
-connectWS();
-loadTrades();
-loadPairs();
-loadBalance();
-loadPnL();
-loadEquity();
-loadPositions();
-loadOpenOrders();
-loadCoinPerformanceReport();
-loadBots();
-makeCardsCollapsible();
-setInterval(loadOrderBook, 8000);
-setInterval(loadPnL, 30000);
-setInterval(loadPositions, 10000);
-setInterval(loadOpenOrders, 5000);
-setInterval(loadCoinPerformanceReport, 30000);
-setInterval(loadBots, 5000);
-setInterval(updateDailyProfitChart, 60000);
+async function initApp() {
+  initTheme();
+  const ok = await loadUserProfile();
+  if (!ok) return;
+
+  connectWS();
+  loadTrades();
+  loadPairs();
+  loadBalance();
+  loadPnL();
+  loadEquity();
+  loadPositions();
+  loadOpenOrders();
+  loadCoinPerformanceReport();
+  loadBots();
+  makeCardsCollapsible();
+
+  setInterval(loadOrderBook, 8000);
+  setInterval(loadPnL, 30000);
+  setInterval(loadPositions, 10000);
+  setInterval(loadOpenOrders, 5000);
+  setInterval(loadCoinPerformanceReport, 30000);
+  setInterval(loadBots, 5000);
+  setInterval(updateDailyProfitChart, 60000);
+}
 
 // --- Manual Trade Helper Functions ---
 let showManualNominals = false;
@@ -4334,12 +4340,12 @@ async function loadUserProfile() {
     const res = await fetch('/api/me');
     if (res.status === 401) {
       window.location.href = '/login';
-      return;
+      return false;
     }
     const data = await res.json();
     if (!data || !data.loggedIn || !data.user) {
       window.location.href = '/login';
-      return;
+      return false;
     }
     currentUserProfile = data.user;
       
@@ -4382,9 +4388,10 @@ async function loadUserProfile() {
           });
         }
       }
-    }
+      return true;
   } catch (err) {
     console.warn('loadUserProfile info:', err.message);
+    return false;
   }
 }
 
@@ -4591,8 +4598,12 @@ async function deleteUserAccount(userId, username) {
   }
 }
 
-// Call loadUserProfile on page load
-loadUserProfile();
+// Start application after DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 </script>
 </body>
 </html>
