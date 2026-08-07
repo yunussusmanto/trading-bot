@@ -169,7 +169,7 @@ setInterval(async () => {
 }, 30 * 60 * 1000);
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'indodax2026';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'R@sendriya#2024';
 
 const app = express();
 const server = http.createServer(app);
