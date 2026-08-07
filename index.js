@@ -11,6 +11,26 @@ const engine = require('./strategy/engine');
 const backtest = require('./strategy/backtest');
 const db = require('./api/db');
 
+// Persistent storage of manual order IDs to distinguish manual from auto orders
+const MANUAL_ORDERS_FILE = path.join(__dirname, 'manual_orders.json');
+let manualOrderIds = new Set();
+try {
+  if (fs.existsSync(MANUAL_ORDERS_FILE)) {
+    const data = JSON.parse(fs.readFileSync(MANUAL_ORDERS_FILE, 'utf8'));
+    manualOrderIds = new Set(data.map(String));
+  }
+} catch (e) {
+  console.error('Error loading manual orders:', e);
+}
+
+function saveManualOrders() {
+  try {
+    fs.writeFileSync(MANUAL_ORDERS_FILE, JSON.stringify([...manualOrderIds]), 'utf8');
+  } catch (e) {
+    console.error('Error saving manual orders:', e);
+  }
+}
+
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
@@ -782,20 +802,29 @@ app.get('/api/open-orders', async (req, res) => {
       await waitRateLimit();
       const data = await indodax.openOrders(targetPair.toLowerCase());
       if (data && data.orders && data.orders.length) {
-        allOrders = data.orders.map(o => ({ ...o, pair: targetPair.toUpperCase() }));
+        allOrders = data.orders.map(o => ({ 
+          ...o, 
+          pair: targetPair.toUpperCase(),
+          source: manualOrderIds.has(String(o.order_id)) ? 'M' : 'A'
+        }));
       }
     } else {
       await waitRateLimit();
       const data = await indodax.openOrders();
       if (data && data.orders) {
         if (Array.isArray(data.orders)) {
-          allOrders = data.orders.map(o => ({ ...o, pair: (o.pair || 'CRYPTO').toUpperCase() }));
+          allOrders = data.orders.map(o => ({ 
+            ...o, 
+            pair: (o.pair || 'CRYPTO').toUpperCase(),
+            source: manualOrderIds.has(String(o.order_id)) ? 'M' : 'A'
+          }));
         } else {
           for (const [pairName, ordersList] of Object.entries(data.orders)) {
             if (Array.isArray(ordersList)) {
               const formatted = ordersList.map(o => ({ 
                 ...o, 
-                pair: pairName.toUpperCase() 
+                pair: pairName.toUpperCase(),
+                source: manualOrderIds.has(String(o.order_id)) ? 'M' : 'A'
               }));
               allOrders = allOrders.concat(formatted);
             }
@@ -859,6 +888,12 @@ app.post('/api/order/manual', async (req, res) => {
       price: targetPrice,
       amount: parseFloat(amount)
     });
+    
+    
+    if (result && result.order_id) {
+      manualOrderIds.add(String(result.order_id));
+      saveManualOrders();
+    }
     
     const coinSymbol = cleanPair.replace('_idr', '').toUpperCase();
     const formattedPrice = targetPrice.toLocaleString('id-ID');
