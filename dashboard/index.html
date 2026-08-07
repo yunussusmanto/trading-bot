@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.8</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.9</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1064,23 +1064,7 @@
           </table>
         </div>
       </div>
-        <div id="open-orders-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
-            <span>📋 Antrian Order Indodax (Limit Order)</span>
-          </div>
-          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time API</span>
-        </div>
 
-        <div class="card-body-collapsible">
-          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-            <table class="indodax-table">
-              <thead><tr><th>Pair</th><th>Tipe</th><th>Sumber</th><th>Target Harga</th><th>Jumlah Koin</th><th>Estimasi Total</th><th>Aksi</th></tr></thead>
-              <tbody id="open-orders-tbody"><tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Belum ada antrian order</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
         <div class="card" id="approval-section">
         <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div class="card-title" style="margin:0;">🔔 Pending Approval (Semi-Auto)</div>
@@ -1324,6 +1308,25 @@
           <div style="text-align: right;">
             <div style="font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 2px;">Status Anti-Loss</div>
             <div style="font-size: 11px; font-weight: 700; color: var(--green); background: rgba(0,192,135,0.15); padding: 2px 8px; border-radius: 6px; display: inline-block;">🛡️ Strict SL 0% (Lock Untung)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Antrian Order Indodax (Limit Order) -->
+      <div id="open-orders-card" class="card" style="padding: 16px; margin-bottom: 16px; transition: all 0.3s ease;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <div class="card-title" style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display:flex; align-items:center; gap:8px; margin:0">
+            <span>📋 Antrian Order Indodax (Limit Order)</span>
+          </div>
+          <span style="font-size:10px; font-weight:700; color:var(--green); background:rgba(0,192,135,0.15); padding:2px 8px; border-radius:4px;">● Real-Time API</span>
+        </div>
+
+        <div class="card-body-collapsible">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="indodax-table">
+              <thead><tr><th>Pair</th><th>Tipe</th><th>Sumber</th><th>Target Harga</th><th>Jumlah Koin</th><th>Estimasi Total</th><th>Aksi</th></tr></thead>
+              <tbody id="open-orders-tbody"><tr><td colspan="7" style="color:var(--muted); text-align:center; padding:12px;">Belum ada antrian order</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
