@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.9 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.8 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -122,8 +122,8 @@
   .app-shell { display: flex; min-height: calc(100vh - 54px); width: 100%; max-width: 100vw; overflow-x: hidden; }
 
   /* Left Sidebar */
-  aside.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; transition: all 0.25s ease-in-out; position: relative; z-index: 10; pointer-events: all; }
-  body.sidebar-collapsed aside.sidebar { display: none !important; pointer-events: none; }
+  aside.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; transition: all 0.25s ease-in-out; }
+  body.sidebar-collapsed aside.sidebar { display: none !important; }
   .user-badge {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -142,8 +142,6 @@
     padding: 9px 12px; border-radius: 8px;
     font-size: 12px; font-weight: 500; color: var(--muted);
     text-decoration: none; transition: all .15s; cursor: pointer;
-    user-select: none; -webkit-user-select: none;
-    position: relative; z-index: 1;
   }
   .menu-item:hover, .menu-item.active { background: rgba(156, 163, 175, 0.12); color: var(--header-blue); font-weight: 600; }
 
@@ -241,7 +239,6 @@
     max-width: 100%;
     overflow-x: hidden;
     position: relative;
-    z-index: auto;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
@@ -274,17 +271,9 @@
   .field-box { display: flex; flex-direction: column; gap: 4px; }
   .field-label { font-size: 11px; font-weight: 600; color: var(--muted); }
   .field-help { font-size: 10px; color: var(--muted); }
-  input:not([type="radio"]):not([type="checkbox"]), select {
+  input, select {
     background: var(--surface2); border: 1px solid var(--border); color: var(--text);
     padding: 8px 10px; border-radius: 6px; font-size: 12px; font-family: inherit; width: 100%; outline: none;
-  }
-  input[type="radio"] {
-    width: 14px !important;
-    height: 14px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    cursor: pointer;
-    vertical-align: middle;
   }
   input:focus, select:focus { border-color: var(--header-blue); }
   select option {
@@ -371,8 +360,6 @@
   button {
     padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
     font-size: 12px; font-weight: 600; font-family: inherit; transition: all .15s;
-    position: relative; z-index: 2;
-    pointer-events: auto;
   }
   .btn-green { background: var(--green); color: #fff; }
   .btn-green:hover { filter: brightness(1.1); }
@@ -489,7 +476,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.9</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.8</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -512,10 +499,10 @@
   <!-- Left Navigation Sidebar -->
   <aside class="sidebar">
     <div class="user-badge">
-      <div class="avatar-circle" id="user-avatar-circle">YS</div>
+      <div class="avatar-circle">YS</div>
       <div>
-        <div class="user-name" id="user-display-name">admin</div>
-        <div class="user-handle" id="user-role-label">Superadmin</div>
+        <div class="user-name">Yunus Susmanto</div>
+        <div class="user-handle">yunussusmanto</div>
       </div>
     </div>
 
@@ -1199,8 +1186,8 @@
         </div>
         
         <!-- Native Candlestick Container (Lightweight Charts) -->
-        <div id="native-chart-container" style="width:100%;height:480px;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
-          <div id="lightweight-chart-div" style="width:100%;height:480px"></div>
+        <div id="native-chart-container" style="width:100%;border-radius:8px;overflow:hidden;background:#121212;border:1px solid var(--border);position:relative">
+          <div id="lightweight-chart-div" style="width:100%;height:100%"></div>
         </div>
       </div>
 
@@ -1373,7 +1360,7 @@
           Markets (Pasar Indodax)
         </div>
         <div style="padding:8px">
-          <input type="text" id="market-search" name="search_coin_filter_input" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" autocomplete="new-password" style="margin-bottom:8px">
+          <input id="market-search" placeholder="🔍 Cari koin..." onkeyup="filterMarkets()" style="margin-bottom:8px">
         </div>
         <div style="max-height:540px;overflow-y:auto">
           <table class="indodax-table">
@@ -1427,103 +1414,96 @@
   </main>
 </div>
 
-<!-- Modal Kelola User Login & Hak Akses -->
+<!-- Modal Kelola User Login (Admin Panel) -->
 <div id="user-mgmt-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;justify-content:center;align-items:center;padding:20px;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:850px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 36px rgba(0,0,0,0.7);overflow:hidden">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2)">
-      <div style="font-size:15px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:8px">
-        <span>👥 Admin Management — Kelola User Login & Hak Akses</span>
+    <!-- Header -->
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface2)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:18px">👥</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--accent2)">Kelola User Login & Hak Akses Panel</div>
+          <div style="font-size:11px;color:var(--muted)">Tambah user baru, atur role (Superadmin, Trader, Viewer), dan persentase hak akses panel</div>
+        </div>
       </div>
-      <button onclick="closeUserMgmtModal()" class="btn-gray" style="padding:4px 10px;font-size:13px">✕ Tutup</button>
+      <button onclick="closeUserMgmtModal()" class="btn-gray" style="padding:4px 10px;font-size:12px">✕ Tutup</button>
     </div>
 
+    <!-- Body -->
     <div style="padding:20px;overflow-y:auto;flex:1">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-        <div style="font-size:12px;color:var(--muted)">Kelola akun pengguna dan izin akses tiap panel di dashboard trading</div>
-        <button onclick="openAddUserForm()" class="btn-green" style="padding:6px 14px;font-size:12px;font-weight:700">+ Tambah User Baru</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--text)">Daftar Akun Pengguna</div>
+        <button onclick="openAddUserForm()" class="btn-green" style="padding:6px 12px;font-size:11px">➕ Tambah User Baru</button>
       </div>
 
       <!-- User List Table -->
-      <div class="table-responsive" style="margin-bottom:16px">
+      <div class="table-responsive" style="border:1px solid var(--border);border-radius:8px;margin-bottom:20px">
         <table class="indodax-table">
           <thead>
             <tr>
               <th>ID</th>
               <th>Username</th>
               <th>Role</th>
-              <th>Izin Akses Panel</th>
+              <th>Hak Akses Panel</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody id="user-mgmt-tbody">
-            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Memuat daftar user...</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">Memuat data user...</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Add / Edit User Form Card -->
-      <div id="user-form-card" class="card" style="display:none;background:var(--surface2);border:1px solid var(--header-blue);padding:16px;margin-top:12px">
-        <div style="font-size:13px;font-weight:700;color:var(--header-blue);margin-bottom:12px" id="user-form-title">➕ Tambah User Baru</div>
+      <!-- Add/Edit User Form Card (Hidden by default) -->
+      <div id="user-form-card" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px">
+        <div id="user-form-title" style="font-size:13px;font-weight:700;color:var(--header-blue);margin-bottom:12px">➕ Tambah User Baru</div>
         <input type="hidden" id="user-form-id">
         
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
           <div>
-            <label class="field-label">Username</label>
-            <input type="text" id="user-form-username" placeholder="Username login..." autocomplete="off">
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Username</label>
+            <input type="text" id="user-form-username" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px" placeholder="Masukkan username">
           </div>
           <div>
-            <label class="field-label">Password <span style="font-weight:normal;color:var(--muted)">(Kosongkan jika tak diubah saat edit)</span></label>
-            <input type="password" id="user-form-password" placeholder="Password...">
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Password (kosongkan jika tidak ubah)</label>
+            <input type="password" id="user-form-password" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px" placeholder="Masukkan password">
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
           <div>
-            <label class="field-label">Role Akses Preset</label>
-            <select id="user-form-role" onchange="applyUserRolePreset(this.value)">
-              <option value="admin">Superadmin (Akses Penuh)</option>
-              <option value="trader" selected>Trader (Robot & Trading Manual)</option>
-              <option value="viewer">Viewer (Hanya Lihat Monitor & Chart)</option>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Role Utama</label>
+            <select id="user-form-role" onchange="applyUserRolePreset(this.value)" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px">
+              <option value="trader">Trader (Akses Trading & Bot)</option>
+              <option value="viewer">Viewer (Hanya Lihat Laporan/PnL)</option>
+              <option value="admin">Superadmin (Akses Penuh + Kelola User)</option>
             </select>
           </div>
           <div>
-            <label class="field-label">Status Akun</label>
-            <select id="user-form-status">
-              <option value="true" selected>Aktif (Dapat Login)</option>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Status Akun</label>
+            <select id="user-form-status" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:12px">
+              <option value="true">Aktif</option>
               <option value="false">Nonaktif (Blokir Login)</option>
             </select>
           </div>
         </div>
 
-        <!-- Individual Panel Permissions -->
-        <div style="margin-bottom:16px">
-          <label class="field-label" style="margin-bottom:8px;display:block">Hak Akses Panel Granular:</label>
-          <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;font-size:12px;background:var(--surface);padding:12px;border-radius:6px;border:1px solid var(--border)">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="perm-panel-robot" checked> 🤖 Robot Trading Control Panel
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="perm-panel-manual" checked> ⚡ Transaksi Manual Jual/Beli
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="perm-panel-orders" checked> 📋 Antrian Order & Pembatalan
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="perm-panel-reports" checked> 📈 Laporan Profit & Equity Curve
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="perm-panel-admin"> ⚙️ Admin Management (Kelola User)
-            </label>
-          </div>
+        <!-- Custom Permission Toggles -->
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px">Izin Spesifik Panel Dashboard:</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:8px;background:var(--surface);padding:10px;border-radius:6px;border:1px solid var(--border);margin-bottom:14px">
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-robot" checked> 🤖 Panel Robot</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-manual" checked> ⚡ Manual Trade</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-orders" checked> 📋 Open Orders</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-reports" checked> 📊 PnL & Laporan</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="perm-panel-admin"> ⚙️ Admin User Panel</label>
         </div>
 
         <div style="display:flex;justify-content:flex-end;gap:8px">
-          <button onclick="closeUserForm()" class="btn-gray" style="padding:6px 12px;font-size:12px">Batal</button>
-          <button onclick="saveUserFromForm()" class="btn-blue" style="padding:6px 16px;font-size:12px;font-weight:700">Simpan User</button>
+          <button onclick="closeUserForm()" class="btn-gray" style="padding:6px 12px;font-size:11px">Batal</button>
+          <button onclick="saveUserFromForm()" class="btn-green" style="padding:6px 16px;font-size:11px">💾 Simpan User</button>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -1685,7 +1665,7 @@ let ws;
 const prices = {};
 const activeBots = {};
 let allPairsData = [];
-let showBalance = true;
+let showBalance = false;
 let cachedBalance = null;
 
 // Clock
@@ -2523,13 +2503,7 @@ function renderMarketsList(list) {
 }
 
 function filterMarkets() {
-  const input = document.getElementById('market-search');
-  if (!input) return;
-  let q = input.value.trim().toLowerCase();
-  if (q === 'admin' || q === 'root') {
-    input.value = '';
-    q = '';
-  }
+  const q = document.getElementById('market-search').value.toLowerCase();
   const filtered = allPairsData.filter(p => p.symbol.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
   renderMarketsList(filtered);
 }
@@ -3167,16 +3141,10 @@ function initTheme() {
 }
 
 function initSidebarState() {
-  // Only collapse if user explicitly set it (not null/missing = always show on desktop)
-  const stored = localStorage.getItem('sidebarCollapsed');
-  if (stored === 'true') {
+  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (isCollapsed) {
     document.body.classList.add('sidebar-collapsed');
     updateSidebarToggleBtn(true);
-  } else {
-    // Ensure expanded state is visible
-    document.body.classList.remove('sidebar-collapsed');
-    updateSidebarToggleBtn(false);
-    if (stored === null) localStorage.setItem('sidebarCollapsed', 'false');
   }
 }
 
@@ -3254,7 +3222,7 @@ async function emergencyStop() {
   } catch (e) { log('Emergency Stop Failed', 'err'); }
 }
 
-let showPnL = true;
+let showPnL = false;
 let cachedPnLData = null;
 let selectedPnLTimeframe = 'today';
 
@@ -4080,32 +4048,25 @@ if (defaultEndInput) defaultEndInput.value = profitTodayStr;
 
 
 
-async function initApp() {
-  initTheme();
-  const ok = await loadUserProfile();
-  if (!ok) return;
-
-  connectWS();
-  loadTrades();
-  loadPairs();
-  loadBalance();
-  loadPnL();
-  loadEquity();
-  loadPositions();
-  loadOpenOrders();
-  loadCoinPerformanceReport();
-  loadBots();
-  makeCardsCollapsible();
-  loadCandlesForPair('btc_idr');
-
-  setInterval(loadOrderBook, 8000);
-  setInterval(loadPnL, 30000);
-  setInterval(loadPositions, 10000);
-  setInterval(loadOpenOrders, 5000);
-  setInterval(loadCoinPerformanceReport, 30000);
-  setInterval(loadBots, 5000);
-  setInterval(updateDailyProfitChart, 60000);
-}
+initTheme();
+connectWS();
+loadTrades();
+loadPairs();
+loadBalance();
+loadPnL();
+loadEquity();
+loadPositions();
+loadOpenOrders();
+loadCoinPerformanceReport();
+loadBots();
+makeCardsCollapsible();
+setInterval(loadOrderBook, 8000);
+setInterval(loadPnL, 30000);
+setInterval(loadPositions, 10000);
+setInterval(loadOpenOrders, 5000);
+setInterval(loadCoinPerformanceReport, 30000);
+setInterval(loadBots, 5000);
+setInterval(updateDailyProfitChart, 60000);
 
 // --- Manual Trade Helper Functions ---
 let showManualNominals = false;
@@ -4326,15 +4287,6 @@ async function executeManualTrade(side) {
     } else {
       alert(`Gagal: ${data.error || 'Terjadi kesalahan sistem'}`);
     }
-  } catch (err) {
-    alert(`Terjadi error: ${err.message}`);
-  } finally {
-    const btn = document.getElementById(`manual-${side}-btn`);
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = side === 'buy' ? `Beli ${cleanCoin}` : `Jual ${cleanCoin}`;
-    }
-  }
 // ── User Permissions & Profile Management ─────────────────────
 let currentUserProfile = null;
 let cachedUserList = [];
@@ -4344,58 +4296,56 @@ async function loadUserProfile() {
     const res = await fetch('/api/me');
     if (res.status === 401) {
       window.location.href = '/login';
-      return false;
+      return;
     }
     const data = await res.json();
     if (!data || !data.loggedIn || !data.user) {
       window.location.href = '/login';
-      return false;
+      return;
     }
     currentUserProfile = data.user;
-      
-      // Update UI Badge
-      const nameEl = document.getElementById('user-display-name');
-      const roleEl = document.getElementById('user-role-label');
-      const avatarEl = document.getElementById('user-avatar-circle');
-      
-      if (nameEl) nameEl.textContent = data.user.username;
-      if (roleEl) roleEl.textContent = (data.user.role || 'trader').toUpperCase();
-      if (avatarEl) avatarEl.textContent = (data.user.username || 'YS').substring(0, 2).toUpperCase();
+    
+    // Update UI Badge
+    const nameEl = document.getElementById('user-display-name');
+    const roleEl = document.getElementById('user-role-label');
+    const avatarEl = document.getElementById('user-avatar-circle');
+    
+    if (nameEl) nameEl.textContent = data.user.username;
+    if (roleEl) roleEl.textContent = (data.user.role || 'trader').toUpperCase();
+    if (avatarEl) avatarEl.textContent = (data.user.username || 'YS').substring(0, 2).toUpperCase();
 
-      const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
-      const perms = data.user.permissions || {};
+    const isSuperadmin = data.user.role === 'admin' || data.user.username === 'admin';
+    const perms = data.user.permissions || {};
 
-      // Show/Hide Admin Mgmt Menu Link
-      const adminMenuLink = document.getElementById('menu-user-mgmt');
-      if (adminMenuLink) {
-        adminMenuLink.style.display = (isSuperadmin || perms.panel_admin) ? 'flex' : 'none';
+    // Show/Hide Admin Mgmt Menu Link
+    const adminMenuLink = document.getElementById('menu-user-mgmt');
+    if (adminMenuLink) {
+      adminMenuLink.style.display = (isSuperadmin || perms.panel_admin) ? 'flex' : 'none';
+    }
+
+    // Front-end Panel Masking ONLY for non-superadmin users with explicit false flags
+    if (!isSuperadmin) {
+      if (perms.panel_robot === false) {
+        const card = document.getElementById('robot-control-card');
+        if (card) card.style.display = 'none';
       }
-
-      // Front-end Panel Masking ONLY for non-superadmin users with explicit false flags
-      if (!isSuperadmin) {
-        if (perms.panel_robot === false) {
-          const card = document.getElementById('robot-control-card');
-          if (card) card.style.display = 'none';
-        }
-        if (perms.panel_manual === false) {
-          const card = document.getElementById('manual-trade-card');
-          if (card) card.style.display = 'none';
-        }
-        if (perms.panel_orders === false) {
-          const card = document.getElementById('open-orders-card');
-          if (card) card.style.display = 'none';
-        }
-        if (perms.panel_reports === false) {
-          ['pnl-summary-card', 'daily-report-card', 'equity-curve-card', 'coin-performance-report-card'].forEach(id => {
-            const card = document.getElementById(id);
-            if (card) card.style.display = 'none';
-          });
-        }
+      if (perms.panel_manual === false) {
+        const card = document.getElementById('manual-trade-card');
+        if (card) card.style.display = 'none';
       }
-      return true;
+      if (perms.panel_orders === false) {
+        const card = document.getElementById('open-orders-card');
+        if (card) card.style.display = 'none';
+      }
+      if (perms.panel_reports === false) {
+        ['pnl-summary-card', 'daily-report-card', 'equity-curve-card', 'coin-performance-report-card'].forEach(id => {
+          const card = document.getElementById(id);
+          if (card) card.style.display = 'none';
+        });
+      }
+    }
   } catch (err) {
     console.warn('loadUserProfile info:', err.message);
-    return false;
   }
 }
 
@@ -4602,12 +4552,7 @@ async function deleteUserAccount(userId, username) {
   }
 }
 
-// Start application after DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+loadUserProfile();
 </script>
 </body>
 </html>
