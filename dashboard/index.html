@@ -386,9 +386,9 @@
 
   /* Responsive Breakpoints */
   .manual-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
   }
   @media(max-width:992px) {
     .form-grid { grid-template-columns: repeat(2, 1fr); }
@@ -397,7 +397,7 @@
 
   /* ── TABLET (768px) ─────────────────────────────────────────── */
   @media(max-width:768px) {
-    .manual-grid { grid-template-columns: 1fr; gap: 12px; }
+    .manual-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
     .app-shell { flex-direction: column; }
     aside.sidebar {
       display: none;
@@ -644,7 +644,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.3.9</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.4.0</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -4321,7 +4321,7 @@ async function makeCardsCollapsible() {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const collapsed = card.classList.toggle('card-collapsed');
-      wrapper.style.display = collapsed ? 'none' : 'block';
+      wrapper.style.display = collapsed ? 'none' : '';
       btn.innerHTML = collapsed ? '➕' : '➖';
       btn.title = collapsed ? 'Maximize Panel' : 'Minimize Panel';
       
