@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Indodax Pro v4.0.2 – Trading Robot Dashboard</title>
+<title>Indodax Pro v4.0.3 – Trading Robot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <style>
@@ -467,7 +467,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.2</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.0.3</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -514,11 +514,26 @@
 
       <!-- Ticker Banner -->
       <div class="pair-banner">
-        <div class="pair-title">
+        <div class="pair-title" style="align-items:center;gap:10px">
           <div class="coin-icon" id="banner-coin-icon">฿</div>
-          <div>
-            <div style="font-size:14px;font-weight:700" id="banner-symbol">BTC to IDR</div>
-            <div style="font-size:11px;color:var(--muted)" id="banner-market-name">BITCOIN MARKET</div>
+          <div class="field-box" style="position:relative">
+            <div id="custom-pair-dropdown" class="custom-dropdown" onclick="toggleCustomDropdown(event)" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:180px">
+              <span id="custom-pair-label" style="font-weight:700;font-size:14px;color:#fff">Bitcoin (BTC/IDR)</span>
+              <span style="font-size:10px;color:var(--muted)">▼</span>
+            </div>
+            <div id="custom-dropdown-menu" class="custom-dropdown-menu" style="display:none;position:absolute;top:42px;left:0;z-index:999;width:240px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.5)">
+              <div style="padding:6px;border-bottom:1px solid var(--border)">
+                <input id="custom-dropdown-search" placeholder="🔍 Cari koin..." onkeyup="filterCustomDropdown()" style="padding:4px 8px;font-size:11px;width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:4px;outline:none">
+              </div>
+              <div id="custom-dropdown-items" style="max-height:220px;overflow-y:auto"></div>
+            </div>
+            <select id="bot-pair" style="display:none" onchange="syncPairFromMainSelect(this.value)">
+              <option value="btc_idr">btc_idr</option>
+            </select>
+          </div>
+          <div style="display:none">
+            <div id="banner-symbol">BTC to IDR</div>
+            <div id="banner-market-name">BITCOIN MARKET</div>
           </div>
         </div>
         <div class="ticker-metrics">
@@ -974,22 +989,13 @@
         
         <!-- Main Form Grid (Row 1: Target & Mode) -->
         <div class="form-grid">
-          <div class="field-box" style="position:relative">
-            <label class="field-label">Target Pair (Indodax) <span class="info-icon">ⓘ<span class="tooltip-popup">Pilih koin kripto & IDR (Rupiah) yang ingin Anda jalankan untuk trading otomatis di Indodax.</span></span></label>
-            <div id="custom-pair-dropdown" class="custom-dropdown" onclick="toggleCustomDropdown(event)">
-              <span id="custom-pair-label" style="font-weight:600">Bitcoin (BTC/IDR)</span>
-              <span style="font-size:10px;color:var(--muted)">▼</span>
+          <div class="field-box">
+            <label class="field-label">Target Pair (Indodax) <span class="info-icon">ⓘ<span class="tooltip-popup">Koin aktif yang sedang dijalankan oleh trading robot. Pilih koin di bagian atas halaman (banner).</span></span></label>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;font-weight:700;color:var(--accent2);display:flex;align-items:center;gap:6px">
+              <span>🎯</span>
+              <span id="control-active-pair-label">Bitcoin (BTC/IDR)</span>
             </div>
-            <div id="custom-dropdown-menu" class="custom-dropdown-menu" style="display:none">
-              <div style="padding:6px;border-bottom:1px solid var(--border)">
-                <input id="custom-dropdown-search" placeholder="🔍 Cari koin..." onkeyup="filterCustomDropdown()" style="padding:4px 8px;font-size:11px">
-              </div>
-              <div id="custom-dropdown-items" style="max-height:220px;overflow-y:auto"></div>
-            </div>
-            <select id="bot-pair" style="display:none" onchange="syncPairFromMainSelect(this.value)">
-              <option value="btc_idr">btc_idr</option>
-            </select>
-            <span class="field-help">Pilih koin trading</span>
+            <span class="field-help">Atur koin di banner atas</span>
           </div>
 
           <div class="field-box">
@@ -2284,6 +2290,8 @@ function filterCustomDropdown() {
 
 function selectCustomPair(symbol, name) {
   document.getElementById('custom-pair-label').textContent = name;
+  const activeLabel = document.getElementById('control-active-pair-label');
+  if (activeLabel) activeLabel.textContent = name;
   const select = document.getElementById('bot-pair');
   if (select) {
     select.value = symbol;
@@ -2629,6 +2637,8 @@ function updateChartSymbol() {
   if (customLabel) {
     const pairName = select.options[select.selectedIndex]?.text || cleanCoin + '/IDR';
     customLabel.textContent = pairName;
+    const activeLabel = document.getElementById('control-active-pair-label');
+    if (activeLabel) activeLabel.textContent = pairName;
   }
 
   // Update Coin Unit Labels in Depth Tables
@@ -3858,6 +3868,10 @@ if (initialSelect) {
 const customLabelLoad = document.getElementById('custom-pair-label');
 if (customLabelLoad) {
   customLabelLoad.textContent = 'Bitcoin (BTC/IDR)';
+}
+const activeLabelLoad = document.getElementById('control-active-pair-label');
+if (activeLabelLoad) {
+  activeLabelLoad.textContent = 'Bitcoin (BTC/IDR)';
 }
 
 // Auto-set profit date pickers to today's date
