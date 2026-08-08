@@ -647,7 +647,7 @@
       <span id="sidebar-toggle-icon">◀</span> Sidebar
     </button>
     <span>INDODAX</span>
-    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.4.3</span>
+    <span style="font-size:11px;background:var(--header-blue);color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;margin-left:6px">ROBOT PRO v4.4.4</span>
   </div>
   <div class="top-right">
     <div style="display:flex;align-items:center;gap:6px">
@@ -1214,13 +1214,40 @@
           <button class="btn-blue" style="flex:1;padding:10px;font-size:13px" onclick="runBacktest()">📊 Run Backtest</button>
         </div>
       </div>
-        <div id="indicator-status-card" class="card">
-        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div class="card-title" style="margin:0;">📊 Indicator Status</div>
+        <div id="indicator-status-card" class="card" style="padding:14px; margin-bottom:16px; border:1px solid var(--border);">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <div class="card-title" style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;margin:0">
+            <span>📊 ANALISIS INDIKATOR TEKNIKAL & SINYAL MARKET</span>
+          </div>
+          <span id="indicator-active-pair-badge" style="font-size:10px;font-weight:700;color:var(--header-blue);background:var(--surface2);padding:2px 8px;border-radius:4px">BTC/IDR</span>
         </div>
-        <div style="display: flex; gap: 16px;">
-          <div><span class="metric-label">RSI:</span> <span id="mini-rsi" style="font-weight:bold; font-size:16px;">--</span></div>
-          <div><span class="metric-label">MACD:</span> <span id="mini-macd" style="font-weight:bold; font-size:16px;">--</span></div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;">
+          <!-- RSI Indicator Block -->
+          <div style="background:var(--surface2);padding:10px 12px;border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:700;color:var(--muted)">RSI (14)</span>
+              <span id="mini-rsi-badge" style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.08);color:var(--text)">Netral 🟡</span>
+            </div>
+            <div id="mini-rsi-val" style="font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--text);margin-bottom:4px">--</div>
+            <div id="mini-rsi-desc" style="font-size:10px;color:var(--muted);line-height:1.3">Memuat indikator RSI...</div>
+          </div>
+
+          <!-- MACD Indicator Block -->
+          <div style="background:var(--surface2);padding:10px 12px;border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-size:11px;font-weight:700;color:var(--muted)">MACD (12,26,9)</span>
+              <span id="mini-macd-badge" style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.08);color:var(--text)">--</span>
+            </div>
+            <div id="mini-macd-val" style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px">--</div>
+            <div id="mini-macd-desc" style="font-size:10px;color:var(--muted);line-height:1.3">Memuat indikator MACD...</div>
+          </div>
+        </div>
+
+        <!-- Sinyal Ringkasan Helper -->
+        <div style="margin-top:10px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;color:var(--muted);font-weight:600">💡 Analisa Rekomendasi Bot:</span>
+          <span id="mini-indicator-action" style="font-size:11px;font-weight:700;color:var(--yellow)">🟡 WAIT & SEE — Menunggu Konfirmasi Sinyal</span>
         </div>
       </div>
       </div>
@@ -2681,21 +2708,94 @@ function updateIndicatorStatusFromCandles(cleanCandles) {
     const macdVal = ema12 - ema26;
     const isBullish = macdVal >= 0;
 
-    const rsiEl = document.getElementById('mini-rsi');
-    if (rsiEl) {
-      rsiEl.textContent = `${rsiVal} (${rsiVal < 30 ? 'Oversold 🟢' : rsiVal > 70 ? 'Overbought 🔴' : 'Netral'})`;
-      if (rsiVal < 30) rsiEl.style.color = 'var(--green)';
-      else if (rsiVal > 70) rsiEl.style.color = 'var(--red)';
-      else rsiEl.style.color = 'var(--text)';
-    }
-
-    const macdEl = document.getElementById('mini-macd');
-    if (macdEl) {
-      macdEl.textContent = isBullish ? '↑ Bullish (Golden Cross 🟢)' : '↓ Bearish (Death Cross 🔴)';
-      macdEl.style.color = isBullish ? 'var(--green)' : 'var(--red)';
-    }
+    const currentPair = document.getElementById('chart-card-pair')?.value || 'btc_idr';
+    updateIndicatorUI(rsiVal, isBullish, currentPair);
   } catch (e) {
     console.error('updateIndicatorStatusFromCandles error:', e);
+  }
+}
+
+function updateIndicatorUI(rsiVal, isBullish, pairName = '') {
+  const rsiValEl = document.getElementById('mini-rsi-val');
+  const rsiBadge = document.getElementById('mini-rsi-badge');
+  const rsiDesc = document.getElementById('mini-rsi-desc');
+  const macdValEl = document.getElementById('mini-macd-val');
+  const macdBadge = document.getElementById('mini-macd-badge');
+  const macdDesc = document.getElementById('mini-macd-desc');
+  const actionEl = document.getElementById('mini-indicator-action');
+  const pairBadge = document.getElementById('indicator-active-pair-badge');
+
+  if (pairName && pairBadge) {
+    pairBadge.textContent = pairName.replace('_idr', '').toUpperCase() + '/IDR';
+  }
+
+  if (rsiVal !== null && rsiVal !== undefined && !isNaN(rsiVal)) {
+    const numRsi = parseFloat(rsiVal);
+    if (rsiValEl) rsiValEl.textContent = numRsi.toFixed(1);
+
+    let rsiLabel = 'Netral 🟡';
+    let rsiDetail = 'Harga stabil di area konsolidasi (30 - 70). Tekanan beli & jual seimbang.';
+    let rsiColor = 'var(--text)';
+    let rsiBg = 'rgba(234, 179, 8, 0.18)';
+
+    if (numRsi < 30) {
+      rsiLabel = 'Oversold 🟢';
+      rsiDetail = 'Jenuh Jual (< 30): Harga sudah turun dalam. Potensi memantul naik (Sinyal Beli).';
+      rsiColor = 'var(--green)';
+      rsiBg = 'rgba(16, 185, 129, 0.18)';
+    } else if (numRsi > 70) {
+      rsiLabel = 'Overbought 🔴';
+      rsiDetail = 'Jenuh Beli (> 70): Harga sudah naik tinggi. Potensi koreksi turun (Sinyal Jual).';
+      rsiColor = 'var(--red)';
+      rsiBg = 'rgba(239, 68, 68, 0.18)';
+    }
+
+    if (rsiBadge) {
+      rsiBadge.textContent = rsiLabel;
+      rsiBadge.style.color = rsiColor;
+      rsiBadge.style.background = rsiBg;
+    }
+    if (rsiDesc) rsiDesc.textContent = rsiDetail;
+  }
+
+  if (isBullish !== null && isBullish !== undefined) {
+    let macdText = isBullish ? '↑ Bullish (Golden Cross 🟢)' : '↓ Bearish (Death Cross 🔴)';
+    let macdDetail = isBullish 
+      ? 'Golden Cross (Bullish): Garis MACD memotong ke atas Signal Line — Momentum Pembeli Dominan (Tren Naik).'
+      : 'Death Cross (Bearish): Garis MACD memotong ke bawah Signal Line — Momentum Penjual Dominan (Tekanan Turun).';
+    let macdColor = isBullish ? 'var(--green)' : 'var(--red)';
+    let macdBg = isBullish ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)';
+
+    if (macdValEl) {
+      macdValEl.textContent = macdText;
+      macdValEl.style.color = macdColor;
+    }
+    if (macdBadge) {
+      macdBadge.textContent = isBullish ? 'Bullish 🟢' : 'Bearish 🔴';
+      macdBadge.style.color = macdColor;
+      macdBadge.style.background = macdBg;
+    }
+    if (macdDesc) macdDesc.textContent = macdDetail;
+  }
+
+  if (actionEl && rsiVal !== null && isBullish !== null && !isNaN(rsiVal)) {
+    const numRsi = parseFloat(rsiVal);
+    if (numRsi < 35 && isBullish) {
+      actionEl.textContent = '🟢 SINYAL BELI AGRESIF — RSI Oversold + MACD Golden Cross (Momentum Rebound Strong)';
+      actionEl.style.color = 'var(--green)';
+    } else if (numRsi < 48 && isBullish) {
+      actionEl.textContent = '🟢 SINYAL BELI MODERAT — MACD Golden Cross (Tren Naik Terkonfirmasi)';
+      actionEl.style.color = 'var(--green)';
+    } else if (numRsi > 70 && !isBullish) {
+      actionEl.textContent = '🔴 SINYAL JUAL / TAKE PROFIT — RSI Overbought + MACD Death Cross (Potensi Koreksi Turun)';
+      actionEl.style.color = 'var(--red)';
+    } else if (!isBullish) {
+      actionEl.textContent = '🔴 TREN TURUN (DEATH CROSS) — Hindari Beli Baru (Tunggu Pembalikan Arah / Rebound)';
+      actionEl.style.color = 'var(--red)';
+    } else {
+      actionEl.textContent = '🟡 KONSOLIDASI (WAIT & SEE) — Harga Berada di Area Netral, Bot Menjaga Sesuai Config';
+      actionEl.style.color = 'var(--yellow)';
+    }
   }
 }
 
@@ -4066,20 +4166,9 @@ async function loadEquity() {
 const oldHandleWS = handleWS;
 handleWS = (msg) => {
   oldHandleWS(msg);
-  if(msg.type === 'bot_status' && msg.analysis) {
-    const rsi = document.getElementById('mini-rsi');
-    if(rsi) {
-      rsi.textContent = msg.analysis.rsi || '--';
-      if(msg.analysis.rsi < 30) rsi.style.color = 'var(--green)';
-      else if(msg.analysis.rsi > 70) rsi.style.color = 'var(--red)';
-      else rsi.style.color = 'var(--text)';
-    }
-    const macd = document.getElementById('mini-macd');
-    if(macd) {
-      if(msg.analysis.macdTrend === 'bullish') { macd.textContent = '↑ Bullish'; macd.style.color = 'var(--green)'; }
-      else if(msg.analysis.macdTrend === 'bearish') { macd.textContent = '↓ Bearish'; macd.style.color = 'var(--red)'; }
-      else { macd.textContent = '--'; macd.style.color = 'var(--text)'; }
-    }
+  if (msg.type === 'bot_status' && msg.analysis) {
+    const isBull = msg.analysis.macdTrend === 'bullish';
+    updateIndicatorUI(msg.analysis.rsi, isBull, msg.pair || '');
   }
 };
 
